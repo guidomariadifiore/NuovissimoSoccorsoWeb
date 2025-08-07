@@ -1,47 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    
     <modelVersion>4.0.0</modelVersion>
     <groupId>webengineering</groupId>
-    <artifactId>NuovissimoSoccorsoWeb</artifactId>
+    <artifactId>nuovissimo-soccorso-web</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>NuovissimoSoccorsoWeb</name>
+    <name>NuovissimoSoccorsoWeb-MVC-REST</name>
     
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jersey.version>3.1.3</jersey.version>
-        <jackson.version>2.15.2</jackson.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        
+        <!-- Versioni delle dipendenze -->
+        <jakartaee.version>10.0.0</jakartaee.version>
+        <jersey.version>3.1.8</jersey.version>
+        <jackson.version>2.17.2</jackson.version>
+        <freemarker.version>2.3.33</freemarker.version>
+        <mysql.version>8.4.0</mysql.version>
+        <jjwt.version>0.12.6</jjwt.version>
     </properties>
-    
+
     <dependencies>
-        <!-- =========================== -->
-        <!-- DIPENDENZE WEB ESISTENTI    -->  
-        <!-- =========================== -->
         
-        <!-- FreeMarker Template Engine - ESSENZIALE -->
-        <dependency>
-            <groupId>org.freemarker</groupId>
-            <artifactId>freemarker</artifactId>
-            <version>2.3.33</version>
-        </dependency>
-        
-        <!-- Supporto java.time per FreeMarker -->
-        <dependency>
-            <groupId>no.api.freemarker</groupId>
-            <artifactId>freemarker-java8</artifactId>
-            <version>3.0.0</version>
-        </dependency>
-        
-        <!-- MySQL Connector -->
-        <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-            <version>9.0.0</version>
-        </dependency>
-        
-        <!-- Jakarta Servlet API -->
+        <!-- ========== DIPENDENZE JAKARTA EE (per Tomcat 10) ========== -->
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
@@ -49,127 +35,152 @@
             <scope>provided</scope>
         </dependency>
         
-        <!-- Jakarta Annotation API (per @Resource, InitialContext) -->
         <dependency>
-            <groupId>jakarta.annotation</groupId>
-            <artifactId>jakarta.annotation-api</artifactId>
-            <version>2.1.1</version>
+            <groupId>jakarta.servlet.jsp</groupId>
+            <artifactId>jakarta.servlet.jsp-api</artifactId>
+            <version>3.1.0</version>
             <scope>provided</scope>
         </dependency>
         
-        <!-- =========================== -->
-        <!-- NUOVE DIPENDENZE API REST   -->
-        <!-- =========================== -->
-        
-        <!-- JAX-RS API (Jersey) -->
         <dependency>
-            <groupId>org.glassfish.jersey.core</groupId>
-            <artifactId>jersey-server</artifactId>
-            <version>${jersey.version}</version>
+            <groupId>jakarta.el</groupId>
+            <artifactId>jakarta.el-api</artifactId>
+            <version>5.0.0</version>
+            <scope>provided</scope>
         </dependency>
         
-        <!-- Jersey Servlet Container -->
+        <dependency>
+            <groupId>jakarta.websocket</groupId>
+            <artifactId>jakarta.websocket-api</artifactId>
+            <version>2.1.0</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>jakarta.authentication</groupId>
+            <artifactId>jakarta.authentication-api</artifactId>
+            <version>3.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- ========== DIPENDENZE MVC (FREEMARKER) ========== -->
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+            <version>${freemarker.version}</version>
+        </dependency>
+        
+        <!-- Supporto Java 8 Time API per Freemarker -->
+        <dependency>
+            <groupId>no.api.freemarker</groupId>
+            <artifactId>freemarker-java8</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+
+        <!-- ========== DIPENDENZE JAX-RS (JERSEY) ========== -->
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-servlet</artifactId>
             <version>${jersey.version}</version>
         </dependency>
         
-        <!-- Jersey Dependency Injection -->
         <dependency>
             <groupId>org.glassfish.jersey.inject</groupId>
             <artifactId>jersey-hk2</artifactId>
             <version>${jersey.version}</version>
         </dependency>
         
-        <!-- Jackson per JSON Processing -->
+        <!-- ========== SERIALIZZAZIONE JSON (JACKSON) ========== -->
         <dependency>
-            <groupId>org.glassfish.jersey.media</groupId>
-            <artifactId>jersey-media-json-jackson</artifactId>
-            <version>${jersey.version}</version>
+            <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
+            <artifactId>jackson-jakarta-rs-json-provider</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
         
-        <!-- Jackson Core Dependencies -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
         </dependency>
         
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-        
-        <!-- Jackson Java 8 Time Support -->
+        <!-- Supporto Jackson per Java 8 Time API -->
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
             <version>${jackson.version}</version>
         </dependency>
+
+        <!-- ========== AUTENTICAZIONE JWT ========== -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>${jjwt.version}</version>
+        </dependency>
         
-        <!-- Bean Validation per API -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- ========== DATABASE ========== -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>${mysql.version}</version>
+        </dependency>
+
+        <!-- ========== EMAIL (per funzionalità MVC esistenti) ========== -->
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>jakarta.mail</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>jakarta.activation</groupId>
+            <artifactId>jakarta.activation-api</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+
+        <!-- ========== VALIDATION ========== -->
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
             <version>3.0.2</version>
         </dependency>
-        
+
+        <!-- ========== LOGGING ========== -->
         <dependency>
-            <groupId>org.hibernate.validator</groupId>
-            <artifactId>hibernate-validator</artifactId>
-            <version>8.0.1.Final</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>2.0.13</version>
         </dependency>
-        
-        <!-- =========================== -->
-        <!-- TESTING PER API             -->
-        <!-- =========================== -->
-        
-        <!-- JUnit per testing -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>5.10.0</version>
-            <scope>test</scope>
-        </dependency>
-        
-        <!-- REST Assured per testing API -->
-        <dependency>
-            <groupId>io.rest-assured</groupId>
-            <artifactId>rest-assured</artifactId>
-            <version>5.3.2</version>
-            <scope>test</scope>
-        </dependency>
-        
-        <!-- Jersey Test Framework -->
-        <dependency>
-            <groupId>org.glassfish.jersey.test-framework</groupId>
-            <artifactId>jersey-test-framework-core</artifactId>
-            <version>${jersey.version}</version>
-            <scope>test</scope>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.glassfish.jersey.test-framework.providers</groupId>
-            <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
-            <version>${jersey.version}</version>
-            <scope>test</scope>
-        </dependency>
+
     </dependencies>
-    
+
     <build>
         <plugins>
+            <!-- Plugin per compilazione Java (versione unificata) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <source>17</source>
+                    <target>17</target>
                 </configuration>
             </plugin>
             
+            <!-- Plugin per packaging WAR (versione unificata) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -178,19 +189,16 @@
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>
             </plugin>
-            
-            <!-- Surefire per testing JUnit 5 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.1.2</version>
-                <configuration>
-                    <includes>
-                        <include>**/*Test.java</include>
-                        <include>**/*Tests.java</include>
-                    </includes>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
+
+    <description>
+        Progetto integrato MVC + REST per SoccorsoWeb
+        - MVC con Freemarker (dal progetto originale)
+        - REST API con JAX-RS (Jersey) (dal progetto esempio)
+        - Hibernate ORM + MySQL
+        - JWT Authentication
+        - Jakarta EE 11 + Tomcat 10
+    </description>
+    
 </project>
