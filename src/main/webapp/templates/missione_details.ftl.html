@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${page_title!} - Sistema Soccorso</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .details-header {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-title {
+            color: #2c3e50;
+            margin: 0 0 1.5rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #ecf0f1;
+            font-size: 1.3rem;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .info-icon {
+            margin-right: 0.75rem;
+            color: #666;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #555;
+            margin-right: 0.75rem;
+            min-width: 120px;
+        }
+        
+        .info-value {
+            color: #333;
+            flex: 1;
+        }
+        
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #3498db;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        
+        .resource-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+        
+        .resource-item {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        
+        .resource-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .resource-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0;
+        }
+        
+        .resource-id {
+            background: #6c757d;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        
+        .resource-details {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .ruolo-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+        
+        .ruolo-caposquadra {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .ruolo-standard {
+            background: #3498db;
+            color: white;
+        }
+        
+        .obiettivo-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .no-resources {
+            text-align: center;
+            color: #95a5a6;
+            font-style: italic;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        /* Sezione note editabili */
+        .note-section {
+            background: #e8f5e8;
+            border: 1px solid #27ae60;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .char-counter {
+            font-size: 0.8rem;
+            color: #6c757d;
+            text-align: right;
+        }
+        
+        .form-control:focus {
+            border-color: #27ae60;
+            box-shadow: 0 0 0 0.2rem rgba(39, 174, 96, 0.25);
+        }
+        
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .resource-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        
+        <#include "common/head.ftl.html">
+
+        <!-- Messaggi -->
+        <#if success_message??>
+            <div class="alert alert-success" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Successo:</strong> ${success_message}
+            </div>
+        </#if>
+        
+        <#if error_message??>
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Errore:</strong> ${error_message}
+            </div>
+        </#if>
+        
+        <!-- Statistiche Rapide -->
+        <div class="section-card">
+            <h3 class="section-title">📊 Riepilogo Risorse</h3>
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-number">${count_operatori!0}</div>
+                    <div class="stat-label">Operatori Assegnati</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${count_mezzi!0}</div>
+                    <div class="stat-label">Mezzi Utilizzati</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${count_materiali!0}</div>
+                    <div class="stat-label">Materiali Impiegati</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Informazioni Missione -->
+        <div class="section-card">
+            <h3 class="section-title">🎯 Informazioni Missione</h3>
+            <div class="info-grid">
+                <div>
+                    <div class="info-item">
+                        <i class="fas fa-hashtag info-icon"></i>
+                        <span class="info-label">Codice:</span>
+                        <span class="info-value">#${missione.codiceRichiesta}</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-tag info-icon"></i>
+                        <span class="info-label">Nome:</span>
+                        <span class="info-value">${missione.nome}</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-map-marker-alt info-icon"></i>
+                        <span class="info-label">Posizione:</span>
+                        <span class="info-value">${missione.posizione}</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-clock info-icon"></i>
+                        <span class="info-label">Ultima modifica:</span>
+                        <span class="info-value">
+                            <#if missione.version?? && missione.version gt 1>
+                                Modificata (v${missione.version})
+                            <#else>
+                                Mai modificata
+                            </#if>
+                        </span>
+                    </div>
+                </div>
+                <div>
+                    <div class="info-item">
+                        <i class="fas fa-calendar-alt info-icon"></i>
+                        <span class="info-label">Data Avvio:</span>
+                        <span class="info-value">
+                            <#if missione.dataOraInizio??>
+                                ${missione.dataOraInizio?string}
+                            <#else>
+                                Data non disponibile
+                            </#if>
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-user-shield info-icon"></i>
+                        <span class="info-label">Admin ID:</span>
+                        <span class="info-value">${missione.idAmministratore}</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-cog info-icon"></i>
+                        <span class="info-label">Versione:</span>
+                        <span class="info-value">${missione.version}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Obiettivo -->
+            <div class="obiettivo-box">
+                <h5><i class="fas fa-bullseye me-2"></i>Obiettivo della Missione</h5>
+                <p class="mb-0">${missione.obiettivo}</p>
+            </div>
+            
+            <!-- Note Editabili -->
+            <div class="note-section">
+                <h5><i class="fas fa-sticky-note me-2"></i>Note della Missione</h5>
+                <form id="noteForm" onsubmit="salvaNoteHandler(event)">
+                    <div class="mb-3">
+                        <textarea class="form-control" 
+                                  id="noteTextarea" 
+                                  name="note" 
+                                  rows="4" 
+                                  placeholder="Aggiungi note per questa missione..."
+                                  maxlength="500">${missione.nota!""}</textarea>
+                        <div class="char-counter mt-1">
+                            <span id="noteCount">0</span>/500 caratteri
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Le note verranno salvate quando premi "Salva Modifiche"
+                        </small>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Salva Modifiche
+                        </button>
+                    </div>
+                    <input type="hidden" name="missioneId" value="${missione.codiceRichiesta}">
+                </form>
+            </div>
+        </div>
+        
+        <!-- Squadra -->
+        <div class="section-card">
+            <h3 class="section-title">👥 Squadra Assegnata</h3>
+            <#if squadra?? && squadra?size gt 0>
+                <div class="resource-grid">
+                    <#list squadra as partecipazione>
+                        <#assign operatoreKey = partecipazione.idOperatore?string>
+                        <#assign operatore = operatori_dettagli[operatoreKey]>
+                        <div class="resource-item">
+                            <div class="resource-header">
+                                <h6 class="resource-name">
+                                    <#if operatore??>
+                                        ${operatore.nome} ${operatore.cognome}
+                                    <#else>
+                                        Operatore ID: ${partecipazione.idOperatore}
+                                    </#if>
+                                </h6>
+                                <span class="resource-id">ID: ${partecipazione.idOperatore}</span>
+                            </div>
+                            <div class="resource-details">
+                                <#if operatore??>
+                                    <strong>Email:</strong> ${operatore.email}<br>
+                                    <strong>CF:</strong> ${operatore.codiceFiscale}
+                                <#else>
+                                    <em>Dettagli operatore non disponibili</em>
+                                </#if>
+                            </div>
+                            <div class="ruolo-badge <#if partecipazione.ruolo?string == 'Caposquadra'>ruolo-caposquadra<#else>ruolo-standard</#if>">
+                                ${partecipazione.ruolo}
+                            </div>
+                        </div>
+                    </#list>
+                </div>
+            <#else>
+                <div class="no-resources">
+                    <i class="fas fa-users-slash fa-3x mb-3"></i>
+                    <h5>Nessun operatore assegnato</h5>
+                    <p>La squadra per questa missione non è ancora stata definita.</p>
+                </div>
+            </#if>
+        </div>
+        
+        <!-- Mezzi -->
+        <div class="section-card">
+            <h3 class="section-title">🚛 Mezzi Utilizzati</h3>
+            <#if mezzi?? && mezzi?size gt 0>
+                <div class="resource-grid">
+                    <#list mezzi as mezzo>
+                        <div class="resource-item">
+                            <div class="resource-header">
+                                <h6 class="resource-name">
+                                    <#if mezzo.nome?? && mezzo.nome?trim != "">
+                                        ${mezzo.nome}
+                                    <#elseif mezzo.descrizione?? && mezzo.descrizione?trim != "">
+                                        ${mezzo.descrizione}
+                                    <#else>
+                                        Mezzo ${mezzo.targa}
+                                    </#if>
+                                </h6>
+                                <span class="resource-id">${mezzo.targa}</span>
+                            </div>
+                            <div class="resource-details">
+                                <strong>Targa:</strong> ${mezzo.targa}<br>
+                                <#if mezzo.descrizione?? && mezzo.descrizione?trim != "">
+                                    <strong>Descrizione:</strong> ${mezzo.descrizione}
+                                <#else>
+                                    <em>Nessuna descrizione disponibile</em>
+                                </#if>
+                            </div>
+                        </div>
+                    </#list>
+                </div>
+            <#else>
+                <div class="no-resources">
+                    <i class="fas fa-truck-slash fa-3x mb-3"></i>
+                    <h5>Nessun mezzo assegnato</h5>
+                    <p>Non ci sono mezzi assegnati a questa missione.</p>
+                </div>
+            </#if>
+        </div>
+        
+        <!-- Materiali -->
+        <div class="section-card">
+            <h3 class="section-title">🧰 Materiali Impiegati</h3>
+            <#if materiali?? && materiali?size gt 0>
+                <div class="resource-grid">
+                    <#list materiali as materiale>
+                        <div class="resource-item">
+                            <div class="resource-header">
+                                <h6 class="resource-name">${materiale.nome}</h6>
+                                <span class="resource-id">ID: ${materiale.id}</span>
+                            </div>
+                            <div class="resource-details">
+                                <#if materiale.descrizione?? && materiale.descrizione?trim != "">
+                                    <strong>Descrizione:</strong> ${materiale.descrizione}
+                                <#else>
+                                    <em>Nessuna descrizione disponibile</em>
+                                </#if>
+                            </div>
+                        </div>
+                    </#list>
+                </div>
+            <#else>
+                <div class="no-resources">
+                    <i class="fas fa-toolbox-slash fa-3x mb-3"></i>
+                    <h5>Nessun materiale assegnato</h5>
+                    <p>Non ci sono materiali specifici assegnati a questa missione.</p>
+                </div>
+            </#if>
+        </div>
+        
+        <!-- Azioni -->
+        <div class="text-center mt-4 mb-4">
+            <a href="${contextPath}/admin/richieste/attive" class="btn btn-secondary me-2">
+                <i class="fas fa-arrow-left me-2"></i>Torna alle Missioni
+            </a>
+            <button class="btn btn-success" onclick="concludiMissione()">
+                <i class="fas fa-flag-checkered me-2"></i>Concludi Missione
+            </button>
+        </div>
+        
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Funzione per concludere la missione
+        function concludiMissione() {
+            if (confirm('Sei sicuro di voler concludere questa missione? Questa azione non può essere annullata.')) {
+                const missioneId = document.querySelector('input[name="missioneId"]').value;
+                
+                // Disabilita il pulsante
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Concludendo...';
+                
+                // Invia richiesta per concludere la missione
+                fetch(window.location.pathname + '/conclude', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'missioneId=' + encodeURIComponent(missioneId)
+                })
+                .then(response => {
+                    if (response.redirected) {
+                        // Il server ha fatto redirect alla pagina di valutazione
+                        window.location.href = response.url;
+                    } else if (response.ok) {
+                        // Successo - vai alla pagina di valutazione
+                        window.location.href = '${contextPath}/admin/valutazione/' + missioneId + '/';
+                    } else {
+                        throw new Error('Errore server: ' + response.status);
+                    }
+                })
+                .catch(error => {
+                    console.error('Errore durante la conclusione:', error);
+                    
+                    // Riabilita il pulsante
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    
+                    alert('Errore durante la conclusione della missione. Riprova.');
+                });
+            }
+        }
+        
+        // Gestione salvataggio note
+        function salvaNoteHandler(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const noteTextarea = document.getElementById('noteTextarea');
+            const missioneId = form.querySelector('input[name="missioneId"]').value;
+            const note = noteTextarea.value.trim();
+            
+            if (confirm('Vuoi salvare le modifiche alle note?')) {
+                // Disabilita temporaneamente il pulsante
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Salvando...';
+                
+                // Crea FormData per inviare i dati
+                const formData = new FormData();
+                formData.append('missioneId', missioneId);
+                formData.append('note', note);
+                
+                // Invia richiesta POST al server
+                fetch(window.location.pathname, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (response.redirected) {
+                        // Il server ha fatto redirect, seguilo
+                        window.location.href = response.url;
+                    } else if (response.ok) {
+                        // Successo - ricarica la pagina
+                        window.location.reload();
+                    } else {
+                        throw new Error('Errore server: ' + response.status);
+                    }
+                })
+                .catch(error => {
+                    console.error('Errore durante il salvataggio:', error);
+                    
+                    // Riabilita il pulsante
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                    
+                    // Mostra errore
+                    alert('Errore durante il salvataggio delle note. Riprova.');
+                });
+            }
+        }
+        
+        // Contatore caratteri per le note
+        function updateNoteCounter() {
+            const textarea = document.getElementById('noteTextarea');
+            const counter = document.getElementById('noteCount');
+            const length = textarea.value.length;
+            
+            counter.textContent = length;
+            
+            // Cambia colore in base alla lunghezza
+            const parent = counter.parentElement;
+            parent.classList.remove('text-warning', 'text-danger');
+            
+            if (length > 400) {
+                parent.classList.add('text-warning');
+            }
+            if (length > 475) {
+                parent.classList.add('text-danger');
+            }
+        }
+        
+        // Mostra messaggio di successo
+        function showSuccessMessage(message) {
+            // Crea alert temporaneo
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success alert-dismissible fade show';
+            alertDiv.innerHTML = 
+                '<i class="fas fa-check-circle me-2"></i>' +
+                '<strong>Successo:</strong> ' + message +
+                '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+            
+            // Inserisce all'inizio del container
+            const container = document.querySelector('.container');
+            const firstChild = container.children[1]; // Dopo l'header
+            container.insertBefore(alertDiv, firstChild);
+            
+            // Rimuove automaticamente dopo 5 secondi
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+        
+        // Animazioni di entrata
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.section-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease-out';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 150);
+            });
+            
+            // Inizializza contatore caratteri note
+            const noteTextarea = document.getElementById('noteTextarea');
+            if (noteTextarea) {
+                noteTextarea.addEventListener('input', updateNoteCounter);
+                noteTextarea.addEventListener('keyup', updateNoteCounter);
+                updateNoteCounter(); // Chiamata iniziale
+            }
+        });
+    </script>
+    
+    <#include "common/footer.ftl.html">
+
+</body>
+</html>

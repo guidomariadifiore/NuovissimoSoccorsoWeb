@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <#assign page_title = "Login - Sistema di Soccorso">
+    <#include "common/head.ftl.html">
+</head>
+<body>
+    <#include "common/header.ftl.html">
+    
+    <main>
+        <div class="container">
+            <div class="card">
+                <div class="card-header">
+                    <h2 style="text-align: center; color: #2c3e50;">🔐 Accesso al Sistema</h2>
+                    <p style="text-align: center; color: #666;">Inserisci le tue credenziali per accedere al sistema di gestione emergenze.</p>
+                </div>
+                
+                <div style="max-width: 400px; margin: 0 auto;">
+                    
+                    <#-- Messaggi di errore o successo -->
+                    <#if error_message??>
+                        <div style="background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; text-align: center;">
+                            <strong>❌ Errore:</strong> ${error_message}
+                        </div>
+                    </#if>
+                    
+                    <#if success_message??>
+                        <div style="background: #d1eddb; border: 1px solid #c3e6cb; color: #155724; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; text-align: center;">
+                            <strong>✅ Successo:</strong> ${success_message}
+                        </div>
+                    </#if>
+                    
+                    <form method="post" action="login">
+                        <#-- Campo nascosto per referrer -->
+                        <#if referrer??>
+                            <input type="hidden" name="referrer" value="${referrer}" />
+                        </#if>
+                        
+                        <div style="margin-bottom: 1.5rem;">
+                            <label for="email" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Email:</label>
+                            <input type="email" id="email" name="email" 
+                                   style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s;"
+                                   placeholder="inserisci@email.com" required 
+                                   onfocus="this.style.borderColor='#007bff'" 
+                                   onblur="this.style.borderColor='#ddd'" />
+                        </div>
+                        
+                        <div style="margin-bottom: 1.5rem;">
+                            <label for="password" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Password:</label>
+                            <input type="password" id="password" name="password" 
+                                   style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s;"
+                                   placeholder="Password" required 
+                                   onfocus="this.style.borderColor='#007bff'" 
+                                   onblur="this.style.borderColor='#ddd'" />
+                        </div>
+                        
+                        <div style="margin-bottom: 2rem;">
+                            <button type="submit" 
+                                    style="width: 100%; padding: 14px; background: #007bff; color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s;"
+                                    onmouseover="this.style.background='#0056b3'; this.style.transform='translateY(-1px)'" 
+                                    onmouseout="this.style.background='#007bff'; this.style.transform='translateY(0)'">
+                                🚀 Accedi al Sistema
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; text-align: center;">
+                        <strong>💡 Demo - Credenziali di test:</strong><br>
+                        <div style="margin-top: 0.5rem;">
+                            <strong>nuovo@amministratore.it</strong> <code style="background: #fff; padding: 2px 6px; border-radius: 4px;">admin@soccorso.it</code> / 
+                            <code style="background: #fff; padding: 2px 6px; border-radius: 4px;">Password (credo, se non funziona registrare un nuovo utente tramite amministratore)</code><br>
+                            <strong>Operatore:</strong> <code style="background: #fff; padding: 2px 6px; border-radius: 4px;">password@password.it</code> / 
+                            <code style="background: #fff; padding: 2px 6px; border-radius: 4px;">Password</code>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #e3f2fd; border: 1px solid #2196f3; border-radius: 8px; padding: 1rem; text-align: center;">
+                        <strong>ℹ️ Info:</strong> Sei sulla pagina: <code style="background: #fff; padding: 2px 6px; border-radius: 4px;">${thispageurl!""}</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>radius: 4px; border-left: 4px solid #ffc107;">
+            </div>
+        </div>
+    </main>
+    
+    <#include "common/footer.ftl.html">
+</body>
+</html>

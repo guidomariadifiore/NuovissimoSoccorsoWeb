@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utente Creato - Sistema Soccorso</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .success-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .success-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 700px;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .success-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 2rem;
+        }
+        
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: bounceIn 1s ease-out;
+        }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .user-type-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+        
+        .admin-badge {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            border: 2px solid rgba(220, 53, 69, 0.5);
+        }
+        
+        .operator-badge {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+            border: 2px solid rgba(40, 167, 69, 0.5);
+        }
+        
+        .email-notification {
+            background: #e8f5e8;
+            border: 1px solid #28a745;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem;
+        }
+        
+        .email-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid #28a745;
+            margin: 1rem 0;
+        }
+        
+        .credentials-info {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem;
+        }
+        
+        .assignments-section {
+            background: #d1ecf1;
+            border: 1px solid #17a2b8;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem;
+        }
+        
+        .assignments-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .assignment-list {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: left;
+        }
+        
+        .assignment-item {
+            display: flex;
+            align-items: center;
+            padding: 0.3rem 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .assignment-item:last-child {
+            border-bottom: none;
+        }
+        
+        .countdown-timer {
+            background: #3498db;
+            color: white;
+            padding: 1rem;
+            margin: 1.5rem;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        
+        .countdown-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #f39c12;
+        }
+        
+        .redirect-info {
+            color: #666;
+            padding: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .empty-list {
+            color: #6c757d;
+            font-style: italic;
+            text-align: center;
+            padding: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .assignments-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .success-container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-card">
+            <div class="success-header">
+                <div class="success-icon pulse-animation">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h2>Utente Creato con Successo!</h2>
+                <h3>"${user_name}"</h3>
+                <div class="user-type-badge <#if user_type == 'Amministratore'>admin-badge<#else>operator-badge</#if>">
+                    <i class="fas fa-<#if user_type == 'Amministratore'>crown<#else>hard-hat</#if> me-2"></i>
+                    ${user_type}
+                </div>
+            </div>
+            
+            <!-- Notifica Email Inviata -->
+            <div class="email-notification">
+                <h5><i class="fas fa-paper-plane me-2 text-success"></i>Email di Benvenuto Inviata</h5>
+                <#if emails_sent?? && emails_sent?size gt 0>
+                    <#list emails_sent as email>
+                        <div class="email-item">
+                            <i class="fas fa-envelope me-3 text-primary"></i>
+                            <span style="font-weight: bold;">${email}</span>
+                            <i class="fas fa-check-circle ms-auto text-success"></i>
+                        </div>
+                    </#list>
+                </#if>
+                <small class="text-muted d-block mt-2">
+                    <i class="fas fa-info-circle me-1"></i>
+                    L'utente riceverà le credenziali di accesso e le istruzioni per il primo login
+                </small>
+            </div>
+            
+            <!-- Informazioni Credenziali -->
+            <div class="credentials-info">
+                <h5><i class="fas fa-key me-2 text-warning"></i>Credenziali di Accesso</h5>
+                <div class="row text-start">
+                    <div class="col-md-6">
+                        <strong>📧 Email:</strong> ${emails_sent[0]}<br>
+                        <strong>🔐 Password:</strong> <span class="text-muted">Inviata via email</span>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>👤 Tipo Account:</strong> ${user_type}<br>
+                        <strong>📅 Stato:</strong> <span class="text-success">Attivo</span>
+                    </div>
+                </div>
+                <div class="alert alert-warning mt-3 mb-0">
+                    <small>
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        <strong>Importante:</strong> L'utente dovrà cambiare la password al primo accesso per motivi di sicurezza.
+                    </small>
+                </div>
+            </div>
+            
+            <!-- Sezione Assegnazioni (solo per operatori) -->
+            <#if user_type == "Operatore" && (assigned_patenti?? || assigned_abilita??)>
+                <div class="assignments-section">
+                    <h5><i class="fas fa-clipboard-list me-2 text-info"></i>Patenti e Abilità Assegnate</h5>
+                    
+                    <div class="assignments-grid">
+                        <!-- Patenti -->
+                        <div class="assignment-list">
+                            <h6><i class="fas fa-id-card me-2 text-primary"></i>Patenti di Guida</h6>
+                            <#if assigned_patenti?? && assigned_patenti?size gt 0>
+                                <#list assigned_patenti as patente>
+                                    <div class="assignment-item">
+                                        <i class="fas fa-car me-2 text-primary"></i>
+                                        <span>${patente}</span>
+                                        <i class="fas fa-check ms-auto text-success"></i>
+                                    </div>
+                                </#list>
+                            <#else>
+                                <div class="empty-list">
+                                    <i class="fas fa-minus-circle me-1"></i>
+                                    Nessuna patente assegnata
+                                </div>
+                            </#if>
+                        </div>
+                        
+                        <!-- Abilità -->
+                        <div class="assignment-list">
+                            <h6><i class="fas fa-tools me-2 text-info"></i>Abilità Professionali</h6>
+                            <#if assigned_abilita?? && assigned_abilita?size gt 0>
+                                <#list assigned_abilita as abilita>
+                                    <div class="assignment-item">
+                                        <i class="fas fa-star me-2 text-info"></i>
+                                        <span>${abilita}</span>
+                                        <i class="fas fa-check ms-auto text-success"></i>
+                                    </div>
+                                </#list>
+                            <#else>
+                                <div class="empty-list">
+                                    <i class="fas fa-minus-circle me-1"></i>
+                                    Nessuna abilità assegnata
+                                </div>
+                            </#if>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-lightbulb me-1"></i>
+                            Le patenti e abilità possono essere modificate successivamente dal pannello di gestione operatori.
+                        </small>
+                    </div>
+                </div>
+            </#if>
+            
+            <!-- Countdown Redirect -->
+            <div class="countdown-timer">
+                <div>Reindirizzamento alla pagina di registrazione in:</div>
+                <div class="countdown-number" id="countdown">3</div>
+                <div><small>secondi...</small></div>
+            </div>
+            
+            <!-- Azioni -->
+            <div class="redirect-info">
+                <p class="mb-3">
+                    <i class="fas fa-arrow-right me-2"></i>
+                    Sarai reindirizzato automaticamente alla pagina di registrazione per creare altri utenti
+                </p>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <button type="button" class="btn btn-primary w-100" id="goNowBtn">
+                            <i class="fas fa-user-plus me-2"></i>
+                            Registra Altro Utente
+                        </button>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <button type="button" class="btn btn-secondary w-100" id="dashboardBtn">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Vai al Dashboard
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let countdownValue = 3;
+            const countdownElement = document.getElementById('countdown');
+            const goNowBtn = document.getElementById('goNowBtn');
+            const dashboardBtn = document.getElementById('dashboardBtn');
+            
+            // Funzioni di redirect
+            function redirectToRegistration() {
+                window.location.href = '${contextPath}/admin/registrazione';
+            }
+            
+            function redirectToDashboard() {
+                window.location.href = '${contextPath}/admin/dashboard';
+            }
+            
+            // Event listeners per i pulsanti
+            goNowBtn.addEventListener('click', redirectToRegistration);
+            dashboardBtn.addEventListener('click', redirectToDashboard);
+            
+            // Countdown automatico
+            const countdownInterval = setInterval(function() {
+                countdownValue--;
+                countdownElement.textContent = countdownValue;
+                
+                // Cambia colore in base al countdown
+                if (countdownValue <= 1) {
+                    countdownElement.style.color = '#e74c3c';
+                }
+                
+                if (countdownValue <= 0) {
+                    clearInterval(countdownInterval);
+                    redirectToRegistration();
+                }
+            }, 1000);
+            
+            // Gestione tasti: Invio per registrazione, Spazio per dashboard
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    clearInterval(countdownInterval);
+                    redirectToRegistration();
+                } else if (event.key === ' ') {
+                    event.preventDefault();
+                    clearInterval(countdownInterval);
+                    redirectToDashboard();
+                }
+            });
+            
+            // Log per debug
+            console.log('${user_type} "${user_name}" creato con successo');
+            <#if emails_sent?? && emails_sent?size gt 0>
+                console.log('Email di benvenuto simulata inviata a: ${emails_sent?join(", ")}');
+            </#if>
+            <#if assigned_patenti?? && assigned_patenti?size gt 0>
+                console.log('Patenti assegnate: ${assigned_patenti?join(", ")}');
+            </#if>
+            <#if assigned_abilita?? && assigned_abilita?size gt 0>
+                console.log('Abilità assegnate: ${assigned_abilita?join(", ")}');
+            </#if>
+        });
+    </script>
+</body>
+</html>

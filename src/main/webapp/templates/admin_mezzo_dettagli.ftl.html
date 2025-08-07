@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dettagli Mezzo - Sistema Soccorso</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .content-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .info-section {
+            margin-bottom: 2rem;
+        }
+        
+        .info-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .info-row {
+            margin-bottom: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.25rem;
+        }
+        
+        .info-value {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+        
+        .badge-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .badge-disponibile {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-in-uso {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+        
+        .breadcrumb-item a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: white;
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .vehicle-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        
+        .empty-list {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .action-buttons {
+            margin-top: 2rem;
+        }
+        
+        /* Stili per la timeline delle missioni */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e9ecef;
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+            padding-left: 25px;
+        }
+        
+        .timeline-marker {
+            position: absolute;
+            left: -20px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .timeline-marker.bg-success {
+            background-color: #28a745;
+        }
+        
+        .timeline-marker.bg-primary {
+            background-color: #007bff;
+        }
+        
+        .timeline-marker.bg-warning {
+            background-color: #ffc107;
+        }
+        
+        .timeline-marker.bg-danger {
+            background-color: #dc3545;
+        }
+        
+        .timeline-marker.bg-secondary {
+            background-color: #6c757d;
+        }
+        
+        .timeline-content {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border-left: 4px solid #e67e22;
+            margin-bottom: 1rem;
+        }
+        
+        .timeline-date {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .timeline-date .row {
+            margin-bottom: 0.5rem;
+        }
+        
+        .timeline-date .col-md-6 {
+            padding: 0.2rem 0.5rem;
+        }
+        
+        .badge-stato-attiva {
+            background-color: #dc3545 !important;
+        }
+        
+        .badge-stato-conclusa {
+            background-color: #28a745 !important;
+        }
+        
+        .badge-stato-chiusa {
+            background-color: #28a745 !important;
+        }
+        
+        .badge-stato-annullata {
+            background-color: #6c757d !important;
+        }
+        
+        .badge-stato-convalidata {
+            background-color: #ffc107 !important;
+            color: #212529;
+        }
+        
+        /* Stili per le card cliccabili delle missioni */
+        .mission-card-hover {
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            padding: 0.5rem;
+        }
+        
+        .mission-card-hover:hover {
+            background-color: rgba(230, 126, 34, 0.05);
+            transform: translateX(5px);
+        }
+        
+        .mission-link-indicator {
+            text-align: center;
+            margin-top: 1rem;
+            padding-top: 0.5rem;
+            border-top: 1px dashed #dee2e6;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+        
+        .timeline-content:hover .mission-link-indicator {
+            opacity: 1;
+        }
+        
+        .timeline-content a {
+            display: block;
+            text-decoration: none !important;
+        }
+        
+        .timeline-content a:hover {
+            color: inherit !important;
+        }
+        
+        @media (max-width: 768px) {
+            .vehicle-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <#include "common/header.ftl.html">
+
+    <div class="container">
+        <!-- Messaggi -->
+        <#if success_message??>
+            <div class="alert alert-success" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Successo:</strong> ${success_message}
+            </div>
+        </#if>
+        
+        <#if error_message??>
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Errore:</strong> ${error_message}
+            </div>
+        </#if>
+
+        <div class="row">
+            <!-- Informazioni Mezzo -->
+            <div class="col-lg-8">
+                <div class="content-card">
+                    <div class="info-section">
+                        <h3 class="info-title">
+                            <i class="fas fa-truck me-2"></i>Informazioni Mezzo
+                        </h3>
+                        
+                        <div class="row">
+                            <div class="col-md-2 text-center">
+                                <div class="vehicle-icon mx-auto">
+                                    <i class="fas fa-truck"></i>
+                                </div>
+                            </div>
+                            <div class="col-md-10">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="info-row">
+                                            <div class="info-label">Targa</div>
+                                            <div class="info-value">
+                                                <strong>${mezzo.targa}</strong>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="info-row">
+                                            <div class="info-label">Nome</div>
+                                            <div class="info-value">
+                                                <i class="fas fa-tag me-2"></i>
+                                                ${mezzo.nome!"N/A"}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-row">
+                                            <div class="info-label">Descrizione</div>
+                                            <div class="info-value">
+                                                ${mezzo.descrizione!"Nessuna descrizione"}
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="info-row">
+                                            <div class="info-label">Versione</div>
+                                            <div class="info-value">
+                                                <span class="badge bg-secondary">${mezzo.version!1}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Storico Missioni -->
+                <div class="content-card">
+                    <div class="info-section">
+                        <h3 class="info-title">
+                            <i class="fas fa-history me-2"></i>Storico Missioni
+                        </h3>
+                        
+                        <#if storico_missioni?? && (storico_missioni?size > 0)>
+                            <!-- Timeline delle missioni -->
+                            <div class="timeline">
+                                <#list storico_missioni as missione_dettaglio>
+                                    <div class="timeline-item">
+                                        <div class="timeline-marker 
+                                            <#if missione_dettaglio.richiesta??>
+                                                <#switch missione_dettaglio.richiesta.stato>
+                                                    <#case "Attiva">bg-danger<#break>
+                                                    <#case "Chiusa">bg-success<#break>
+                                                    <#case "Conclusa">bg-success<#break>
+                                                    <#case "Annullata">bg-secondary<#break>
+                                                    <#case "Convalidata">bg-warning<#break>
+                                                    <#default>bg-primary
+                                                </#switch>
+                                            <#else>
+                                                bg-secondary
+                                            </#if>"></div>
+                                        <div class="timeline-content">
+                                            <!-- Link cliccabile a tutta la card -->
+                                            <a href="${contextPath}/admin/valutazione/<#if missione_dettaglio.missione??>${missione_dettaglio.missione.codiceRichiesta}<#else>0</#if>" 
+                                               class="text-decoration-none text-dark">
+                                                <div class="mission-card-hover">
+                                                    <div class="row">
+                                                        <div class="col-md-8">
+                                                            <h6 class="mb-2">
+                                                                <i class="fas fa-flag me-2"></i>
+                                                                <#if missione_dettaglio.missione??>
+                                                                    ${missione_dettaglio.missione.nome!"Missione #" + missione_dettaglio.missione.codiceRichiesta}
+                                                                <#else>
+                                                                    Missione N/A
+                                                                </#if>
+                                                            </h6>
+                                                            <p class="text-muted mb-1">
+                                                                <strong>Obiettivo:</strong> 
+                                                                <#if missione_dettaglio.missione??>
+                                                                    ${missione_dettaglio.missione.obiettivo!"N/A"}
+                                                                <#else>
+                                                                    N/A
+                                                                </#if>
+                                                            </p>
+                                                            <p class="text-muted mb-1">
+                                                                <strong>Posizione:</strong> 
+                                                                <#if missione_dettaglio.missione??>
+                                                                    ${missione_dettaglio.missione.posizione!"N/A"}
+                                                                <#else>
+                                                                    N/A
+                                                                </#if>
+                                                            </p>
+                                                            <#if missione_dettaglio.missione?? && missione_dettaglio.missione.nota?? && missione_dettaglio.missione.nota?trim != "">
+                                                                <p class="text-muted mb-1">
+                                                                    <strong>Note:</strong> ${missione_dettaglio.missione.nota}
+                                                                </p>
+                                                            </#if>
+                                                        </div>
+                                                        <div class="col-md-4 text-end">
+                                                            <div class="mission-badges">
+                                                                <span class="badge 
+                                                    <#if missione_dettaglio.richiesta??>
+                                                        <#switch missione_dettaglio.richiesta.stato>
+                                                            <#case "Attiva">badge-stato-attiva<#break>
+                                                            <#case "Chiusa">badge-stato-chiusa<#break>
+                                                            <#case "Conclusa">badge-stato-conclusa<#break>
+                                                            <#case "Annullata">badge-stato-annullata<#break>
+                                                            <#case "Convalidata">badge-stato-convalidata<#break>
+                                                            <#default>badge-stato-convalidata
+                                                        </#switch>
+                                                    <#else>
+                                                        badge-stato-annullata
+                                                    </#if>">
+                                                                    <#if missione_dettaglio.richiesta??>
+                                                                        ${missione_dettaglio.richiesta.stato}
+                                                                    <#else>
+                                                                        N/A
+                                                                    </#if>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="timeline-date">
+                                                        <div class="row">
+                                                            <div class="col-md-6">
+                                                                <i class="fas fa-play me-1"></i>
+                                                                <strong>Inizio:</strong>
+                                                                <#if missione_dettaglio.missione?? && missione_dettaglio.missione.dataOraInizio??>
+                                                                    ${missione_dettaglio.missione.dataOraInizio}
+                                                                <#else>
+                                                                    Data non disponibile
+                                                                </#if>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <#if missione_dettaglio.infoMissione?? && missione_dettaglio.infoMissione.dataOraFine??>
+                                                                    <i class="fas fa-stop me-1"></i>
+                                                                    <strong>Fine:</strong>
+                                                                    ${missione_dettaglio.infoMissione.dataOraFine}
+                                                                <#else>
+                                                                    <#if missione_dettaglio.richiesta?? && missione_dettaglio.richiesta.stato == "Attiva">
+                                                                        <i class="fas fa-clock me-1"></i>
+                                                                        <span class="text-warning"><strong>In corso...</strong></span>
+                                                                    <#else>
+                                                                        <i class="fas fa-question me-1"></i>
+                                                                        <span class="text-muted">Fine non registrata</span>
+                                                                    </#if>
+                                                                </#if>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <#-- Mostra informazioni aggiuntive se la missione è conclusa -->
+                                                        <#if missione_dettaglio.infoMissione??>
+                                                            <div class="row mt-2">
+                                                                <div class="col-md-6">
+                                                                    <small class="text-muted">
+                                                                        <i class="fas fa-chart-line me-1"></i>
+                                                                        <strong>Successo:</strong> 
+                                                                        ${missione_dettaglio.infoMissione.successo}/5
+                                                                    </small>
+                                                                </div>
+                                                                <#if missione_dettaglio.infoMissione.commento?? && missione_dettaglio.infoMissione.commento?trim != "">
+                                                                    <div class="col-md-6">
+                                                                        <small class="text-muted">
+                                                                            <i class="fas fa-comment me-1"></i>
+                                                                            <strong>Note:</strong> ${missione_dettaglio.infoMissione.commento}
+                                                                        </small>
+                                                                    </div>
+                                                                </#if>
+                                                            </div>
+                                                        </#if>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                            
+                                            <!-- Indicatore visivo che è cliccabile -->
+                                            <div class="mission-link-indicator">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-external-link-alt me-1"></i>
+                                                    Clicca per vedere dettagli completi
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </#list>
+                            </div>
+                        <#else>
+                            <!-- Nessuna missione trovata -->
+                            <div class="empty-list">
+                                <i class="fas fa-clipboard-list" style="font-size: 2rem; opacity: 0.3; margin-bottom: 1rem;"></i>
+                                <h5 class="text-muted">Nessuna Missione</h5>
+                                <p class="mb-0">Questo mezzo non ha ancora partecipato a nessuna missione</p>
+                            </div>
+                        </#if>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar Status -->
+            <div class="col-lg-4">
+                <div class="content-card">
+                    <h4 class="info-title">
+                        <i class="fas fa-info-circle me-2"></i>Stato Mezzo
+                    </h4>
+                    
+                    <div class="text-center mb-4">
+                        <#if disponibile>
+                            <span class="badge-status badge-disponibile">
+                                <i class="fas fa-check-circle me-2"></i>Disponibile
+                            </span>
+                            <p class="text-muted mt-2 small">
+                                Il mezzo non è attualmente assegnato a missioni attive
+                            </p>
+                        <#else>
+                            <span class="badge-status badge-in-uso">
+                                <i class="fas fa-exclamation-circle me-2"></i>In Uso
+                            </span>
+                            <p class="text-muted mt-2 small">
+                                Il mezzo è attualmente impegnato in una missione attiva
+                            </p>
+                        </#if>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="info-row">
+                        <div class="info-label">Totale Missioni</div>
+                        <div class="info-value">
+                            <span class="badge bg-primary">${storico_missioni?size!0}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-row">
+                        <div class="info-label">Tipo Veicolo</div>
+                        <div class="info-value">
+                            <i class="fas fa-truck me-1"></i>
+                            Mezzo di Soccorso
+                        </div>
+                    </div>
+                    
+                    <div class="info-row">
+                        <div class="info-label">Codice Identificativo</div>
+                        <div class="info-value">
+                            <code>${mezzo.targa}</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Azioni -->
+        <div class="action-buttons text-center">
+            <a href="${contextPath}/admin/mezzi" class="btn btn-outline-primary me-3">
+                <i class="fas fa-arrow-left me-2"></i>Torna alla Lista
+            </a>
+            <a href="${contextPath}/admin/dashboard" class="btn btn-outline-secondary">
+                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Animazione di entrata per le cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.content-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease-out';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 150);
+            });
+        });
+    </script>
+    
+    <#include "common/footer.ftl.html">
+
+</body>
+</html>

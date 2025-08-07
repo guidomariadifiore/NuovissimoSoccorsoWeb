@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <#assign page_title = "Richiesta di Soccorso - Sistema di Soccorso">
+    <#include "common/head.ftl.html">
+    <style>
+        /* CSS per il countdown e animazioni */
+        .success-message-container {
+            border-radius: 8px;
+            border: 1px solid #d4edda;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .email-countdown {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        #countdown {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #27ae60;
+            background: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #27ae60;
+        }
+
+        #email-fallback {
+            border-radius: 6px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* CSS per il captcha */
+        .captcha-container {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .captcha-checkbox {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 15px 0;
+        }
+
+        .captcha-checkbox input[type="checkbox"] {
+            transform: scale(1.5);
+            cursor: pointer;
+        }
+
+        .captcha-checkbox label {
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .submit-button-container {
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        #submitBtn:disabled {
+            background: #6c757d !important;
+            cursor: not-allowed !important;
+            opacity: 0.6;
+        }
+
+        .captcha-warning {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <#include "common/header.ftl.html">
+    
+    <main>
+        <div class="container">
+            <div class="card">
+                <div class="card-header">
+                    <h1 style="text-align: center; color: #dc3545;">🚨 Richiesta di Soccorso</h1>
+                    <p style="text-align: center; color: #666; font-size: 1.1rem;">
+                        Compila il modulo per richiedere un intervento di emergenza
+                    </p>
+                </div>
+                
+                <div style="max-width: 600px; margin: 0 auto;">
+                    
+                    <#-- Messaggi di errore -->
+                    <#if error_message??>
+                        <div style="background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; text-align: center;">
+                            <strong>❌ Errore:</strong> ${error_message}
+                        </div>
+                    </#if>
+                    
+                    <#-- Messaggio di successo con countdown -->
+                    <#if success_message??>
+                        <div class="success-message-container" style="background: #d1eddb; border: 1px solid #c3e6cb; color: #155724;">
+                            <h4 style="margin-top: 0;">✅ ${success_message}</h4>
+                            
+                            <!-- Countdown per apertura email -->
+                            <div class="email-countdown" style="margin-top: 15px; padding: 10px; background: #e8f5e8; border-left: 4px solid #27ae60; border-radius: 4px;">
+                                <p style="margin: 0;">
+                                    📧 <strong>Email di conferma in apertura tra <span id="countdown">3</span> secondi...</strong>
+                                </p>
+                                <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #555;">
+                                    L'email si aprirà automaticamente in una nuova scheda del browser.
+                                </p>
+                            </div>
+                            
+                            <!-- Fallback se il popup è bloccato -->
+                            <div id="email-fallback" style="display: none; margin-top: 15px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+                                <p style="margin: 0;">
+                                    ⚠️ <strong>Il browser ha bloccato l'apertura automatica.</strong>
+                                </p>
+                                <p style="margin: 5px 0 0 0;">
+                                    <a id="email-link" href="#" target="_blank" style="display: inline-block; background: #007bff; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px;">
+                                        📧 Clicca qui per aprire l'email di conferma
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                    </#if>
+                    
+                    <!-- Avviso rate limiting aggiornato -->
+                    <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; text-align: center;">
+                        <strong style="color: #856404;">⏰ Importante:</strong><br>
+                        <span style="color: #856404; font-size: 0.9rem;">
+                            È possibile inviare <strong>massimo 1 richiesta per ora</strong> dallo stesso indirizzo IP e dalla stessa email.<br>
+                            Questo limite serve a prevenire abusi del sistema di emergenza.
+                        </span>
+                    </div>
+                    
+                    <form method="post" action="/NuovissimoSoccorsoWeb-1.0-SNAPSHOT/emergenza">
+                        
+                        <!-- Informazioni sull'emergenza -->
+                        <div style="background: #fff3cd; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                            <h3 style="margin-top: 0; color: #856404;">📍 Informazioni sull'Emergenza</h3>
+                            
+                            <div style="margin-bottom: 1.2rem;">
+                                <label for="nome" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                                    Tipo di Emergenza: <span style="color: #dc3545;">*</span>
+                                </label>
+                                <input type="text" id="nome" name="nome" 
+                                       style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box;"
+                                       placeholder="es. Incidente stradale, Incendio, Persona in difficoltà..." required />
+                            </div>
+                            
+                            <div style="margin-bottom: 1.2rem;">
+                                <label for="indirizzo" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                                    Indirizzo/Luogo: <span style="color: #dc3545;">*</span>
+                                </label>
+                                <input type="text" id="indirizzo" name="indirizzo" 
+                                       style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box;"
+                                       placeholder="Via/Piazza e numero civico, Comune" required />
+                            </div>
+                            
+                            <div style="margin-bottom: 1.2rem;">
+                                <label for="coordinate" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                                    Coordinate GPS (opzionale):
+                                </label>
+                                <input type="text" id="coordinate" name="coordinate" 
+                                       style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box;"
+                                       placeholder="es. 41.9028, 12.4964" />
+                                <button type="button" onclick="getLocation()" 
+                                        style="margin-top: 0.5rem; padding: 8px 16px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                    📍 Rileva Posizione Automatica
+                                </button>
+                            </div>
+                            
+                            <div style="margin-bottom: 0;">
+                                <label for="descrizione" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                                    Descrizione dettagliata: <span style="color: #dc3545;">*</span>
+                                </label>
+                                <textarea id="descrizione" name="descrizione" rows="4"
+                                          style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; resize: vertical; box-sizing: border-box;"
+                                          placeholder="Descrivi in dettaglio cosa è successo, quante persone sono coinvolte, se ci sono feriti, ecc..." required></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Informazioni del segnalante -->
+                        <div style="background: #e3f2fd; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                            <h3 style="margin-top: 0; color: #1565c0;">👤 I tuoi Dati</h3>
+                            
+                            <div style="margin-bottom: 1.2rem;">
+                                <label for="nome_segnalante" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                                    Il tuo Nome e Cognome: <span style="color: #dc3545;">*</span>
+                                </label>
+                                <input type="text" id="nome_segnalante" name="nome_segnalante" 
+                                       style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box;"
+                                       placeholder="Nome Cognome" required />
+                            </div>
+                            
+                            <div style="margin-bottom: 0;">
+                                <label for="email_segnalante" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                                    La tua Email: <span style="color: #dc3545;">*</span>
+                                </label>
+                                <input type="email" id="email_segnalante" name="email_segnalante" 
+                                       style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box;"
+                                       placeholder="email@esempio.com" required />
+                                <small style="color: #666; font-size: 0.9rem;">
+                                    Verrà utilizzata per eventuali comunicazioni riguardo la tua segnalazione
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <!-- Avviso emergenze gravi -->
+                        <div style="background: #f8d7da; border: 2px solid #dc3545; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; text-align: center;">
+                            <strong style="color: #721c24;">⚠️ ATTENZIONE:</strong><br>
+                            <span style="color: #721c24;">
+                                Per emergenze con pericolo immediato chiama direttamente il <strong>112</strong>!<br>
+                                Questo modulo è per segnalazioni che necessitano coordinamento ma non urgenza estrema.
+                            </span>
+                        </div>
+                        
+                        <!-- Sistema di Captcha semplice -->
+                        <div class="captcha-container">
+                            <h4 style="margin-top: 0; color: #495057;">🤖 Verifica di Sicurezza</h4>
+                            <p style="color: #6c757d; margin-bottom: 15px;">
+                                Per prevenire invii automatici, conferma di essere una persona reale
+                            </p>
+                            
+                            <div class="captcha-checkbox">
+                                <input type="checkbox" id="captcha_check" name="captcha_check" value="confirmed" onchange="toggleSubmitButton()">
+                                <label for="captcha_check">✅ Confermo di non essere un robot</label>
+                            </div>
+                            
+                            <div class="captcha-warning" id="captcha-warning">
+                                ⚠️ Devi confermare di non essere un robot per continuare
+                            </div>
+                        </div>
+                        
+                        <div class="submit-button-container">
+                            <button type="submit" id="submitBtn" disabled
+                                    style="background: #6c757d; color: white; padding: 15px 40px; border: none; border-radius: 8px; font-size: 1.2rem; font-weight: 600; cursor: not-allowed; transition: all 0.3s; opacity: 0.6;">
+                                🚨 Invia Richiesta di Soccorso
+                            </button>
+                            <p style="color: #6c757d; font-size: 0.9rem; margin-top: 10px;">
+                                <em>Il pulsante si attiverà dopo aver confermato il captcha</em>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div style="background: #e8f4fd; border: 1px solid #2196f3; border-radius: 8px; padding: 1rem; text-align: center; margin-top: 1rem;">
+                <strong>ℹ️ Info:</strong> Sei sulla pagina: <code style="background: #fff; padding: 2px 6px; border-radius: 4px;">${thispageurl!""}</code>
+            </div>
+        </div>
+    </main>
+    
+    <#include "common/footer.ftl.html">
+
+    <script>
+        // Funzione per attivare/disattivare il pulsante di invio
+        function toggleSubmitButton() {
+            const captchaCheckbox = document.getElementById('captcha_check');
+            const submitBtn = document.getElementById('submitBtn');
+            const captchaWarning = document.getElementById('captcha-warning');
+            
+            if (captchaCheckbox.checked) {
+                // Attiva il pulsante
+                submitBtn.disabled = false;
+                submitBtn.style.background = '#dc3545';
+                submitBtn.style.cursor = 'pointer';
+                submitBtn.style.opacity = '1';
+                
+                // Nascondi warning
+                captchaWarning.style.display = 'none';
+                
+                // Aggiungi hover effects
+                submitBtn.onmouseover = function() { this.style.background = '#c82333'; };
+                submitBtn.onmouseout = function() { this.style.background = '#dc3545'; };
+            } else {
+                // Disattiva il pulsante
+                submitBtn.disabled = true;
+                submitBtn.style.background = '#6c757d';
+                submitBtn.style.cursor = 'not-allowed';
+                submitBtn.style.opacity = '0.6';
+                
+                // Rimuovi hover effects
+                submitBtn.onmouseover = null;
+                submitBtn.onmouseout = null;
+            }
+        }
+
+        // Funzione per rilevare la posizione GPS
+        function getLocation() {
+            const coordinateInput = document.getElementById('coordinate');
+            const button = event.target;
+            
+            if (navigator.geolocation) {
+                button.textContent = '🔍 Rilevamento...';
+                button.disabled = true;
+                
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude.toFixed(6);
+                        const lng = position.coords.longitude.toFixed(6);
+                        coordinateInput.value = lat + ', ' + lng;
+                        button.textContent = '✅ Posizione Rilevata';
+                        button.style.background = '#28a745';
+                        
+                        setTimeout(function() {
+                            button.textContent = '📍 Rileva Posizione Automatica';
+                            button.style.background = '#17a2b8';
+                            button.disabled = false;
+                        }, 2000);
+                    },
+                    function(error) {
+                        alert('Errore nel rilevamento della posizione: ' + error.message);
+                        button.textContent = '❌ Errore';
+                        button.style.background = '#dc3545';
+                        
+                        setTimeout(function() {
+                            button.textContent = '📍 Rileva Posizione Automatica';
+                            button.style.background = '#17a2b8';
+                            button.disabled = false;
+                        }, 2000);
+                    }
+                );
+            } else {
+                alert('La geolocalizzazione non è supportata dal tuo browser.');
+            }
+        }
+
+        // Script per apertura automatica email dopo successo
+        <#if success_message??>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Estrai il token dalla success_message (assumendo formato "...Codice emergenza: #TOKEN")
+            const successMsg = '${success_message}';
+            const tokenMatch = successMsg.match(/#([^"]+)/);
+            
+            if (tokenMatch && tokenMatch[1]) {
+                const token = tokenMatch[1];
+                
+                // Mostra un countdown per l'utente
+                let countdown = 3;
+                const countdownElement = document.getElementById('countdown');
+                
+                if (countdownElement) {
+                    const countdownInterval = setInterval(function() {
+                        countdownElement.textContent = countdown;
+                        countdown--;
+                        
+                        if (countdown < 0) {
+                            clearInterval(countdownInterval);
+                            
+                            // Apri la nuova scheda con l'email
+                            const emailUrl = '/NuovissimoSoccorsoWeb-1.0-SNAPSHOT/email-conferma?token=' + token;
+                            
+                            // Tenta di aprire in una nuova scheda
+                            const newWindow = window.open(emailUrl, '_blank');
+                            
+                            // Fallback se il popup è bloccato
+                            if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+                                // Se il popup è bloccato, mostra un link cliccabile
+                                const fallbackDiv = document.getElementById('email-fallback');
+                                if (fallbackDiv) {
+                                    fallbackDiv.style.display = 'block';
+                                    const fallbackLink = document.getElementById('email-link');
+                                    if (fallbackLink) {
+                                        fallbackLink.href = emailUrl;
+                                    }
+                                }
+                            } else {
+                                // Nasconde il countdown e mostra conferma se la scheda si è aperta con successo
+                                const countdownDiv = document.querySelector('.email-countdown');
+                                if (countdownDiv) {
+                                    countdownDiv.innerHTML = '<p style="margin: 0;">📧 <strong>Email di conferma aperta in una nuova scheda!</strong></p>';
+                                    countdownDiv.style.background = '#d4edda';
+                                    countdownDiv.style.borderLeft = '4px solid #28a745';
+                                }
+                            }
+                        }
+                    }, 1000);
+                }
+            }
+        });
+        </#if>
+
+        // Validazione form avanzata
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('submitBtn');
+            const captchaCheckbox = document.getElementById('captcha_check');
+            const captchaWarning = document.getElementById('captcha-warning');
+            
+            // Verifica captcha prima di tutto
+            if (!captchaCheckbox.checked) {
+                e.preventDefault();
+                captchaWarning.style.display = 'block';
+                captchaCheckbox.focus();
+                return false;
+            }
+            
+            // Previeni doppi invii
+            if (submitBtn.disabled) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Disabilita il pulsante e mostra loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Invio in corso...';
+            submitBtn.style.background = '#6c757d';
+            submitBtn.onmouseover = null;
+            submitBtn.onmouseout = null;
+            
+            // Validazione email più rigorosa
+            const email = document.getElementById('email_segnalante').value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (!emailRegex.test(email)) {
+                alert('Inserisci un indirizzo email valido');
+                // Riattiva il pulsante
+                toggleSubmitButton();
+                e.preventDefault();
+                return false;
+            }
+            
+            // Se tutto va bene, il form viene inviato
+            return true;
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Materiali - Sistema Soccorso</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #8e44ad 0%, #7d3c98 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .content-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .stats-summary {
+            background: linear-gradient(135deg, #f4f0ff 0%, #e8deff 100%);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #8e44ad;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table thead th {
+            background: linear-gradient(135deg, #8e44ad 0%, #7d3c98 100%);
+            color: white;
+            border: none;
+            font-weight: 600;
+            padding: 1rem;
+        }
+        
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+            transform: scale(1.01);
+        }
+        
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .badge-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .badge-disponibile {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-in-uso {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .badge-quantita {
+            background: #cce5ff;
+            color: #004085;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .btn-action {
+            margin: 0 0.2rem;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+        
+        .breadcrumb-item a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: white;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .action-buttons {
+            margin-bottom: 1.5rem;
+        }
+        
+        .material-icon {
+            font-size: 1.5rem;
+            color: #8e44ad;
+            margin-right: 0.5rem;
+        }
+
+        .btn-nuovo-materiale {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .btn-nuovo-materiale:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .quantity-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .table-responsive {
+                font-size: 0.9rem;
+            }
+            
+            .btn-action {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <#include "common/header.ftl.html">
+
+    <div class="container">
+        <!-- Messaggi -->
+        <#if success_message??>
+            <div class="alert alert-success" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Successo:</strong> ${success_message}
+            </div>
+        </#if>
+        
+        <#if error_message??>
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Errore:</strong> ${error_message}
+            </div>
+        </#if>
+
+        <!-- Statistiche -->
+        <div class="stats-summary">
+            <div class="row">
+                <div class="col-md-8">
+                    <h4 class="mb-2">
+                        <i class="fas fa-chart-bar me-2"></i>Statistiche Materiali
+                    </h4>
+                    <p class="mb-1">
+                        Totale tipologie materiali: <strong>${total_materiali!0}</strong>
+                    </p>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <span class="badge-status badge-disponibile">
+                                <i class="fas fa-check-circle me-1"></i>
+                                Disponibili: ${materiali_disponibili_count!0}
+                            </span>
+                        </div>
+                        <div class="col-md-6">
+                            <span class="badge-status badge-in-uso">
+                                <i class="fas fa-exclamation-circle me-1"></i>
+                                In Uso: ${materiali_in_uso_count!0}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="mt-2">
+                        <i class="fas fa-boxes" style="font-size: 2rem; opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Azioni -->
+        <div class="content-card">
+            <div class="action-buttons">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h3 class="mb-0">
+                            <i class="fas fa-list me-2"></i>Lista Materiali
+                        </h3>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a href="${contextPath}/admin/NuovoMateriale" class="btn-nuovo-materiale">
+                            <i class="fas fa-plus me-2"></i>Nuovo Materiale
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabella Materiali -->
+            <#if materiali?? && (materiali?size > 0)>
+                <div class="table-container">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">
+                                    <i class="fas fa-hashtag me-1"></i>ID
+                                </th>
+                                <th scope="col">
+                                    <i class="fas fa-tag me-1"></i>Nome
+                                </th>
+                                <th scope="col">
+                                    <i class="fas fa-info-circle me-1"></i>Descrizione
+                                </th>
+                                <th scope="col">
+                                    <i class="fas fa-signal me-1"></i>Stato
+                                </th>
+                                <th scope="col" class="text-center">
+                                    <i class="fas fa-cogs me-1"></i>Azioni
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <#list materiali as materiale>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="material-icon fas fa-box"></i>
+                                            <strong>${materiale.id}</strong>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <strong>${materiale.nome!"N/A"}</strong>
+                                    </td>
+                                    <td>
+                                        ${materiale.descrizione!"Nessuna descrizione"}
+                                    </td>
+                                    <td>
+                                        <#assign disponibile = materiali_disponibilita[materiale.id?string]!true>
+                                        <#if disponibile>
+                                            <span class="badge-status badge-disponibile">
+                                                <i class="fas fa-check-circle me-1"></i>Disponibile
+                                            </span>
+                                        <#else>
+                                            <span class="badge-status badge-in-uso">
+                                                <i class="fas fa-exclamation-circle me-1"></i>In Uso
+                                            </span>
+                                        </#if>
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="${contextPath}/admin/materiali/${materiale.id}" 
+                                           class="btn btn-outline-info btn-action" 
+                                           title="Visualizza dettagli">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </#list>
+                        </tbody>
+                    </table>
+                </div>
+            <#else>
+                <!-- Stato vuoto -->
+                <div class="empty-state">
+                    <i class="fas fa-boxes"></i>
+                    <h4>Nessun materiale trovato</h4>
+                    <p class="text-muted">Non ci sono materiali registrati nel sistema.</p>
+                    <a href="${contextPath}/admin/NuovoMateriale" class="btn btn-success">
+                        <i class="fas fa-plus me-2"></i>Aggiungi primo materiale
+                    </a>
+                </div>
+            </#if>
+        </div>
+
+        <!-- Torna alla Dashboard -->
+        <div class="text-center mb-4">
+            <a href="${contextPath}/admin/dashboard" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Torna alla Dashboard
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Animazione di entrata per le righe della tabella
+        document.addEventListener('DOMContentLoaded', function() {
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach((row, index) => {
+                row.style.opacity = '0';
+                row.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    row.style.transition = 'all 0.5s ease-out';
+                    row.style.opacity = '1';
+                    row.style.transform = 'translateY(0)';
+                }, index * 50);
+            });
+        });
+    </script>
+    
+    <#include "common/footer.ftl.html">
+
+</body>
+</html>

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <#assign page_title = "Registrazione Nuovo Utente - Sistema di Soccorso">
+    <#include "common/head.ftl.html">
+</head>
+<body>
+    <#include "common/header.ftl.html">
+    
+    <main>
+        <div class="container">
+            <div class="card">
+                <div class="card-header">
+                    <h1 style="text-align: center; color: #2c3e50;">👥 Registrazione Nuovo Utente</h1>
+                    <p style="text-align: center; color: #666; font-size: 1.1rem;">
+                        Crea un nuovo account amministratore o operatore
+                    </p>
+                    <#if current_admin_name??>
+                        <p style="text-align: center; color: #17a2b8; font-size: 0.9rem;">
+                            Logged in as: <strong>${current_admin_name}</strong>
+                        </p>
+                    </#if>
+                </div>
+                
+                <div style="max-width: 700px; margin: 0 auto;">
+                    
+                    <#-- Messaggi di errore o successo -->
+                    <#if error_message??>
+                        <div style="background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; text-align: center;">
+                            <strong>❌ Errore:</strong> ${error_message}
+                        </div>
+                    </#if>
+                    
+                    <#if success_message??>
+                        <div style="background: #d1eddb; border: 1px solid #c3e6cb; color: #155724; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; text-align: center;">
+                            <strong>✅ ${success_message}</strong>
+                        </div>
+                    </#if>
+                    
+                    <form method="post" action="/NuovissimoSoccorsoWeb-1.0-SNAPSHOT/admin/registrazione">
+                        
+                        <!-- Tipo di utente -->
+                        <div style="background: #e8f4fd; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                            <h3 style="margin-top: 0; color: #1565c0;">🎯 Tipo di Utente</h3>
+                            
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                                    Seleziona il tipo di utente da creare: <span style="color: #dc3545;">*</span>
+                                </label>
+                                
+                                <div style="display: flex; gap: 2rem; margin-top: 1rem;">
+                                    <label style="display: flex; align-items: center; cursor: pointer;">
+                                        <input type="radio" name="tipo_utente" value="amministratore" required 
+                                               style="margin-right: 0.5rem;" onchange="toggleOperatorFields()">
+                                        <span style="font-weight: 600; color: #dc3545;">👑 Amministratore</span>
+                                    </label>
+                                    
+                                    <label style="display: flex; align-items: center; cursor: pointer;">
+                                        <input type="radio" name="tipo_utente" value="operatore" required 
+                                               style="margin-right: 0.5rem;" onchange="toggleOperatorFields()">
+                                        <span style="font-weight: 600; color: #28a745;">🛠️ Operatore</span>
+                                    </label>
+                                </div>
+                                
+                                <div style="margin-top: 1rem; padding: 1rem; background: #fff3cd; border-radius: 4px; font-size: 0.9rem;">
+                                    <strong>📋 Differenze:</strong><br>
+                                    • <strong>Amministratore:</strong> Può creare altri utenti e gestire il sistema<br>
+                                    • <strong>Operatore:</strong> Può solo gestire le emergenze assegnate
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Dati personali -->
+                        <div style="background: #fff3cd; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                            <h3 style="margin-top: 0; color: #856404;">👤 Dati Personali</h3>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.2rem;">
+                                <div>
+                                    <label for="nome" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                                        Nome: <span style="color: #dc3545;">*</span>
+                                    </label>
+                                    <input type="text" id="nome" name="nome" 
+                                           style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box;"
+                                           placeholder="Mario" required minlength="2" />
+                                </div>
+                                
+                                <div>
+                                    <label for="cognome" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                                        Cognome: <span style="color: #dc3545;">*</span>
+                                    </label>
+                                    <input type="text" id="cognome" name="cognome" 
+                                           style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box;"
+                                           placeholder="Rossi" required minlength="2" />
+                                </div>
+                            </div>
+                            
+                            <div style="margin-bottom: 1.2rem;">
+                                <label for="codice_fiscale" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                                    Codice Fiscale: <span style="color: #dc3545;">*</span>
+                                </label>
+                                <input type="text" id="codice_fiscale" name="codice_fiscale" 
+                                       style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box; text-transform: uppercase;"
+                                       placeholder="RSSMRA80A01H501X" required maxlength="16" 
+                                       pattern="^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$" />
+                                <small style="color: #666; font-size: 0.8rem;">
+                                    Formato: 6 lettere + 2 numeri + 1 lettera + 2 numeri + 1 lettera + 3 numeri + 1 lettera
+                                </small>
+                            </div>
+                            
+                            <div style="margin-bottom: 0;">
+                                <label for="email" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                                    Email: <span style="color: #dc3545;">*</span>
+                                </label>
+                                <input type="email" id="email" name="email" 
+                                       style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box;"
+                                       placeholder="mario.rossi@esempio.com" required />
+                                <small style="color: #666; font-size: 0.8rem;">
+                                    Verrà utilizzata per l'accesso al sistema
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Sezione Patenti e Abilità (solo per operatori) -->
+                        <div id="operator-specific-fields" style="display: none;">
+                            
+                            <!-- Patenti -->
+                            <div style="background: #d4edda; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                                <h3 style="margin-top: 0; color: #155724;">🚗 Patenti Possedute</h3>
+                                <p style="color: #155724; margin-bottom: 1rem; font-size: 0.9rem;">
+                                    Seleziona tutte le patenti possedute dall'operatore (opzionale):
+                                </p>
+                                
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.8rem;">
+                                    <#list ["AM", "A1", "A2", "A", "B1", "B", "B96", "BE", "C1", "C1E", "C", "CE", "D1", "D1E", "D", "DE", "KA", "KB", "CQC", "CQC Merci"] as patente>
+                                        <label style="display: flex; align-items: center; padding: 0.5rem; background: white; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                                            <input type="checkbox" name="patenti" value="${patente}" style="margin-right: 0.5rem;">
+                                            <span>${patente}</span>
+                                        </label>
+                                    </#list>
+                                </div>
+                            </div>
+
+                            <!-- Abilità -->
+                            <div style="background: #d1ecf1; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                                <h3 style="margin-top: 0; color: #0c5460;">🛠️ Abilità Professionali</h3>
+                                <p style="color: #0c5460; margin-bottom: 1rem; font-size: 0.9rem;">
+                                    Seleziona tutte le abilità dell'operatore (opzionale):
+                                </p>
+                                
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.8rem;">
+                                    <#list ["Pompiere", "Medico", "Infermiere", "Elettricista", "Sommozzatore", "Alpinista", "Tecnico di primo soccorso", "Meccanico", "Logistica e coordinamento", "Pilota di droni"] as abilita>
+                                        <label style="display: flex; align-items: center; padding: 0.8rem; background: white; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                                            <input type="checkbox" name="abilita" value="${abilita}" style="margin-right: 0.5rem;">
+                                            <span>${abilita}</span>
+                                        </label>
+                                    </#list>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        
+                        <!-- Credenziali di accesso -->
+                        <div style="background: #f8d7da; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                            <h3 style="margin-top: 0; color: #721c24;">🔐 Credenziali di Accesso</h3>
+                            
+                            <div style="margin-bottom: 1.2rem;">
+                                <label for="password" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                                    Password: <span style="color: #dc3545;">*</span>
+                                </label>
+                                <input type="password" id="password" name="password" 
+                                       style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box;"
+                                       placeholder="Minimo 8 caratteri" required minlength="8" />
+                                <small style="color: #666; font-size: 0.8rem;">
+                                    Almeno 8 caratteri. Consigliato: usa lettere, numeri e simboli
+                                </small>
+                            </div>
+                            
+                            <div style="margin-bottom: 0;">
+                                <label for="conferma_password" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                                    Conferma Password: <span style="color: #dc3545;">*</span>
+                                </label>
+                                <input type="password" id="conferma_password" name="conferma_password" 
+                                       style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box;"
+                                       placeholder="Ripeti la password" required minlength="8" />
+                            </div>
+                        </div>
+                        
+                        <!-- Avviso sicurezza -->
+                        <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; text-align: center;">
+                            <strong style="color: #856404;">🛡️ Importante:</strong><br>
+                            <span style="color: #856404; font-size: 0.9rem;">
+                                L'utente creato avrà accesso al sistema di gestione emergenze.<br>
+                                Assicurati che sia una persona autorizzata e di fiducia.
+                            </span>
+                        </div>
+                        
+                        <div style="text-align: center;">
+                            <button type="submit" id="submitBtn"
+                                    style="background: #28a745; color: white; padding: 15px 40px; border: none; border-radius: 8px; font-size: 1.2rem; font-weight: 600; cursor: pointer; transition: all 0.3s;"
+                                    onmouseover="this.style.background='#218838'" 
+                                    onmouseout="this.style.background='#28a745'">
+                                👥 Crea Nuovo Utente
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div style="background: #e8f4fd; border: 1px solid #2196f3; border-radius: 8px; padding: 1rem; text-align: center; margin-top: 1rem;">
+                <strong>ℹ️ Info:</strong> Sei sulla pagina: <code style="background: #fff; padding: 2px 6px; border-radius: 4px;">${thispageurl!""}</code>
+            </div>
+        </div>
+    </main>
+    
+    <#include "common/footer.ftl.html">
+    
+    <!-- JavaScript per validazione form e show/hide campi operatore -->
+    <script>
+        // Funzione per mostrare/nascondere i campi specifici dell'operatore
+        function toggleOperatorFields() {
+            const operatorRadio = document.querySelector('input[name="tipo_utente"][value="operatore"]');
+            const operatorFields = document.getElementById('operator-specific-fields');
+            
+            if (operatorRadio && operatorRadio.checked) {
+                operatorFields.style.display = 'block';
+                // Scroll dolce verso i nuovi campi
+                setTimeout(() => {
+                    operatorFields.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 300);
+            } else {
+                operatorFields.style.display = 'none';
+                // Deseleziona tutte le checkbox quando si nasconde la sezione
+                const checkboxes = operatorFields.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(cb => cb.checked = false);
+            }
+        }
+
+        // Validazione codice fiscale in tempo reale
+        document.getElementById('codice_fiscale').addEventListener('input', function(e) {
+            let cf = e.target.value.toUpperCase();
+            e.target.value = cf;
+            
+            const cfPattern = /^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$/;
+            
+            if (cf.length === 16) {
+                if (cfPattern.test(cf)) {
+                    e.target.style.borderColor = '#28a745';
+                } else {
+                    e.target.style.borderColor = '#dc3545';
+                }
+            } else {
+                e.target.style.borderColor = '#ddd';
+            }
+        });
+        
+        // Validazione conferma password
+        function checkPasswordMatch() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('conferma_password').value;
+            const confirmField = document.getElementById('conferma_password');
+            
+            if (confirmPassword.length > 0) {
+                if (password === confirmPassword) {
+                    confirmField.style.borderColor = '#28a745';
+                } else {
+                    confirmField.style.borderColor = '#dc3545';
+                }
+            } else {
+                confirmField.style.borderColor = '#ddd';
+            }
+        }
+        
+        document.getElementById('password').addEventListener('input', checkPasswordMatch);
+        document.getElementById('conferma_password').addEventListener('input', checkPasswordMatch);
+        
+        // Validazione form prima dell'invio
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('conferma_password').value;
+            const codiceFiscale = document.getElementById('codice_fiscale').value;
+            const tipoUtente = document.querySelector('input[name="tipo_utente"]:checked');
+            
+            let isValid = true;
+            let errorMessage = '';
+            
+            // Verifica tipo utente selezionato
+            if (!tipoUtente) {
+                errorMessage += '• Seleziona il tipo di utente\n';
+                isValid = false;
+            }
+            
+            // Verifica password
+            if (password !== confirmPassword) {
+                errorMessage += '• Le password non coincidono\n';
+                isValid = false;
+            }
+            
+            if (password.length < 8) {
+                errorMessage += '• La password deve essere lunga almeno 8 caratteri\n';
+                isValid = false;
+            }
+            
+            // Verifica codice fiscale
+            const cfPattern = /^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$/;
+            if (!cfPattern.test(codiceFiscale)) {
+                errorMessage += '• Il codice fiscale non è nel formato corretto\n';
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert('Errori di validazione:\n\n' + errorMessage);
+            } else {
+                // Disabilita il bottone per evitare doppi click
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '⏳ Creazione in corso...';
+                submitBtn.style.background = '#6c757d';
+            }
+        });
+        
+        // Focus automatico sul primo campo
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstRadio = document.querySelector('input[name="tipo_utente"]');
+            if (firstRadio) {
+                firstRadio.focus();
+            }
+        });
+        
+        // Effetto visivo per i radio button
+        document.querySelectorAll('input[name="tipo_utente"]').forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                document.querySelectorAll('input[name="tipo_utente"]').forEach(function(r) {
+                    r.parentElement.style.fontWeight = '600';
+                    r.parentElement.style.transform = 'scale(1)';
+                });
+                
+                if (this.checked) {
+                    this.parentElement.style.fontWeight = '700';
+                    this.parentElement.style.transform = 'scale(1.05)';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

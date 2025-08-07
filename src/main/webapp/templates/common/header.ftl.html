@@ -1,0 +1,108 @@
+<header style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <!-- Logo/Brand -->
+            <div style="display: flex; align-items: center;">
+                <h1 style="margin: 0; font-size: 1.8rem; font-weight: 700;">
+                    <a href="${thispageurl!'/'}" style="color: white; text-decoration: none;">
+                        🚨 Sistema di Soccorso
+                    </a>
+                </h1>
+            </div>
+            
+            <!-- Navigation -->
+            <nav style="display: flex; align-items: center; gap: 2rem;">
+                <#if user_logged_in?? && user_logged_in>
+                    <!-- Menu per utenti loggati -->
+                    <#if is_admin?? && is_admin>
+                        <!-- Pulsanti per Amministratore -->
+                        <a href="/NuovissimoSoccorsoWeb-1.0-SNAPSHOT/admin/dashboard" 
+                           style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 5px; transition: background-color 0.3s;"
+                           onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'" 
+                           onmouseout="this.style.backgroundColor='transparent'">
+                            📊 Dashboard
+                        </a>
+                        
+                        <a href="/NuovissimoSoccorsoWeb-1.0-SNAPSHOT/emergenza" 
+                           style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 5px; transition: background-color 0.3s;"
+                           onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'" 
+                           onmouseout="this.style.backgroundColor='transparent'">
+                            📋 Nuova Richiesta
+                        </a>
+                    </#if>
+                    
+                    <#if is_operator?? && is_operator>
+                        <!-- Pulsanti per Operatore -->
+                        <a href="/NuovissimoSoccorsoWeb-1.0-SNAPSHOT/operatore/dashboard" 
+                           style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 5px; transition: background-color 0.3s;"
+                           onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'" 
+                           onmouseout="this.style.backgroundColor='transparent'">
+                            📊 Dashboard
+                        </a>
+                        
+                        <a href="/NuovissimoSoccorsoWeb-1.0-SNAPSHOT/emergenza" 
+                           style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 5px; transition: background-color 0.3s;"
+                           onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'" 
+                           onmouseout="this.style.backgroundColor='transparent'">
+                            📋 Nuova Richiesta
+                        </a>
+                    </#if>
+                <#else>
+                    <!-- Link per utenti non loggati -->
+                    <a href="/NuovissimoSoccorsoWeb-1.0-SNAPSHOT/emergenza" 
+                       style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 5px; transition: background-color 0.3s;"
+                       onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'" 
+                       onmouseout="this.style.backgroundColor='transparent'">
+                        📋 Emergenza
+                    </a>
+                </#if>
+                
+                <!-- Info utente e logout/login -->
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <#if user_logged_in?? && user_logged_in == true>
+                        <!-- Utente loggato -->
+                        <div style="display: flex; align-items: center; gap: 1rem; padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); border-radius: 25px;">
+                            <div style="text-align: right;">
+                                <div style="font-weight: 600; font-size: 0.9rem;">
+                                    ${user_display_name!'Utente'}
+                                </div>
+                                <div style="font-size: 0.8rem; opacity: 0.8;">
+                                    ${user_role_display!''}
+                                </div>
+                            </div>
+                            
+                            <a href="${logout_url!'/logout'}" 
+                               style="background: #dc3545; color: white; padding: 0.5rem 1rem; border-radius: 20px; text-decoration: none; font-weight: 600; transition: all 0.3s;"
+                               onmouseover="this.style.backgroundColor='#c82333'; this.style.transform='scale(1.05)'" 
+                               onmouseout="this.style.backgroundColor='#dc3545'; this.style.transform='scale(1)'"
+                               onclick="return confirm('Sei sicuro di voler effettuare il logout?')">
+                                🚪 Logout
+                            </a>
+                        </div>
+                    <#else>
+                        <!-- Utente non loggato -->
+                        <a href="${login_url!'/login'}" 
+                           style="background: #28a745; color: white; padding: 0.5rem 1.5rem; border-radius: 20px; text-decoration: none; font-weight: 600; transition: all 0.3s;"
+                           onmouseover="this.style.backgroundColor='#218838'; this.style.transform='scale(1.05)'" 
+                           onmouseout="this.style.backgroundColor='#28a745'; this.style.transform='scale(1)'">
+                            🔑 Login
+                        </a>
+                    </#if>
+                </div>
+            </nav>
+        </div>
+        
+        <!-- Debug info (solo in sviluppo) -->
+        <#if user_logged_in?? && user_logged_in>
+            <div style="margin-top: 0.5rem; padding: 0.5rem; background: rgba(255,255,255,0.1); border-radius: 5px; font-size: 0.8rem; opacity: 0.8;">
+                <strong>Debug:</strong> 
+                Logged in: ${user_logged_in?c} | 
+                Admin: ${is_admin?c} | 
+                Operator: ${is_operator?c} |
+                <a href="/NuovissimoSoccorsoWeb-1.0-SNAPSHOT/debug/session" style="color: #ffc107; text-decoration: underline;">
+                    Session Debug
+                </a>
+            </div>
+        </#if>
+    </div>
+</header>

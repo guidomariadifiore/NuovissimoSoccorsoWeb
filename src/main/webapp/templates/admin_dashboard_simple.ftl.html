@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Amministratore - Sistema Soccorso</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .stat-label {
+            font-size: 1.1rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+        }
+        
+        .stat-icon {
+            font-size: 2.5rem;
+            opacity: 0.3;
+            position: absolute;
+            right: 2rem;
+            top: 2rem;
+        }
+        
+        .stat-convalidate .stat-icon { color: #f39c12; }
+        .stat-attive .stat-icon { color: #e74c3c; }
+        .stat-concluse .stat-icon { color: #27ae60; }
+        .stat-annullate .stat-icon { color: #95a5a6; }
+        
+        .welcome-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        
+        /* Stili per le nuove card di gestione */
+        .management-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            text-align: center;
+            border: 2px solid transparent;
+        }
+        
+        .management-card:hover {
+            transform: translateY(-5px);
+            border-color: #667eea;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .management-card .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .management-card .card-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        
+        .management-card .card-description {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .management-operatori .card-icon { color: #3498db; }
+        .management-mezzi .card-icon { color: #e67e22; }
+        .management-materiali .card-icon { color: #9b59b6; }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <#include "common/header.ftl.html">
+
+    <div class="container">
+        <!-- Messaggi -->
+        <#if success_message??>
+            <div class="alert alert-success" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Successo:</strong> ${success_message}
+            </div>
+        </#if>
+        
+        <#if error_message??>
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Errore:</strong> ${error_message}
+            </div>
+        </#if>
+
+        <!-- Benvenuto -->
+        <div class="welcome-section">
+            <h3><i class="fas fa-home me-2"></i>Panoramica Sistema</h3>
+            <p class="mb-0">
+                Qui puoi visualizzare le statistiche generali del sistema di soccorso. 
+                Totale richieste gestite: <strong>${totale_richieste!0}</strong>
+            </p>
+        </div>
+
+        <!-- Statistiche -->
+        <div class="row">
+            <!-- Richieste Convalidate -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <a href="${contextPath}/admin/richieste/convalidate" class="text-decoration-none">
+                    <div class="stats-card stat-convalidate position-relative">
+                        <i class="fas fa-clipboard-check stat-icon"></i>
+                        <div class="stat-number">${count_convalidate!0}</div>
+                        <div class="stat-label">Richieste Convalidate</div>
+                        <div class="mt-3">
+                            <small class="text-muted">Pronte per essere attivate</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Missioni Attive (era Richieste Attive) -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <a href="${contextPath}/admin/richieste/attive" class="text-decoration-none">
+                    <div class="stats-card stat-attive position-relative">
+                        <i class="fas fa-exclamation-circle stat-icon"></i>
+                        <div class="stat-number">${count_attive!0}</div>
+                        <div class="stat-label">Missioni Attive</div>
+                        <div class="mt-3">
+                            <small class="text-muted">Missioni in corso</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Richieste Concluse -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <a href="${contextPath}/admin/richieste/concluse" class="text-decoration-none">
+                    <div class="stats-card stat-concluse position-relative">
+                        <i class="fas fa-check-circle stat-icon"></i>
+                        <div class="stat-number">${count_concluse!0}</div>
+                        <div class="stat-label">Richieste Concluse</div>
+                        <div class="mt-3">
+                            <small class="text-muted">Completate con successo</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Richieste Annullate -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <a href="${contextPath}/admin/richieste/annullate" class="text-decoration-none">
+                    <div class="stats-card stat-annullate position-relative">
+                        <i class="fas fa-times-circle stat-icon"></i>
+                        <div class="stat-number">${count_annullate!0}</div>
+                        <div class="stat-label">Richieste Annullate</div>
+                        <div class="mt-3">
+                            <small class="text-muted">Non elaborate</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Sezione Gestione Risorse -->
+        <div class="welcome-section">
+            <h3 class="section-title">
+                <i class="fas fa-cogs me-2"></i>Gestione Risorse
+            </h3>
+            
+            <div class="row">
+                <!-- Visualizza Operatori -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <a href="${contextPath}/admin/operatori" class="text-decoration-none">
+                        <div class="management-card management-operatori">
+                            <div class="card-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="card-title">Visualizza Operatori</div>
+                            <div class="card-description">
+                                Gestisci e visualizza tutti gli operatori del sistema
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Gestisci Mezzi -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <a href="${contextPath}/admin/mezzi" class="text-decoration-none">
+                        <div class="management-card management-mezzi">
+                            <div class="card-icon">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                            <div class="card-title">Gestisci Mezzi</div>
+                            <div class="card-description">
+                                Amministra i mezzi di soccorso disponibili
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Gestisci Materiali -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <a href="${contextPath}/admin/materiali" class="text-decoration-none">
+                        <div class="management-card management-materiali">
+                            <div class="card-icon">
+                                <i class="fas fa-boxes"></i>
+                            </div>
+                            <div class="card-title">Gestisci Materiali</div>
+                            <div class="card-description">
+                                Gestisci l'inventario dei materiali di soccorso
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info aggiuntive -->
+        <div class="welcome-section">
+            <h4><i class="fas fa-info-circle me-2"></i>Informazioni</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Stato del Sistema</h6>
+                    <p class="text-success">
+                        <i class="fas fa-circle me-1"></i>
+                        Sistema operativo e funzionante
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <h6>Ultima Attività</h6>
+                    <p class="text-muted">
+                        <i class="fas fa-clock me-1"></i>
+                        ${.now?string("dd/MM/yyyy HH:mm")}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logout -->
+        <div class="text-center mb-4">
+            <a href="${contextPath}/logout" class="btn btn-outline-danger">
+                <i class="fas fa-sign-out-alt me-2"></i>
+                Logout
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Animazione di entrata per le carte
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.stats-card, .management-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease-out';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+    <#include "common/footer.ftl.html">
+
+</body>
+</html>

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Operatore - Sistema Soccorso</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .dashboard-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            border-left: 5px solid transparent;
+            height: 100%;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-missioni {
+            border-left-color: #e74c3c;
+        }
+        
+        .card-patenti {
+            border-left-color: #f39c12;
+        }
+        
+        .card-storico {
+            border-left-color: #27ae60;
+        }
+        
+        .card-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .icon-missioni {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+        
+        .icon-patenti {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        }
+        
+        .icon-storico {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+        }
+        
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-subtitle {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .card-number {
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 1rem 0;
+        }
+        
+        .number-missioni {
+            color: #e74c3c;
+        }
+        
+        .number-patenti {
+            color: #f39c12;
+        }
+        
+        .number-storico {
+            color: #27ae60;
+        }
+        
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+        
+        .breadcrumb-item a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: white;
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .welcome-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .quick-stats {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .quick-stats-item {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 0.5rem;
+        }
+        
+        .quick-stats-number {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .card-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+            
+            .card-number {
+                font-size: 2.5rem;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+        }
+        
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        
+        .fade-in:nth-child(1) { animation-delay: 0.1s; }
+        .fade-in:nth-child(2) { animation-delay: 0.2s; }
+        .fade-in:nth-child(3) { animation-delay: 0.3s; }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <#include "common/header.ftl.html">
+
+    <div class="container">
+        <!-- Messaggi -->
+        <#if success_message??>
+            <div class="alert alert-success" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Successo:</strong> ${success_message}
+            </div>
+        </#if>
+        
+        <#if error_message??>
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Errore:</strong> ${error_message}
+            </div>
+        </#if>
+
+        <!-- Welcome Section -->
+        <div class="welcome-section fade-in">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h3>
+                        <i class="fas fa-hand-holding-medical me-2 text-primary"></i>
+                        Ciao ${operatore_name!"Operatore"}!
+                    </h3>
+                    <p class="text-muted mb-0">
+                        Ecco un riepilogo delle tue attività e dello stato del tuo profilo.
+                        Seleziona una delle sezioni sottostanti per accedere alle funzionalità.
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <#if (patenti_status!"aggiornate") == "aggiornate">
+                        <span class="status-badge status-active">
+                            <i class="fas fa-check-circle me-1"></i>Profilo Aggiornato
+                        </span>
+                    <#else>
+                        <span class="status-badge status-warning">
+                            <i class="fas fa-exclamation-triangle me-1"></i>Aggiornamenti Richiesti
+                        </span>
+                    </#if>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Cards -->
+        <div class="row">
+            <!-- Missioni in Corso -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="dashboard-card card-missioni fade-in">
+                    <div class="text-center">
+                        <div class="card-icon icon-missioni mx-auto">
+                            <i class="fas fa-ambulance"></i>
+                        </div>
+                    </div>
+                    
+                    <h4 class="card-title text-center">Missioni in Corso</h4>
+                    <p class="card-subtitle text-center">
+                        Gestisci le tue missioni attive
+                    </p>
+                    
+                    <div class="text-center">
+                        <div class="card-number number-missioni">
+                            ${missioni_in_corso!0}
+                        </div>
+                        <p class="text-muted">
+                            <#if (missioni_in_corso!0) == 0>
+                                Nessuna missione attiva al momento
+                            <#elseif (missioni_in_corso!0) == 1>
+                                missione attiva
+                            <#else>
+                                missioni attive
+                            </#if>
+                        </p>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <a href="${contextPath}/operatore/missioni" class="btn btn-outline-danger">
+                            <i class="fas fa-eye me-2"></i>Visualizza Missioni
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Aggiorna Patenti e Abilità -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="dashboard-card card-patenti fade-in">
+                    <div class="text-center">
+                        <div class="card-icon icon-patenti mx-auto">
+                            <i class="fas fa-id-card"></i>
+                        </div>
+                    </div>
+                    
+                    <h4 class="card-title text-center">Patenti e Abilità</h4>
+                    <p class="card-subtitle text-center">
+                        Aggiorna il tuo profilo professionale
+                    </p>
+                    
+                    <div class="text-center">
+                        <div class="card-number number-patenti">
+                            <#if (patenti_status!"aggiornate") == "aggiornate">
+                                <i class="fas fa-check-circle"></i>
+                            <#else>
+                                <i class="fas fa-exclamation-circle"></i>
+                            </#if>
+                        </div>
+                        <p class="text-muted">
+                            <#if (patenti_status!"aggiornate") == "aggiornate">
+                                Profilo aggiornato
+                            <#else>
+                                Aggiornamenti necessari
+                            </#if>
+                        </p>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <a href="${contextPath}/operatore/modifica" class="btn btn-outline-warning">
+                            <i class="fas fa-edit me-2"></i>Gestisci Profilo
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Storico Missioni -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="dashboard-card card-storico fade-in">
+                    <div class="text-center">
+                        <div class="card-icon icon-storico mx-auto">
+                            <i class="fas fa-history"></i>
+                        </div>
+                    </div>
+                    
+                    <h4 class="card-title text-center">Storico Missioni</h4>
+                    <p class="card-subtitle text-center">
+                        Consulta le missioni completate
+                    </p>
+                    
+                    <div class="text-center">
+                        <div class="card-number number-storico">
+                            ${storico_missioni!0}
+                        </div>
+                        <p class="text-muted">
+                            <#if (storico_missioni!0) == 0>
+                                Nessuna missione completata
+                            <#elseif (storico_missioni!0) == 1>
+                                missione completata
+                            <#else>
+                                missioni completate
+                            </#if>
+                        </p>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <a href="${contextPath}/operatore/storico" class="btn btn-outline-success">
+                            <i class="fas fa-list me-2"></i>Visualizza Storico
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <#include "common/footer.ftl.html">
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animazione di ingresso per le card
+            const cards = document.querySelectorAll('.dashboard-card');
+            
+            // Effetto hover per le card
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.borderLeftWidth = '8px';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.borderLeftWidth = '5px';
+                });
+            });
+            
+            // Log delle statistiche (per debug)
+            console.log('Dashboard Operatore caricata');
+            console.log('Missioni in corso: ${missioni_in_corso!0}');
+            console.log('Storico missioni: ${storico_missioni!0}');
+            console.log('Patenti aggiornate: ${patenti_aggiornate!"true"}');
+        });
+    </script>
+</body>
+</html>

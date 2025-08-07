@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${page_title!} - Sistema Soccorso</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .valutazione-header {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-title {
+            color: #2c3e50;
+            margin: 0 0 1.5rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #ecf0f1;
+            font-size: 1.3rem;
+        }
+        
+        .mission-info {
+            background: #e8f5e8;
+            border: 1px solid #27ae60;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .mission-info h5 {
+            color: #27ae60;
+            margin-bottom: 1rem;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .info-icon {
+            margin-right: 0.75rem;
+            color: #666;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #555;
+            margin-right: 0.75rem;
+            min-width: 100px;
+        }
+        
+        .info-value {
+            color: #333;
+            flex: 1;
+        }
+        
+        /* Stelle per valutazione */
+        .stelle-container {
+            background: #fff9c4;
+            border: 2px solid #f39c12;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .stelle-title {
+            color: #f39c12;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stelle-rating {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+        }
+        
+        .stella {
+            color: #ddd;
+            cursor: pointer;
+            transition: color 0.2s;
+            user-select: none;
+        }
+        
+        .stella:hover,
+        .stella.active {
+            color: #f39c12;
+        }
+        
+        .stella.readonly {
+            cursor: default;
+        }
+        
+        .rating-label {
+            color: #666;
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+        }
+        
+        /* Commento */
+        .commento-container {
+            background: #e3f2fd;
+            border: 2px solid #2196f3;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .commento-title {
+            color: #2196f3;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .form-control:focus {
+            border-color: #2196f3;
+            box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.25);
+        }
+        
+        .char-counter {
+            font-size: 0.8rem;
+            color: #6c757d;
+            text-align: right;
+            margin-top: 0.5rem;
+        }
+        
+        .readonly-content {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 1rem;
+            min-height: 100px;
+        }
+        
+        .conclusion-date {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stelle-rating {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        
+        <#include "common/header.ftl.html">
+
+        <!-- Messaggi -->
+        <#if success_message??>
+            <div class="alert alert-success" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Successo:</strong> ${success_message}
+            </div>
+        </#if>
+        
+        <#if error_message??>
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Errore:</strong> ${error_message}
+            </div>
+        </#if>
+        
+        <!-- Informazioni Missione -->
+        <div class="section-card">
+            <h3 class="section-title">📋 Riepilogo Missione</h3>
+            <div class="mission-info">
+                <h5><i class="fas fa-info-circle me-2"></i>Dettagli Missione</h5>
+                <div class="info-grid">
+                    <div>
+                        <div class="info-item">
+                            <i class="fas fa-hashtag info-icon"></i>
+                            <span class="info-label">Codice:</span>
+                            <span class="info-value">#${missione.codiceRichiesta}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-tag info-icon"></i>
+                            <span class="info-label">Nome:</span>
+                            <span class="info-value">${missione.nome}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt info-icon"></i>
+                            <span class="info-label">Posizione:</span>
+                            <span class="info-value">${missione.posizione}</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="info-item">
+                            <i class="fas fa-calendar-alt info-icon"></i>
+                            <span class="info-label">Data Avvio:</span>
+                            <span class="info-value">
+                                <#if missione.dataOraInizio??>
+                                    ${missione.dataOraInizio?string}
+                                <#else>
+                                    Data non disponibile
+                                </#if>
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-bullseye info-icon"></i>
+                            <span class="info-label">Obiettivo:</span>
+                            <span class="info-value">${missione.obiettivo}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contenuto condizionale -->
+        <#if form_mode == "create">
+            <!-- Form per nuova valutazione -->
+            <form id="valutazioneForm" method="POST" action="${contextPath}/admin/valutazione/${missione.codiceRichiesta}/">
+                
+                <!-- Valutazione con stelle -->
+                <div class="section-card">
+                    <div class="stelle-container">
+                        <h4 class="stelle-title">
+                            <i class="fas fa-star me-2"></i>Valuta il successo della missione
+                        </h4>
+                        <div class="stelle-rating" id="stelleRating">
+                            <span class="stella" data-rating="1">★</span>
+                            <span class="stella" data-rating="2">★</span>
+                            <span class="stella" data-rating="3">★</span>
+                            <span class="stella" data-rating="4">★</span>
+                            <span class="stella" data-rating="5">★</span>
+                        </div>
+                        <div class="rating-label" id="ratingLabel">Seleziona una valutazione</div>
+                        <input type="hidden" name="successo" id="successoInput" value="">
+                    </div>
+                </div>
+                
+                <!-- Commento -->
+                <div class="section-card">
+                    <div class="commento-container">
+                        <h4 class="commento-title">
+                            <i class="fas fa-comment-alt me-2"></i>Commenti sulla missione
+                        </h4>
+                        <div class="mb-3">
+                            <textarea class="form-control" 
+                                      name="commento" 
+                                      id="commentoTextarea"
+                                      rows="6" 
+                                      placeholder="Descrivi l'esito della missione, eventuali difficoltà incontrate, punti di forza e aree di miglioramento..."
+                                      maxlength="1000"></textarea>
+                            <div class="char-counter">
+                                <span id="commentoCount">0</span>/1000 caratteri
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pulsanti -->
+                <div class="text-center mt-4 mb-4">
+                    <a href="${contextPath}/admin/richieste/attive" class="btn btn-secondary me-2">
+                        <i class="fas fa-times me-2"></i>Annulla
+                    </a>
+                    <button type="submit" class="btn btn-success" id="submitBtn" disabled>
+                        <i class="fas fa-save me-2"></i>Salva Valutazione
+                    </button>
+                </div>
+                
+            </form>
+        <#else>
+            <!-- Visualizzazione valutazione esistente -->
+            <div class="section-card">
+                <div class="stelle-container">
+                    <h4 class="stelle-title">
+                        <i class="fas fa-star me-2"></i>Valutazione della missione
+                    </h4>
+                    <div class="stelle-rating">
+                        <#list 1..5 as i>
+                            <span class="stella readonly <#if i <= info_missione.successo>active</#if>">★</span>
+                        </#list>
+                    </div>
+                    <div class="rating-label">
+                        <#switch info_missione.successo>
+                            <#case 1>Molto insoddisfacente<#break>
+                            <#case 2>Insoddisfacente<#break>
+                            <#case 3>Sufficiente<#break>
+                            <#case 4>Buono<#break>
+                            <#case 5>Eccellente<#break>
+                            <#default>Non valutato</#switch>
+                        (${info_missione.successo}/5)
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Commento (solo lettura) -->
+            <div class="section-card">
+                <div class="commento-container">
+                    <h4 class="commento-title">
+                        <i class="fas fa-comment-alt me-2"></i>Commenti sulla missione
+                    </h4>
+                    <div class="readonly-content">
+                        <#if info_missione.commento?? && info_missione.commento?trim != "">
+                            ${info_missione.commento}
+                        <#else>
+                            <em style="color: #6c757d;">Nessun commento inserito</em>
+                        </#if>
+                    </div>
+                    <div class="conclusion-date">
+                        <strong>Missione conclusa il:</strong> 
+                        <#if info_missione.dataOraFine??>
+                            ${info_missione.dataOraFine?string}
+                        <#else>
+                            Data non disponibile
+                        </#if>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pulsanti (solo lettura) -->
+            <div class="text-center mt-4 mb-4">
+                <a href="${contextPath}/admin/richieste/attive" class="btn btn-secondary me-2">
+                    <i class="fas fa-arrow-left me-2"></i>Torna alle Missioni
+                </a>
+                <a href="${contextPath}/admin/missione/${missione.codiceRichiesta}" class="btn btn-outline-primary">
+                    <i class="fas fa-eye me-2"></i>Visualizza Dettagli Missione
+                </a>
+            </div>
+        </#if>
+        
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        <#if form_mode == "create">
+        // Variabili per la valutazione
+        let currentRating = 0;
+        const ratingLabels = {
+            1: "Molto insoddisfacente",
+            2: "Insoddisfacente", 
+            3: "Sufficiente",
+            4: "Buono",
+            5: "Eccellente"
+        };
+        
+        // Gestione stelle
+        document.addEventListener('DOMContentLoaded', function() {
+            const stelle = document.querySelectorAll('.stella');
+            const ratingLabel = document.getElementById('ratingLabel');
+            const successoInput = document.getElementById('successoInput');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // Click sulle stelle
+            stelle.forEach(stella => {
+                stella.addEventListener('click', function() {
+                    currentRating = parseInt(this.dataset.rating);
+                    updateStelle();
+                    updateSubmitButton();
+                });
+                
+                // Hover effect
+                stella.addEventListener('mouseenter', function() {
+                    const hoverRating = parseInt(this.dataset.rating);
+                    highlightStelle(hoverRating);
+                });
+            });
+            
+            // Reset hover quando si esce dal container
+            document.getElementById('stelleRating').addEventListener('mouseleave', function() {
+                updateStelle();
+            });
+            
+            function updateStelle() {
+                stelle.forEach((stella, index) => {
+                    if (index < currentRating) {
+                        stella.classList.add('active');
+                    } else {
+                        stella.classList.remove('active');
+                    }
+                });
+                
+                if (currentRating > 0) {
+                    ratingLabel.textContent = ratingLabels[currentRating] + ' (' + currentRating + '/5)';
+                    successoInput.value = currentRating;
+                } else {
+                    ratingLabel.textContent = 'Seleziona una valutazione';
+                    successoInput.value = '';
+                }
+            }
+            
+            function highlightStelle(rating) {
+                stelle.forEach((stella, index) => {
+                    if (index < rating) {
+                        stella.classList.add('active');
+                    } else {
+                        stella.classList.remove('active');
+                    }
+                });
+            }
+            
+            function updateSubmitButton() {
+                if (currentRating > 0) {
+                    submitBtn.disabled = false;
+                } else {
+                    submitBtn.disabled = true;
+                }
+            }
+            
+            // Contatore caratteri commento
+            const commentoTextarea = document.getElementById('commentoTextarea');
+            const commentoCount = document.getElementById('commentoCount');
+            
+            function updateCommentCounter() {
+                const length = commentoTextarea.value.length;
+                commentoCount.textContent = length;
+                
+                // Cambia colore in base alla lunghezza
+                const parent = commentoCount.parentElement;
+                parent.classList.remove('text-warning', 'text-danger');
+                
+                if (length > 800) {
+                    parent.classList.add('text-warning');
+                }
+                if (length > 950) {
+                    parent.classList.add('text-danger');
+                }
+            }
+            
+            commentoTextarea.addEventListener('input', updateCommentCounter);
+            commentoTextarea.addEventListener('keyup', updateCommentCounter);
+            updateCommentCounter(); // Chiamata iniziale
+            
+            // Gestione submit form
+            document.getElementById('valutazioneForm').addEventListener('submit', function(e) {
+                if (currentRating === 0) {
+                    e.preventDefault();
+                    alert('Seleziona una valutazione da 1 a 5 stelle prima di procedere.');
+                    return;
+                }
+                
+                if (!confirm('Confermi la valutazione della missione? Questa azione non può essere annullata.')) {
+                    e.preventDefault();
+                    return;
+                }
+                
+                // Disabilita il pulsante per prevenire doppi invii
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Salvando...';
+            });
+        });
+        </#if>
+        
+        // Animazioni di entrata
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.section-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease-out';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 150);
+            });
+        });
+    </script>
+    
+    <#include "common/footer.ftl.html">
+
+</body>
+</html>

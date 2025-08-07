@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storico Missioni - Sistema Soccorso</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .content-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .stats-summary {
+            background: linear-gradient(135deg, #e8f5e8 0%, #d5f4d5 100%);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #27ae60;
+        }
+        
+        .mission-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #27ae60;
+            transition: all 0.3s ease;
+        }
+        
+        .mission-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .mission-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .mission-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0;
+        }
+        
+        .mission-code {
+            background: #27ae60;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .mission-status {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .status-completata {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-fallita {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-in-corso {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .mission-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .detail-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .detail-icon {
+            color: #27ae60;
+            margin-right: 0.5rem;
+            width: 20px;
+        }
+        
+        .detail-text {
+            font-size: 0.9rem;
+            color: #495057;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+        
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+        
+        .breadcrumb-item a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: white;
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .mission-info-extra {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .rating-stars {
+            color: #f39c12;
+        }
+        
+        .rating-empty {
+            color: #ddd;
+        }
+        
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        
+        .fade-in:nth-child(odd) { animation-delay: 0.1s; }
+        .fade-in:nth-child(even) { animation-delay: 0.2s; }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .mission-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            
+            .mission-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <#include "common/header.ftl.html">
+
+    <div class="container">
+        <!-- Messaggi -->
+        <#if success_message??>
+            <div class="alert alert-success" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Successo:</strong> ${success_message}
+            </div>
+        </#if>
+        
+        <#if error_message??>
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Errore:</strong> ${error_message}
+            </div>
+        </#if>
+
+        <!-- Statistiche -->
+        <div class="stats-summary">
+            <div class="row">
+                <div class="col-md-8">
+                    <h4 class="mb-2">
+                        <i class="fas fa-chart-line me-2"></i>Riepilogo Attività
+                    </h4>
+                    <p class="mb-1">
+                        Totale missioni completate: <strong>${total_missioni!0}</strong>
+                    </p>
+                    <#assign totMissioni = total_missioni!0>
+                    <#if totMissioni gt 0>
+                        <small class="text-muted">
+                            Hai contribuito a ${totMissioni} <#if totMissioni == 1>missione<#else>missioni</#if> di soccorso
+                        </small>
+                    </#if>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="mt-2">
+                        <i class="fas fa-medal" style="font-size: 2rem; opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista Missioni -->
+        <div class="content-card">
+            <h3 class="mb-4">
+                <i class="fas fa-list-alt me-2"></i>Cronologia Missioni
+            </h3>
+
+            <#if storico_missioni?? && (storico_missioni?size > 0)>
+                <#list storico_missioni as missioneDettagli>
+                    <div class="mission-card fade-in">
+                        <div class="mission-header">
+                            <div class="d-flex align-items-center flex-grow-1">
+                                <h5 class="mission-title me-3">
+                                    ${missioneDettagli.missione.nome!"Missione Senza Nome"}
+                                </h5>
+                                <span class="mission-code">
+                                    #${missioneDettagli.missione.codiceRichiesta}
+                                </span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <#if missioneDettagli.infoMissione??>
+                                    <#assign rating = missioneDettagli.infoMissione.successo!0>
+                                    <#if rating gte 4>
+                                        <span class="mission-status status-completata">
+                                            <i class="fas fa-check-circle me-1"></i>Completata con Successo
+                                        </span>
+                                    <#elseif rating gte 3>
+                                        <span class="mission-status status-warning">
+                                            <i class="fas fa-exclamation-circle me-1"></i>Completata
+                                        </span>
+                                    <#elseif rating gte 1>
+                                        <span class="mission-status status-fallita">
+                                            <i class="fas fa-times-circle me-1"></i>Completata con Difficoltà
+                                        </span>
+                                    <#else>
+                                        <span class="mission-status status-in-corso">
+                                            <i class="fas fa-clock me-1"></i>Non Valutata
+                                        </span>
+                                    </#if>
+                                <#else>
+                                    <span class="mission-status status-in-corso">
+                                        <i class="fas fa-clock me-1"></i>In Corso
+                                    </span>
+                                </#if>
+                            </div>
+                        </div>
+
+                        <div class="mission-details">
+                            <div class="detail-item">
+                                <i class="fas fa-calendar-alt detail-icon"></i>
+                                <div class="detail-text">
+                                    <span class="detail-label">Inizio:</span>
+                                    <#if missioneDettagli.missione.dataOraInizio??>
+                                        <#if missioneDettagli.missione.dataOraInizio?is_string>
+                                            ${missioneDettagli.missione.dataOraInizio}
+                                        <#else>
+                                            ${missioneDettagli.missione.dataOraInizio?string("dd/MM/yyyy HH:mm")}
+                                        </#if>
+                                    <#else>
+                                        Non disponibile
+                                    </#if>
+                                </div>
+                            </div>
+
+                            <#if missioneDettagli.infoMissione?? && missioneDettagli.infoMissione.dataFine??>
+                                <div class="detail-item">
+                                    <i class="fas fa-flag-checkered detail-icon"></i>
+                                    <div class="detail-text">
+                                        <span class="detail-label">Fine:</span>
+                                        <#if missioneDettagli.infoMissione.dataFine?is_string>
+                                            ${missioneDettagli.infoMissione.dataFine}
+                                        <#else>
+                                            ${missioneDettagli.infoMissione.dataFine?string("dd/MM/yyyy HH:mm")}
+                                        </#if>
+                                    </div>
+                                </div>
+                            </#if>
+
+                            <div class="detail-item">
+                                <i class="fas fa-map-marker-alt detail-icon"></i>
+                                <div class="detail-text">
+                                    <span class="detail-label">Posizione:</span>
+                                    ${missioneDettagli.missione.posizione!"Non specificata"}
+                                </div>
+                            </div>
+
+                            <#if missioneDettagli.richiesta??>
+                                <div class="detail-item">
+                                    <i class="fas fa-exclamation-triangle detail-icon"></i>
+                                    <div class="detail-text">
+                                        <span class="detail-label">Tipo:</span>
+                                        ${missioneDettagli.richiesta.tipoEmergenza!"Non specificato"}
+                                    </div>
+                                </div>
+                            </#if>
+
+                            <#if missioneDettagli.ruoloSquadra??>
+                                <div class="detail-item">
+                                    <i class="fas fa-user-tag detail-icon"></i>
+                                    <div class="detail-text">
+                                        <span class="detail-label">Ruolo:</span>
+                                        <#if missioneDettagli.ruoloSquadra == "Caposquadra">
+                                            <span class="badge bg-primary">${missioneDettagli.ruoloSquadra}</span>
+                                        <#else>
+                                            <span class="badge bg-secondary">${missioneDettagli.ruoloSquadra}</span>
+                                        </#if>
+                                    </div>
+                                </div>
+                            </#if>
+                        </div>
+
+                        <#if missioneDettagli.missione.obiettivo?? || missioneDettagli.missione.nota?? || (missioneDettagli.infoMissione?? && (missioneDettagli.infoMissione.commento?? || missioneDettagli.infoMissione.successo??))>
+                            <div class="mission-info-extra">
+                                <#if missioneDettagli.missione.obiettivo??>
+                                    <div class="mb-2">
+                                        <strong><i class="fas fa-bullseye me-2 text-primary"></i>Obiettivo:</strong>
+                                        <p class="mb-1 ms-4">${missioneDettagli.missione.obiettivo}</p>
+                                    </div>
+                                </#if>
+
+                                <#if missioneDettagli.missione.nota??>
+                                    <div class="mb-2">
+                                        <strong><i class="fas fa-sticky-note me-2 text-info"></i>Note:</strong>
+                                        <p class="mb-1 ms-4">${missioneDettagli.missione.nota}</p>
+                                    </div>
+                                </#if>
+
+                                <#if missioneDettagli.infoMissione?? && missioneDettagli.infoMissione.commento??>
+                                    <div class="mb-2">
+                                        <strong><i class="fas fa-comment me-2 text-success"></i>Commento finale:</strong>
+                                        <p class="mb-1 ms-4">${missioneDettagli.infoMissione.commento}</p>
+                                    </div>
+                                </#if>
+                                
+                                <#if missioneDettagli.infoMissione?? && missioneDettagli.infoMissione.successo??>
+                                    <div class="mb-2">
+                                        <strong><i class="fas fa-star me-2 text-warning"></i>Valutazione:</strong>
+                                        <div class="ms-4">
+                                            <#assign rating = missioneDettagli.infoMissione.successo!0>
+                                            <span class="rating-stars">
+                                                <#if rating gte 1>★<#else><span class="rating-empty">☆</span></#if><#if rating gte 2>★<#else><span class="rating-empty">☆</span></#if><#if rating gte 3>★<#else><span class="rating-empty">☆</span></#if><#if rating gte 4>★<#else><span class="rating-empty">☆</span></#if><#if rating gte 5>★<#else><span class="rating-empty">☆</span></#if>
+                                            </span>
+                                            <span class="ms-2 text-muted">
+                                                <#if rating == 1>Molto insoddisfacente<#elseif rating == 2>Insoddisfacente<#elseif rating == 3>Sufficiente<#elseif rating == 4>Buono<#elseif rating == 5>Eccellente<#else>Non valutato</#if>
+                                                (${rating}/5)
+                                            </span>
+                                        </div>
+                                    </div>
+                                </#if>
+                            </div>
+                        </#if>
+                    </div>
+                </#list>
+            <#else>
+                <!-- Stato vuoto -->
+                <div class="empty-state">
+                    <i class="fas fa-history"></i>
+                    <h4>Nessuna missione trovata</h4>
+                    <p class="text-muted">Non hai ancora partecipato a nessuna missione di soccorso.</p>
+                    <a href="${contextPath}/operatore/dashboard" class="btn btn-success">
+                        <i class="fas fa-arrow-left me-2"></i>Torna alla Dashboard
+                    </a>
+                </div>
+            </#if>
+        </div>
+
+        <!-- Torna alla Dashboard -->
+        <div class="text-center mb-4">
+            <a href="${contextPath}/operatore/dashboard" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Torna alla Dashboard
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Storico Missioni Operatore caricato');
+            console.log('Totale missioni: ${total_missioni!0}');
+            
+            // Animazione di entrata per le mission cards
+            const cards = document.querySelectorAll('.mission-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease-out';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+    
+    <#include "common/footer.ftl.html">
+
+</body>
+</html>

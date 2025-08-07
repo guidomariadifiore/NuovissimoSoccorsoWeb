@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <#assign page_title = "Email di Conferma - Sistema di Soccorso">
+    <#include "common/head.ftl.html">
+    <link rel="stylesheet" href="/NuovissimoSoccorsoWeb-1.0-SNAPSHOT/css/email-conferma.css">
+</head>
+<body>
+    <#include "common/header.ftl.html">
+    
+    <main>
+        <div class="container">
+            <div class="card">
+                <div class="card-header">
+                    <h1>📧 Email di Conferma Richiesta</h1>
+                    <p>Questa è la simulazione dell'email che sarà inviata al segnalante</p>
+                </div>
+                
+                <div class="email-container">
+                    
+                    <!-- Simulazione finestra email -->
+                    <div class="email-window">
+                        <div class="email-header">
+                            <div class="email-meta">
+                                <div class="email-from">
+                                    <strong>Da:</strong> sistema@soccorso.it
+                                </div>
+                                <div class="email-to">
+                                    <strong>A:</strong> ${email_segnalante}
+                                </div>
+                                <div class="email-subject">
+                                    <strong>Oggetto:</strong> Conferma la tua richiesta di soccorso
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="email-body">
+                            <p>Ciao <strong>${nome_segnalante}</strong>,</p>
+                            
+                            <p>Hai inviato una richiesta di soccorso attraverso il nostro sistema. 
+                               Per procedere con l'elaborazione, devi confermare la tua richiesta.</p>
+                            
+                            <div class="richiesta-details">
+                                <h3>📋 Dettagli della richiesta:</h3>
+                                <div class="detail-row">
+                                    <span class="detail-label">Tipo di emergenza:</span>
+                                    <span class="detail-value">${tipo_emergenza}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Luogo:</span>
+                                    <span class="detail-value">${luogo}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Descrizione:</span>
+                                    <span class="detail-value">${descrizione}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Stato:</span>
+                                    <span class="detail-value status-pending">In attesa di conferma</span>
+                                </div>
+                            </div>
+                            
+                            <div class="action-section">
+                                <p><strong>Per attivare la richiesta, clicca sul pulsante qui sotto:</strong></p>
+                                
+                                <div class="button-container">
+                                    <a href="${confirmation_url}" class="confirm-button">
+                                        ✅ CONFERMA RICHIESTA
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="important-note">
+                                <p><strong>⚠️ Importante:</strong></p>
+                                <ul>
+                                    <li>La richiesta sarà elaborata solo dopo la conferma</li>
+                                    <li>Se non hai fatto tu questa richiesta, ignora questa email</li>
+                                    <li>Il link di conferma è valido e sicuro</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="url-fallback">
+                                <p>Se il pulsante non funziona, copia e incolla questo link:</p>
+                                <div class="url-box">
+                                    ${confirmation_url}
+                                </div>
+                            </div>
+                            
+                            <div class="email-footer">
+                                <p>Sistema di Soccorso - Servizio Automatico</p>
+                                <p><small>Questa email è stata generata automaticamente.</small></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Nota informativa -->
+                    <div class="simulation-note">
+                        <h3>ℹ️ Nota di Simulazione</h3>
+                        <p>In un sistema reale, questa email verrebbe inviata automaticamente all'indirizzo <strong>${email_segnalante}</strong>. 
+                           Per scopi dimostrativi, viene mostrata qui l'anteprima del contenuto.</p>
+                        <p>Il pulsante "CONFERMA RICHIESTA" è funzionante e ti porterà alla pagina di conferma.</p>
+                    </div>
+                    
+                    <!-- Pulsanti di azione -->
+                    <div class="page-actions">
+                        <a href="/NuovissimoSoccorsoWeb-1.0-SNAPSHOT/" class="btn btn-secondary">
+                            🏠 Torna alla Home
+                        </a>
+                        <a href="/NuovissimoSoccorsoWeb-1.0-SNAPSHOT/emergenza" class="btn btn-primary">
+                            🚨 Nuova Richiesta
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <#include "common/footer.ftl.html">
+</body>
+</html>

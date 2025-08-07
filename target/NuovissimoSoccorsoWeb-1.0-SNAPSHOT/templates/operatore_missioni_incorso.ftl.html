@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Missioni in Corso - Sistema Soccorso</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .mission-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            border-left: 5px solid #e74c3c;
+        }
+        
+        .mission-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .mission-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .mission-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0;
+        }
+        
+        .mission-code {
+            background: #e74c3c;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .mission-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .detail-item {
+            display: flex;
+            align-items: center;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .detail-item i {
+            color: #e74c3c;
+            width: 20px;
+            margin-right: 0.5rem;
+        }
+        
+        .detail-value {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-left: 0.25rem;
+        }
+        
+        .mission-actions {
+            text-align: right;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .btn-mission {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            border: none;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-mission:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+            color: white;
+        }
+        
+        .empty-state {
+            background: white;
+            border-radius: 15px;
+            padding: 3rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .empty-icon {
+            font-size: 4rem;
+            color: #bdc3c7;
+            margin-bottom: 1rem;
+        }
+        
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+        
+        .breadcrumb-item a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: white;
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .priority-high {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .priority-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .priority-low {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .stats-summary {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .stats-item {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stats-number {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .mission-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            
+            .mission-actions {
+                text-align: left;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+        }
+        
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        
+        .fade-in:nth-child(odd) { animation-delay: 0.1s; }
+        .fade-in:nth-child(even) { animation-delay: 0.2s; }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <#include "common/header.ftl.html">
+
+    <div class="container">
+        <!-- Messaggi -->
+        <#if success_message??>
+            <div class="alert alert-success" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Successo:</strong> ${success_message}
+            </div>
+        </#if>
+        
+        <#if error_message??>
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Errore:</strong> ${error_message}
+            </div>
+        </#if>
+
+        <#if missioni_in_corso?? && (missioni_in_corso?size > 0)>
+            <!-- Lista Missioni -->
+            <div class="row">
+                <#list missioni_in_corso as missione>
+                    <div class="col-12">
+                        <div class="mission-card fade-in">
+                            <div class="mission-header">
+                                <div class="d-flex align-items-center gap-3">
+                                    <h3 class="mission-title">${missione.nome!("Missione " + missione.codiceRichiesta)}</h3>
+                                    <span class="mission-code">#${missione.codiceRichiesta}</span>
+                                    <span class="status-badge status-active">Attiva</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mission-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-bullseye"></i>
+                                    <span>Obiettivo:</span>
+                                    <span class="detail-value">${missione.obiettivo!"Non specificato"}</span>
+                                </div>
+                                
+                                <div class="detail-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>Posizione:</span>
+                                    <span class="detail-value">${missione.posizione!"Non specificata"}</span>
+                                </div>
+                                
+                                <div class="detail-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Inizio:</span>
+                                    <span class="detail-value">
+                                        <#if missione.dataOraInizio??>
+                                            <#if missione.dataOraInizio?is_string>
+                                                ${missione.dataOraInizio}
+                                            <#else>
+                                                ${missione.dataOraInizio?string("dd/MM/yyyy HH:mm")}
+                                            </#if>
+                                        <#else>
+                                            Non specificato
+                                        </#if>
+                                    </span>
+                                </div>
+                                
+                                <div class="detail-item">
+                                    <i class="fas fa-user-shield"></i>
+                                    <span>Il tuo ruolo:</span>
+                                    <span class="detail-value">
+                                        <!-- TODO: Implementare quando avremo il ruolo -->
+                                        Standard
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <#if missione.nota?? && missione.nota?trim != "">
+                                <div class="alert alert-info mt-3 mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Note:</strong> ${missione.nota}
+                                </div>
+                            </#if>
+                            
+                            <div class="mission-actions">
+                                <button class="btn btn-mission" disabled>
+                                    <i class="fas fa-eye me-2"></i>Visualizza Dettagli
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </#list>
+            </div>
+            
+        <#else>
+            <!-- Stato Vuoto -->
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <h3>Nessuna Missione Attiva</h3>
+                <p class="text-muted mb-4">
+                    Al momento non hai missioni in corso assegnate. 
+                    Le nuove missioni appariranno qui quando verrai assegnato.
+                </p>
+                <a href="${contextPath}/operatore/dashboard" class="btn btn-mission">
+                    <i class="fas fa-arrow-left me-2"></i>Torna alla Dashboard
+                </a>
+            </div>
+        </#if>
+        
+        <!-- Footer Actions -->
+        <div class="text-center mt-5 mb-4">
+            <a href="${contextPath}/operatore/dashboard" class="btn btn-outline-secondary me-3">
+                <i class="fas fa-arrow-left me-2"></i>Torna alla Dashboard
+            </a>
+            
+            <#if missioni_in_corso?? && (missioni_in_corso?size > 0)>
+                <button class="btn btn-outline-primary" disabled>
+                    <i class="fas fa-refresh me-2"></i>Aggiorna Lista
+                </button>
+            </#if>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animazioni delle card
+            const cards = document.querySelectorAll('.mission-card');
+            
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.borderLeftWidth = '8px';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.borderLeftWidth = '5px';
+                });
+            });
+            
+            // Log per debug
+            console.log('Missioni in corso caricate: ${numero_missioni!0}');
+            console.log('Operatore ID: ${operatore_id!"non disponibile"}');
+            
+            // Auto-refresh ogni 5 minuti (opzionale)
+            // setInterval(() => {
+            //     window.location.reload();
+            // }, 300000);
+        });
+    </script>
+    
+    <#include "common/footer.ftl.html">
+
+</body>
+</html>

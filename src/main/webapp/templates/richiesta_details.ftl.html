@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${page_title!} - Sistema Soccorso</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .details-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .back-button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        
+        .details-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .details-main {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .details-sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+        
+        .section-title {
+            color: #2c3e50;
+            margin: 0 0 1.5rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #ecf0f1;
+            font-size: 1.3rem;
+        }
+        
+        .info-row {
+            display: flex;
+            margin-bottom: 1.5rem;
+            align-items: flex-start;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #555;
+            min-width: 140px;
+            margin-right: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .info-value {
+            color: #333;
+            line-height: 1.5;
+            flex: 1;
+        }
+        
+        .description-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .description-text {
+            margin: 0;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .coordinates-link {
+            color: #3498db;
+            text-decoration: none;
+            font-family: monospace;
+            background: #ecf0f1;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+        
+        .coordinates-link:hover {
+            background: #d5dbdb;
+        }
+        
+        .stato-badge {
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+        
+        .stato-convalidata { background: #f39c12; color: white; }
+        .stato-attiva { background: #e74c3c; color: white; }
+        .stato-conclusa { background: #27ae60; color: white; }
+        .stato-annullata { background: #95a5a6; color: white; }
+        
+        .meta-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+        }
+        
+        .meta-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .meta-label {
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .meta-value {
+            color: #333;
+            font-family: monospace;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        
+        .photo-container {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+        
+        .photo-container img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .details-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+            
+            .info-row {
+                flex-direction: column;
+            }
+            
+            .info-label {
+                min-width: auto;
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        
+        <#include "common/header.ftl.html">
+
+        <!-- Messaggi -->
+        <#if success_message??>
+            <div class="alert alert-success" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Successo:</strong> ${success_message}
+            </div>
+        </#if>
+        
+        <#if error_message??>
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Errore:</strong> ${error_message}
+            </div>
+        </#if>
+        
+        <!-- Contenuto principale -->
+        <div class="details-grid">
+            
+            <!-- Dettagli principali -->
+            <div class="details-main">
+                <h2 class="section-title">📋 Informazioni Emergenza</h2>
+                
+                <div class="info-row">
+                    <span class="info-label">🚨 Tipo:</span>
+                    <span class="info-value"><strong>${richiesta.nome}</strong></span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">📍 Indirizzo:</span>
+                    <span class="info-value">${richiesta.indirizzo}</span>
+                </div>
+                
+                <#if richiesta.coordinate?? && richiesta.coordinate?trim != "">
+                    <div class="info-row">
+                        <span class="info-label">🌐 Coordinate:</span>
+                        <span class="info-value">
+                            <a href="https://www.google.com/maps?q=${richiesta.coordinate}" 
+                               target="_blank" class="coordinates-link">
+                                ${richiesta.coordinate}
+                            </a>
+                        </span>
+                    </div>
+                </#if>
+                
+                <div class="description-box">
+                    <h3 style="margin: 0 0 1rem 0; color: #2c3e50;">📝 Descrizione Dettagliata</h3>
+                    <p class="description-text">${richiesta.descrizione}</p>
+                </div>
+                
+                <div class="meta-info">
+                    <div class="meta-row">
+                        <span class="meta-label">👤 Segnalante:</span>
+                        <span class="meta-value">${richiesta.nomeSegnalante!"N/A"}</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">📧 Email:</span>
+                        <span class="meta-value">${richiesta.emailSegnalante!"N/A"}</span>
+                    </div>
+                    <#if richiesta.ip??>
+                        <div class="meta-row">
+                            <span class="meta-label">🌐 IP Segnalazione:</span>
+                            <span class="meta-value">${richiesta.ip}</span>
+                        </div>
+                    </#if>
+                    <#if richiesta.stringa??>
+                        <div class="meta-row">
+                            <span class="meta-label">🔐 Token:</span>
+                            <span class="meta-value">${richiesta.stringa[0..7]}...</span>
+                        </div>
+                    </#if>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="details-sidebar">
+                <h3 class="section-title">ℹ️ Stato Richiesta</h3>
+                
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <div class="stato-badge stato-${richiesta.stato?lower_case?replace(' ', '')?replace('à', 'a')}" style="font-size: 1.2rem;">
+                        ${richiesta.stato}
+                    </div>
+                </div>
+                
+                <#switch richiesta.stato>
+                    <#case "Convalidata">
+                        <div style="background: #fff3cd; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                            <strong>📋 Richiesta Convalidata</strong><br>
+                            <small>La richiesta è stata confermata dal segnalante e può essere gestita.</small>
+                        </div>
+                        <#break>
+                    <#case "Attiva">
+                        <div style="background: #f8d7da; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                            <strong>🚨 Richiesta Attiva</strong><br>
+                            <small>La richiesta è attiva e in fase di elaborazione.</small>
+                        </div>
+                        <#break>
+                    <#case "Conclusa">
+                        <div style="background: #d4edda; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                            <strong>✅ Richiesta Conclusa</strong><br>
+                            <small>L'intervento è stato completato con successo.</small>
+                        </div>
+                        <#break>
+                    <#case "Annullata">
+                        <div style="background: #f1f3f4; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                            <strong>❌ Richiesta Annullata</strong><br>
+                            <small>La richiesta è stata annullata.</small>
+                        </div>
+                        <#break>
+                </#switch>
+                
+                <#if richiesta.foto?? && richiesta.foto?trim != "">
+                    <div class="photo-container">
+                        <h4 style="margin-bottom: 0.5rem;">📷 Foto Allegata</h4>
+                        <img src="${richiesta.foto}" alt="Foto richiesta" loading="lazy">
+                    </div>
+                </#if>
+            </div>
+        </div>
+        
+        <!-- Informazioni aggiuntive -->
+        <div style="background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <h2 class="section-title">📊 Informazioni Tecniche</h2>
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; text-align: center; color: #666;">
+                <p style="margin: 0;">
+                    <strong>Codice Richiesta:</strong> ${richiesta.codice?c}<br>
+                    <strong>Stato Corrente:</strong> ${richiesta.stato}<br>
+                    <small>Gestisci la richiesta utilizzando i pulsanti di azione disponibili.</small>
+                </p>
+            </div>
+        </div>
+        
+        <!-- Azioni disponibili -->
+        <#if richiesta.stato == "Convalidata">
+            <div style="background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-top: 2rem;">
+                <h2 class="section-title">⚙️ Azioni Disponibili</h2>
+                
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Attenzione:</strong> Le azioni modificheranno permanentemente lo stato della richiesta.
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <form method="POST" onsubmit="return confirm('Sei sicuro di voler ATTIVARE questa richiesta?');">
+                            <input type="hidden" name="action" value="attiva">
+                            <input type="hidden" name="richiesta_id" value="${richiesta.codice?c}">
+                            <button type="submit" class="btn btn-success btn-lg w-100">
+                                <i class="fas fa-play me-2"></i>
+                                ATTIVA RICHIESTA
+                            </button>
+                            <small class="text-muted d-block mt-2">La richiesta passerà in stato "Attiva"</small>
+                        </form>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <form method="POST" onsubmit="return confirm('Sei sicuro di voler ANNULLARE questa richiesta? Questa azione non può essere annullata.');">
+                            <input type="hidden" name="action" value="annulla">
+                            <input type="hidden" name="richiesta_id" value="${richiesta.codice?c}">
+                            <button type="submit" class="btn btn-danger btn-lg w-100">
+                                <i class="fas fa-times me-2"></i>
+                                ANNULLA RICHIESTA
+                            </button>
+                            <small class="text-muted d-block mt-2">La richiesta passerà in stato "Annullata"</small>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        <#else>
+            <div style="background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-top: 2rem;">
+                <h2 class="section-title">ℹ️ Nessuna Azione Disponibile</h2>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Le azioni sono disponibili solo per le richieste in stato "Convalidata".
+                    Stato attuale: <strong>${richiesta.stato}</strong>
+                </div>
+            </div>
+        </#if>
+        
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Animazioni di entrata
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = document.querySelectorAll('.details-main, .details-sidebar');
+            elements.forEach((element, index) => {
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    element.style.transition = 'all 0.5s ease-out';
+                    element.style.opacity = '1';
+                    element.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        });
+    </script>
+    
+    <#include "common/footer.ftl.html">
+
+</body>
+</html>

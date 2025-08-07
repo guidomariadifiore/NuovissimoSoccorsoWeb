@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${page_title!} - Sistema Soccorso</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        
+        .card-missione {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s;
+            border-left: 4px solid #27ae60;
+            color: inherit;
+            text-decoration: none;
+        }
+        
+        .card-missione:hover {
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+            color: inherit;
+            text-decoration: none;
+        }
+        
+        .header-card {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .id-badge {
+            background: #27ae60;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: bold;
+        }
+        
+        .data-conclusione {
+            background: #e8f5e8;
+            color: #27ae60;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        .titolo {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 0.75rem;
+            font-size: 1.3rem;
+        }
+        
+        .posizione {
+            color: #666;
+            margin-bottom: 0.75rem;
+        }
+        
+        .obiettivo {
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+        
+        .valutazione-section {
+            background: #fff9c4;
+            border: 1px solid #f39c12;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stelle-rating {
+            display: flex;
+            gap: 0.2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stella {
+            color: #f39c12;
+            font-size: 1.2rem;
+        }
+        
+        .stella.inactive {
+            color: #ddd;
+        }
+        
+        .rating-text {
+            font-size: 0.9rem;
+            color: #f39c12;
+            font-weight: bold;
+        }
+        
+        .commento {
+            background: #f8f9fa;
+            border-left: 3px solid #007bff;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+            font-style: italic;
+            color: #555;
+        }
+        
+        .footer-card {
+            padding-top: 1rem;
+            border-top: 1px solid #ecf0f1;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .stato-vuoto {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #7f8c8d;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .riepilogo {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        
+        <#include "common/head.ftl.html">
+
+        <!-- Messaggi -->
+        <#if success_message??>
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Successo:</strong> ${success_message}
+            </div>
+        </#if>
+        
+        <#if error_message??>
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Errore:</strong> ${error_message}
+            </div>
+        </#if>
+        
+        <!-- Riepilogo -->
+        <#if count_concluse?? && (count_concluse > 0)>
+            <div class="riepilogo">
+                <strong>📊 Riepilogo:</strong> 
+                Ci sono <strong>${count_concluse}</strong> missioni completate e valutate nel sistema.
+            </div>
+        </#if>
+        
+        <!-- Lista Missioni Concluse -->
+        <#if info_missioni?? && (info_missioni?size > 0)>
+            <#list info_missioni as info>
+                <#assign missioneKey = info.codiceMissione?string>
+                <#assign missione = (missioni_map[missioneKey])!"">
+                
+                <a href="${contextPath}/admin/valutazione/${info.codiceMissione}/" class="card-missione d-block">
+                    <div class="header-card">
+                        <span class="id-badge">#${info.codiceMissione}</span>
+                        <span class="data-conclusione">
+                            <i class="fas fa-calendar-check me-1"></i>
+                            <#if info.dataOraFine??>
+                                ${info.dataOraFine?string}
+                            <#else>
+                                Data non disponibile
+                            </#if>
+                        </span>
+                    </div>
+                    
+                    <#if missione?? && missione != "">
+                        <div class="titolo">${missione.nome}</div>
+                        
+                        <div class="posizione">
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                            ${missione.posizione}
+                        </div>
+                        
+                        <div class="obiettivo">${missione.obiettivo}</div>
+                    <#else>
+                        <div class="titolo">Missione #${info.codiceMissione}</div>
+                        <div class="text-muted">Dettagli missione non disponibili</div>
+                    </#if>
+                    
+                    <!-- Valutazione -->
+                    <div class="valutazione-section">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Valutazione:</strong>
+                                <div class="stelle-rating">
+                                    <#list 1..5 as i>
+                                        <span class="stella <#if i <= info.successo>active<#else>inactive</#if>">★</span>
+                                    </#list>
+                                </div>
+                                <div class="rating-text">
+                                    <#switch info.successo>
+                                        <#case 1>Molto insoddisfacente<#break>
+                                        <#case 2>Insoddisfacente<#break>
+                                        <#case 3>Sufficiente<#break>
+                                        <#case 4>Buono<#break>
+                                        <#case 5>Eccellente<#break>
+                                        <#default>Non valutato</#switch>
+                                    (${info.successo}/5)
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <#if info.commento?? && info.commento?trim != "">
+                            <div class="commento">
+                                <strong>Commento:</strong> ${info.commento}
+                            </div>
+                        </#if>
+                    </div>
+                    
+                    <div class="footer-card">
+                        <i class="fas fa-clock me-1"></i>
+                        Conclusa il: 
+                        <#if info.dataOraFine??>
+                            ${info.dataOraFine?string}
+                        <#else>
+                            Data non disponibile
+                        </#if>
+                    </div>
+                </a>
+            </#list>
+        <#else>
+            <!-- Nessuna missione conclusa -->
+            <div class="stato-vuoto">
+                <i class="fas fa-check-circle fa-4x mb-3" style="color: #27ae60;"></i>
+                <h3>Nessuna missione conclusa</h3>
+                <p>Non ci sono ancora missioni completate e valutate nel sistema.</p>
+                <a href="${contextPath}/admin/dashboard" class="back-btn mt-3">
+                    <i class="fas fa-arrow-left me-2"></i>Dashboard
+                </a>
+            </div>
+        </#if>
+        
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.card-missione');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease-out';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+    <#include "common/footer.ftl.html">
+
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <#assign page_title = "Richiesta di Soccorso - Sistema di Soccorso">
+    <#include "common/head.ftl.html">
+</head>
+<body>
+    <#include "common/header.ftl.html">
+    
+    <main>
+        <div class="container">
+            <div class="card">
+                <div class="card-header">
+                    <h1 style="text-align: center; color: #dc3545;">🚨 Richiesta di Soccorso</h1>
+                    <p style="text-align: center; color: #666; font-size: 1.1rem;">
+                        Compila il modulo per richiedere un intervento di emergenza
+                    </p>
+                </div>
+                
+                <div style="max-width: 600px; margin: 0 auto;">
+                    
+                    <#-- Messaggi di errore o successo -->
+                    <#if error_message??>
+                        <div style="background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; text-align: center;">
+                            <strong>❌ Errore:</strong> ${error_message}
+                        </div>
+                    </#if>
+                    
+                    <#if success_message??>
+                        <div style="background: #d1eddb; border: 1px solid #c3e6cb; color: #155724; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; text-align: center;">
+                            <strong>✅ ${success_message}</strong>
+                        </div>
+                    </#if>
+                    
+                    <!-- Avviso rate limiting -->
+                    <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; text-align: center;">
+                        <strong style="color: #856404;">⏰ Importante:</strong><br>
+                        <span style="color: #856404; font-size: 0.9rem;">
+                            È possibile inviare <strong>massimo 1 richiesta per ora</strong> dallo stesso indirizzo IP.<br>
+                            Questo limite serve a prevenire abusi del sistema di emergenza.
+                        </span>
+                    </div>
+                    
+                    <form method="post" action="/NuovissimoSoccorsoWeb-1.0-SNAPSHOT/emergenza">
+                        
+                        <!-- Informazioni sull'emergenza -->
+                        <div style="background: #fff3cd; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                            <h3 style="margin-top: 0; color: #856404;">📍 Informazioni sull'Emergenza</h3>
+                            
+                            <div style="margin-bottom: 1.2rem;">
+                                <label for="nome" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                                    Tipo di Emergenza: <span style="color: #dc3545;">*</span>
+                                </label>
+                                <input type="text" id="nome" name="nome" 
+                                       style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box;"
+                                       placeholder="es. Incidente stradale, Incendio, Persona in difficoltà..." required />
+                            </div>
+                            
+                            <div style="margin-bottom: 1.2rem;">
+                                <label for="indirizzo" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                                    Indirizzo/Luogo: <span style="color: #dc3545;">*</span>
+                                </label>
+                                <input type="text" id="indirizzo" name="indirizzo" 
+                                       style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box;"
+                                       placeholder="Via/Piazza e numero civico, Comune" required />
+                            </div>
+                            
+                            <div style="margin-bottom: 1.2rem;">
+                                <label for="coordinate" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                                    Coordinate GPS (opzionale):
+                                </label>
+                                <input type="text" id="coordinate" name="coordinate" 
+                                       style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box;"
+                                       placeholder="es. 41.9028, 12.4964" />
+                                <button type="button" onclick="getLocation()" 
+                                        style="margin-top: 0.5rem; padding: 8px 16px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                    📍 Rileva Posizione Automatica
+                                </button>
+                            </div>
+                            
+                            <div style="margin-bottom: 0;">
+                                <label for="descrizione" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                                    Descrizione dettagliata: <span style="color: #dc3545;">*</span>
+                                </label>
+                                <textarea id="descrizione" name="descrizione" rows="4"
+                                          style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; resize: vertical; box-sizing: border-box;"
+                                          placeholder="Descrivi in dettaglio cosa è successo, quante persone sono coinvolte, se ci sono feriti, ecc..." required></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Informazioni del segnalante -->
+                        <div style="background: #e3f2fd; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                            <h3 style="margin-top: 0; color: #1565c0;">👤 I tuoi Dati</h3>
+                            
+                            <div style="margin-bottom: 1.2rem;">
+                                <label for="nome_segnalante" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                                    Il tuo Nome e Cognome: <span style="color: #dc3545;">*</span>
+                                </label>
+                                <input type="text" id="nome_segnalante" name="nome_segnalante" 
+                                       style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box;"
+                                       placeholder="Nome Cognome" required />
+                            </div>
+                            
+                            <div style="margin-bottom: 0;">
+                                <label for="email_segnalante" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">
+                                    La tua Email: <span style="color: #dc3545;">*</span>
+                                </label>
+                                <input type="email" id="email_segnalante" name="email_segnalante" 
+                                       style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box;"
+                                       placeholder="email@esempio.com" required />
+                                <small style="color: #666; font-size: 0.9rem;">
+                                    Verrà utilizzata per eventuali comunicazioni riguardo la tua segnalazione
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <!-- Avviso emergenze gravi -->
+                        <div style="background: #f8d7da; border: 2px solid #dc3545; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; text-align: center;">
+                            <strong style="color: #721c24;">⚠️ ATTENZIONE:</strong><br>
+                            <span style="color: #721c24;">
+                                Per emergenze con pericolo immediato chiama direttamente il <strong>112</strong>!<br>
+                                Questo modulo è per segnalazioni che necessitano coordinamento ma non urgenza estrema.
+                            </span>
+                        </div>
+                        
+                        <div style="text-align: center;">
+                            <button type="submit" id="submitBtn"
+                                    style="background: #dc3545; color: white; padding: 15px 40px; border: none; border-radius: 8px; font-size: 1.2rem; font-weight: 600; cursor: pointer; transition: all 0.3s;"
+                                    onmouseover="this.style.background='#c82333'" 
+                                    onmouseout="this.style.background='#dc3545'">
+                                🚨 Invia Richiesta di Soccorso
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div style="background: #e8f4fd; border: 1px solid #2196f3; border-radius: 8px; padding: 1rem; text-align: center; margin-top: 1rem;">
+                <strong>ℹ️ Info:</strong> Sei sulla pagina: <code style="background: #fff; padding: 2px 6px; border-radius: 4px;">${thispageurl!""}</code>
+                
+                <#include "common/footer.ftl.html">

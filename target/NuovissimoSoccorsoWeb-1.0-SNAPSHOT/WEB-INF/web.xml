@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
+         version="5.0">
+    <display-name>NuovissimoSoccorsoWeb</display-name>
+    
+    <!-- Configurazione template -->
+    <context-param>
+        <param-name>view.template_directory</param-name>
+        <param-value>templates</param-value>
+    </context-param>
+    <context-param>
+        <param-name>view.encoding</param-name>
+        <param-value>UTF-8</param-value>
+    </context-param>
+    <context-param>
+        <param-name>view.outline_template</param-name>
+        <param-value>outline.ftl.html</param-value>
+    </context-param>
+    <context-param>
+        <param-name>view.debug</param-name>
+        <param-value>true</param-value>
+    </context-param>
+    <context-param>
+        <param-name>view.template.cache</param-name>
+        <param-value>false</param-value>
+    </context-param>
+    <context-param>
+        <param-name>view.date_format</param-name>
+        <param-value>dd/MM/yyyy hh:mm:ss</param-value>
+    </context-param>
+    <context-param>
+        <param-name>view.error_template</param-name>
+        <param-value>error.ftl.html</param-value>
+    </context-param>
+    
+    <!-- Configurazione data source -->
+    <context-param>
+        <param-name>data.source</param-name>
+        <param-value>jdbc/soccorso</param-value> 
+    </context-param>
+    
+    <resource-ref>
+        <description>Database soccorso</description>
+        <res-ref-name>jdbc/soccorso</res-ref-name>
+        <res-type>javax.sql.DataSource</res-type>
+        <res-auth>Container</res-auth>
+    </resource-ref>
+    
+    <!-- Filtri -->
+    <filter>
+        <filter-name>AuthenticationFilter</filter-name>
+        <filter-class>webengineering.nuovissimosoccorsoweb.util.AuthenticationFilter</filter-class>
+    </filter>
+    
+    <filter-mapping>
+        <filter-name>AuthenticationFilter</filter-name>
+        <url-pattern>/admin/*</url-pattern>
+    </filter-mapping>
+    
+    <filter-mapping>
+        <filter-name>AuthenticationFilter</filter-name>
+        <url-pattern>/operatore/*</url-pattern>
+    </filter-mapping>
+    
+    <!-- Servlet declarations - SOLO LE ESSENZIALI -->
+    <servlet>
+        <servlet-name>Login</servlet-name>
+        <servlet-class>webengineering.nuovissimosoccorsoweb.controller.Login</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>Home</servlet-name>
+        <servlet-class>webengineering.nuovissimosoccorsoweb.controller.Home</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>RedirectServlet</servlet-name>
+        <servlet-class>webengineering.nuovissimosoccorsoweb.controller.RedirectServlet</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>Logout</servlet-name>
+        <servlet-class>webengineering.nuovissimosoccorsoweb.controller.Logout</servlet-class>
+    </servlet>
+    
+    <!-- AdminDashboard -->
+    <servlet>
+        <servlet-name>AdminDashboard</servlet-name>
+        <servlet-class>webengineering.nuovissimosoccorsoweb.controller.AdminDashboardController</servlet-class>
+    </servlet>
+    
+    <!-- Lista richieste -->
+    <servlet>
+        <servlet-name>RichiesteList</servlet-name>
+        <servlet-class>webengineering.nuovissimosoccorsoweb.controller.RichiesteListController</servlet-class>
+    </servlet>
+    
+    <!-- Dettagli richiesta -->
+    <servlet>
+        <servlet-name>RichiestaDetails</servlet-name>
+        <servlet-class>webengineering.nuovissimosoccorsoweb.controller.RichiestaDetailsController</servlet-class>
+    </servlet>
+    
+    <!-- Dettagli Missione -->
+    <servlet>
+        <servlet-name>MissioneDetails</servlet-name>
+        <servlet-class>webengineering.nuovissimosoccorsoweb.controller.MissioneDetailsController</servlet-class>
+    </servlet>
+
+    
+    <!-- Nuova missione -->
+    <servlet>
+        <servlet-name>NuovaMissione</servlet-name>
+        <servlet-class>webengineering.nuovissimosoccorsoweb.controller.NuovaMissioneController</servlet-class>
+    </servlet>
+    
+    <!-- Valutazione Missione -->
+    <servlet>
+        <servlet-name>ValutazioneMissione</servlet-name>
+        <servlet-class>webengineering.nuovissimosoccorsoweb.controller.ValutazioneMissioneController</servlet-class>
+    </servlet>
+    
+    <!-- Valutazione Missione -->
+    <servlet>
+        <servlet-name>AdminOperatori</servlet-name>
+        <servlet-class>webengineering.nuovissimosoccorsoweb.controller.AdminOperatoriController</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>AdminMezzi</servlet-name>
+        <servlet-class>webengineering.nuovissimosoccorsoweb.controller.AdminMezziController</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>ConfermaRichiesta</servlet-name>
+        <servlet-class>webengineering.nuovissimosoccorsoweb.controller.ConfermaRichiesta</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>RegistrazioneNuovoUtente</servlet-name>
+        <servlet-class>webengineering.nuovissimosoccorsoweb.controller.RegistrazioneNuovoUtente</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>AdminNuovoMezzo</servlet-name>
+        <servlet-class>webengineering.nuovissimosoccorsoweb.controller.AdminNuovoMezzoController</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>AdminMateriali</servlet-name>
+        <servlet-class>webengineering.nuovissimosoccorsoweb.controller.AdminMaterialiController</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>AdminNuovoMateriale</servlet-name>
+        <servlet-class>webengineering.nuovissimosoccorsoweb.controller.AdminNuovoMaterialeController</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>OperatoreDashboard</servlet-name>
+        <servlet-class>webengineering.nuovissimosoccorsoweb.controller.OperatoreDashboardController</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>OperatoreMissioni</servlet-name>
+        <servlet-class>webengineering.nuovissimosoccorsoweb.controller.OperatoreMissioniController</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>OperatoreModifica</servlet-name>
+        <servlet-class>webengineering.nuovissimosoccorsoweb.controller.OperatoreModificaController</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>OperatoreStoricoController</servlet-name>
+        <servlet-class>webengineering.nuovissimosoccorsoweb.controller.OperatoreStoricoController</servlet-class>
+    </servlet>
+
+
+    
+    <!-- Servlet mappings -->
+    <servlet-mapping>
+        <servlet-name>Home</servlet-name>
+        <url-pattern>/emergenza</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>Home</servlet-name>
+        <url-pattern>/home</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>Login</servlet-name>
+        <url-pattern>/login</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>Logout</servlet-name>
+        <url-pattern>/logout</url-pattern>
+    </servlet-mapping>
+    
+    <!-- Dashboard admin -->
+    <servlet-mapping>
+        <servlet-name>AdminDashboard</servlet-name>
+        <url-pattern>/admin/dashboard</url-pattern>
+    </servlet-mapping>
+    
+    <!-- Lista richieste -->
+    <servlet-mapping>
+        <servlet-name>RichiesteList</servlet-name>
+        <url-pattern>/admin/richieste/*</url-pattern>
+    </servlet-mapping>
+    
+    <!-- Dettagli richiesta -->
+    <servlet-mapping>
+        <servlet-name>RichiestaDetails</servlet-name>
+        <url-pattern>/admin/richiesta/*</url-pattern>
+    </servlet-mapping>
+    
+    <!-- Nuova missione -->
+    <servlet-mapping>
+        <servlet-name>NuovaMissione</servlet-name>
+        <url-pattern>/admin/NuovaMissione/*</url-pattern>
+    </servlet-mapping>
+    
+    <!-- Dettagli missione -->
+    <servlet-mapping>
+        <servlet-name>MissioneDetails</servlet-name>
+        <url-pattern>/admin/missione/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- Valutazione missione -->
+    <servlet-mapping>
+        <servlet-name>ValutazioneMissione</servlet-name>
+        <url-pattern>/admin/valutazione/*</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>AdminOperatori</servlet-name>
+        <url-pattern>/admin/operatori</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>AdminOperatori</servlet-name>
+        <url-pattern>/admin/operatori/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>AdminMezzi</servlet-name>
+        <url-pattern>/admin/mezzi</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>AdminMezzi</servlet-name>
+        <url-pattern>/admin/mezzi/*</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>ConfermaRichiesta</servlet-name>
+        <url-pattern>/email-conferma</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>RegistrazioneNuovoUtente</servlet-name>
+        <url-pattern>/admin/registrazione</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>AdminNuovoMezzo</servlet-name>
+        <url-pattern>/admin/NuovoMezzo</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>AdminMateriali</servlet-name>
+        <url-pattern>/admin/materiali</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>AdminMateriali</servlet-name>
+        <url-pattern>/admin/materiali/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>AdminNuovoMateriale</servlet-name>
+        <url-pattern>/admin/NuovoMateriale</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>OperatoreDashboard</servlet-name>
+        <url-pattern>/operatore/dashboard</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>OperatoreMissioni</servlet-name>
+        <url-pattern>/operatore/missioni</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>OperatoreModifica</servlet-name>
+        <url-pattern>/operatore/modifica</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>OperatoreStoricoController</servlet-name>
+        <url-pattern>/operatore/storico</url-pattern>
+    </servlet-mapping>
+
+
+    
+    <!-- Root redirect -->
+    <servlet-mapping>
+        <servlet-name>RedirectServlet</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>RedirectServlet</servlet-name>
+        <url-pattern>/index.html</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>RedirectServlet</servlet-name>
+        <url-pattern>/index.jsp</url-pattern>
+    </servlet-mapping>
+    
+    <!-- Welcome file -->
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+        
+</web-app>

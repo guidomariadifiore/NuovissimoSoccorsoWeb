@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${page_title!} - Sistema Soccorso</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        
+        .form-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .info-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #3498db;
+        }
+        
+        .section-title {
+            color: #2c3e50;
+            margin: 0 0 1.5rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #ecf0f1;
+            font-size: 1.3rem;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control:focus {
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25);
+        }
+        
+        .info-item {
+            margin-bottom: 1rem;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #666;
+            margin-right: 0.5rem;
+        }
+        
+        .info-value {
+            color: #333;
+        }
+        
+        .description-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        
+        .char-counter {
+            font-size: 0.8rem;
+            color: #6c757d;
+            text-align: right;
+            margin-top: 0.25rem;
+        }
+        
+        .required {
+            color: #e74c3c;
+        }
+        
+        /* Stili per le sezioni risorse */
+        .resource-section {
+            border: 2px solid #ecf0f1;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .resource-section:hover {
+            border-color: #bdc3c7;
+        }
+        
+        .resource-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        
+        .resource-header:hover {
+            background: #f8f9fa;
+        }
+        
+        .resource-title {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 1.2rem;
+        }
+        
+        .resource-count {
+            background: #3498db;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        .resource-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .resource-card {
+            background: #f8f9fa;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .resource-card:hover {
+            border-color: #3498db;
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+        }
+        
+        .resource-card.selected {
+            border-color: #27ae60;
+            background: #d5f4e6;
+            box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+        }
+        
+        .resource-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .resource-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0;
+        }
+        
+        .resource-id {
+            background: #95a5a6;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        
+        .resource-description {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0.5rem 0;
+        }
+        
+        .selection-checkbox {
+            transform: scale(1.2);
+            margin-right: 0.5rem;
+        }
+        
+        .role-selector {
+            margin-top: 0.5rem;
+            display: none;
+        }
+        
+        .resource-card.selected .role-selector {
+            display: block;
+        }
+        
+        .collapse-btn {
+            background: none;
+            border: none;
+            color: #3498db;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .collapse-btn.collapsed {
+            transform: rotate(180deg);
+        }
+        
+        .no-resources {
+            text-align: center;
+            color: #95a5a6;
+            font-style: italic;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        
+        .selection-summary {
+            background: #e8f5e8;
+            border: 1px solid #27ae60;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .summary-item:last-child {
+            margin-bottom: 0;
+            font-weight: bold;
+            border-top: 1px solid #27ae60;
+            padding-top: 0.5rem;
+        }
+        
+        /* Stili per badge patenti e abilità */
+        .resource-description .badge {
+            font-size: 0.7rem;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+        }
+        
+        .resource-description {
+            line-height: 1.6;
+        }
+        
+        /* Miglioramenti per le cards operatori */
+        .resource-card .resource-description strong {
+            display: inline-block;
+            margin-top: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .resource-card .resource-description strong:first-child {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        
+        <#include "common/head.ftl.html">
+
+        <!-- Messaggi di errore -->
+        <#if error_message??>
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Errore:</strong> ${error_message}
+            </div>
+        </#if>
+        
+        <!-- Info richiesta originale -->
+        <div class="info-card">
+            <h3 class="section-title">📋 Richiesta di Origine</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="info-item">
+                        <span class="info-label">Codice Richiesta:</span>
+                        <span class="info-value">#${richiesta.codice}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Stato:</span>
+                        <span class="badge bg-danger">${richiesta.stato}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Segnalante:</span>
+                        <span class="info-value">${richiesta.nomeSegnalante!"N/A"}</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-item">
+                        <span class="info-label">Email:</span>
+                        <span class="info-value">${richiesta.emailSegnalante!"N/A"}</span>
+                    </div>
+                    <#if richiesta.coordinate??>
+                        <div class="info-item">
+                            <span class="info-label">Coordinate:</span>
+                            <span class="info-value">${richiesta.coordinate}</span>
+                        </div>
+                    </#if>
+                </div>
+            </div>
+            
+            <!-- Descrizione originale -->
+            <div class="description-box">
+                <h5><i class="fas fa-file-alt me-2"></i>Descrizione Richiesta Originale</h5>
+                <p class="mb-0">${richiesta.descrizione}</p>
+                <small class="text-muted">
+                    <strong>Nota:</strong> Questa descrizione non verrà copiata automaticamente nella missione. 
+                    Usala come riferimento per definire l'obiettivo della missione.
+                </small>
+            </div>
+        </div>
+        
+        <!-- Form per creare missione -->
+        <div class="form-card">
+            <h3 class="section-title">🎯 Dati Missione</h3>
+            
+            <form id="missionForm" method="POST">
+                <!-- Nome Missione -->
+                <div class="mb-3">
+                    <label for="nome" class="form-label">
+                        <i class="fas fa-tag me-2"></i>Nome Missione <span class="required">*</span>
+                    </label>
+                    <input type="text" 
+                           class="form-control" 
+                           id="nome" 
+                           name="nome" 
+                           value="${nome_missione!""}" 
+                           required 
+                           maxlength="45"
+                           placeholder="Nome identificativo della missione">
+                    <div class="char-counter">
+                        <span id="nomeCount">0</span>/45 caratteri
+                    </div>
+                    <small class="text-muted">Pre-compilato dal nome della richiesta, ma modificabile</small>
+                </div>
+                
+                <!-- Posizione Missione -->
+                <div class="mb-3">
+                    <label for="posizione" class="form-label">
+                        <i class="fas fa-map-marker-alt me-2"></i>Posizione <span class="required">*</span>
+                    </label>
+                    <input type="text" 
+                           class="form-control" 
+                           id="posizione" 
+                           name="posizione" 
+                           value="${posizione_missione!""}" 
+                           required 
+                           maxlength="100"
+                           placeholder="Indirizzo o descrizione del luogo">
+                    <div class="char-counter">
+                        <span id="posizioneCount">0</span>/100 caratteri
+                    </div>
+                    <small class="text-muted">Pre-compilato dall'indirizzo della richiesta, ma modificabile</small>
+                </div>
+                
+                <!-- Obiettivo Missione -->
+                <div class="mb-3">
+                    <label for="obiettivo" class="form-label">
+                        <i class="fas fa-bullseye me-2"></i>Obiettivo Missione <span class="required">*</span>
+                    </label>
+                    <textarea class="form-control" 
+                              id="obiettivo" 
+                              name="obiettivo" 
+                              rows="3" 
+                              required 
+                              maxlength="45"
+                              placeholder="Descrivi brevemente l'obiettivo della missione (max 45 caratteri)">${obiettivo_missione!""}</textarea>
+                    <div class="char-counter">
+                        <span id="obiettivoCount">0</span>/45 caratteri
+                    </div>
+                    <small class="text-muted">
+                        Campo da compilare basandosi sulla descrizione della richiesta originale
+                    </small>
+                </div>
+                
+                <!-- Campi nascosti -->
+                <input type="hidden" name="codice_richiesta" value="${richiesta.codice}">
+                
+            </form>
+        </div>
+        
+        <!-- Sezione Operatori -->
+        <div class="form-card">
+            <div class="resource-section">
+                <div class="resource-header" onclick="toggleSection('operatori')">
+                    <h3 class="resource-title">
+                        <i class="fas fa-users me-2"></i>Assegna Operatori
+                    </h3>
+                    <div class="d-flex align-items-center">
+                        <span class="resource-count me-3">${operatori_disponibili?size} disponibili</span>
+                        <button type="button" class="collapse-btn" id="operatori-btn">
+                            <i class="fas fa-chevron-up"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="operatori-content">
+                    <#if operatori_disponibili?size gt 0>
+                        <div class="resource-grid">
+                            <#list operatori_disponibili as operatore>
+                                <div class="resource-card" onclick="toggleOperatore(${operatore.id})">
+                                    <div class="resource-card-header">
+                                        <h5 class="resource-name">${operatore.nome} ${operatore.cognome}</h5>
+                                        <span class="resource-id">ID: ${operatore.id}</span>
+                                    </div>
+                                    <div class="resource-description">
+                                        <strong>📧 Email:</strong> ${operatore.email}<br>
+                                        <strong>🆔 CF:</strong> ${operatore.codiceFiscale}<br>
+                                        
+                                        <#-- Patenti dell'operatore -->
+                                        <#assign operatoreKey = operatore.id?string>
+                                        <#if operatori_patenti[operatoreKey]?? && operatori_patenti[operatoreKey]?size gt 0>
+                                            <strong>🚗 Patenti:</strong>
+                                            <div class="mt-1">
+                                                <#list operatori_patenti[operatoreKey] as patente>
+                                                    <span class="badge bg-primary me-1 mb-1">${patente}</span>
+                                                </#list>
+                                            </div>
+                                        <#else>
+                                            <strong>🚗 Patenti:</strong> <span class="text-muted">Nessuna</span><br>
+                                        </#if>
+                                        
+                                        <#-- Abilità dell'operatore -->
+                                        <#if operatori_abilita[operatoreKey]?? && operatori_abilita[operatoreKey]?size gt 0>
+                                            <strong>⚡ Abilità:</strong>
+                                            <div class="mt-1">
+                                                <#list operatori_abilita[operatoreKey] as abilita>
+                                                    <span class="badge bg-info me-1 mb-1">${abilita}</span>
+                                                </#list>
+                                            </div>
+                                        <#else>
+                                            <strong>⚡ Abilità:</strong> <span class="text-muted">Nessuna</span>
+                                        </#if>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <input type="checkbox" 
+                                               class="selection-checkbox" 
+                                               id="op-${operatore.id}" 
+                                               name="operatori" 
+                                               value="${operatore.id}"
+                                               onchange="updateOperatoreSelection(${operatore.id})">
+                                        <label for="op-${operatore.id}">Seleziona operatore</label>
+                                    </div>
+                                    <div class="role-selector">
+                                        <label for="role-${operatore.id}" class="form-label">Ruolo nella squadra:</label>
+                                        <select class="form-select form-select-sm" 
+                                                id="role-${operatore.id}" 
+                                                name="ruolo_${operatore.id}">
+                                            <option value="Standard">Operatore Standard</option>
+                                            <option value="Caposquadra">Capo Squadra</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </#list>
+                        </div>
+                    <#else>
+                        <div class="no-resources">
+                            <i class="fas fa-users-slash fa-3x mb-3"></i>
+                            <h5>Nessun operatore disponibile</h5>
+                            <p>Tutti gli operatori sono attualmente impegnati in altre missioni.</p>
+                        </div>
+                    </#if>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sezione Mezzi -->
+        <div class="form-card">
+            <div class="resource-section">
+                <div class="resource-header" onclick="toggleSection('mezzi')">
+                    <h3 class="resource-title">
+                        <i class="fas fa-truck me-2"></i>Assegna Mezzi
+                    </h3>
+                    <div class="d-flex align-items-center">
+                        <span class="resource-count me-3">${mezzi_disponibili?size} disponibili</span>
+                        <button type="button" class="collapse-btn" id="mezzi-btn">
+                            <i class="fas fa-chevron-up"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="mezzi-content">
+                    <#if mezzi_disponibili?size gt 0>
+                        <div class="resource-grid">
+                            <#list mezzi_disponibili as mezzo>
+                                <div class="resource-card" onclick="toggleMezzo('${mezzo.targa}')">
+                                    <div class="resource-card-header">
+                                        <h5 class="resource-name">
+                                            <#if mezzo.nome?? && mezzo.nome?trim != "">
+                                                ${mezzo.nome}
+                                            <#elseif mezzo.descrizione?? && mezzo.descrizione?trim != "">
+                                                ${mezzo.descrizione}
+                                            <#else>
+                                                Mezzo ${mezzo.targa}
+                                            </#if>
+                                        </h5>
+                                        <span class="resource-id">${mezzo.targa}</span>
+                                    </div>
+                                    <div class="resource-description">
+                                        <strong>Targa:</strong> ${mezzo.targa}<br>
+                                        <#if mezzo.descrizione?? && mezzo.descrizione?trim != "">
+                                            <strong>Descrizione:</strong> ${mezzo.descrizione}
+                                        <#else>
+                                            <span class="text-muted">Nessuna descrizione disponibile</span>
+                                        </#if>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <input type="checkbox" 
+                                               class="selection-checkbox" 
+                                               id="mezzo-${mezzo.targa}" 
+                                               name="mezzi" 
+                                               value="${mezzo.targa}"
+                                               onchange="updateMezzoSelection('${mezzo.targa}')">
+                                        <label for="mezzo-${mezzo.targa}">Seleziona mezzo</label>
+                                    </div>
+                                </div>
+                            </#list>
+                        </div>
+                    <#else>
+                        <div class="no-resources">
+                            <i class="fas fa-truck-slash fa-3x mb-3"></i>
+                            <h5>Nessun mezzo disponibile</h5>
+                            <p>Tutti i mezzi sono attualmente impegnati in altre missioni.</p>
+                        </div>
+                    </#if>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sezione Materiali -->
+        <div class="form-card">
+            <div class="resource-section">
+                <div class="resource-header" onclick="toggleSection('materiali')">
+                    <h3 class="resource-title">
+                        <i class="fas fa-toolbox me-2"></i>Assegna Materiali
+                    </h3>
+                    <div class="d-flex align-items-center">
+                        <span class="resource-count me-3">${materiali_disponibili?size} disponibili</span>
+                        <button type="button" class="collapse-btn" id="materiali-btn">
+                            <i class="fas fa-chevron-up"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="materiali-content">
+                    <#if materiali_disponibili?size gt 0>
+                        <div class="resource-grid">
+                            <#list materiali_disponibili as materiale>
+                                <div class="resource-card" onclick="toggleMateriale(${materiale.id})">
+                                    <div class="resource-card-header">
+                                        <h5 class="resource-name">${materiale.nome}</h5>
+                                        <span class="resource-id">ID: ${materiale.id}</span>
+                                    </div>
+                                    <div class="resource-description">
+                                        <#if materiale.descrizione?? && materiale.descrizione?trim != "">
+                                            <strong>Descrizione:</strong> ${materiale.descrizione}
+                                        </#if>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <input type="checkbox" 
+                                               class="selection-checkbox" 
+                                               id="mat-${materiale.id}" 
+                                               name="materiali" 
+                                               value="${materiale.id}"
+                                               onchange="updateMaterialeSelection(${materiale.id})">
+                                        <label for="mat-${materiale.id}">Seleziona materiale</label>
+                                    </div>
+                                </div>
+                            </#list>
+                        </div>
+                    <#else>
+                        <div class="no-resources">
+                            <i class="fas fa-toolbox-slash fa-3x mb-3"></i>
+                            <h5>Nessun materiale disponibile</h5>
+                            <p>Tutti i materiali sono attualmente impegnati in altre missioni.</p>
+                        </div>
+                    </#if>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Riepilogo Selezioni -->
+        <div class="form-card">
+            <h3 class="section-title">📊 Riepilogo Assegnazioni</h3>
+            <div id="selection-summary">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Seleziona le risorse dalle sezioni sopra per visualizzare il riepilogo.
+                </div>
+            </div>
+        </div>
+        
+        <!-- Info aggiuntive -->
+        <div class="form-card">
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Informazioni Importanti:</strong>
+                <ul class="mb-0 mt-2">
+                    <li>Tutti i campi della missione sono modificabili anche se pre-compilati</li>
+                    <li>Puoi assegnare più operatori, mezzi e materiali alla stessa missione</li>
+                    <li>Ogni operatore deve avere un ruolo assegnato (Standard o Capo Squadra)</li>
+                    <li>Le risorse mostrate sono solo quelle attualmente disponibili</li>
+                    <li>La data/ora di inizio sarà impostata automaticamente al momento della conferma</li>
+                </ul>
+            </div>
+            
+            <!-- Pulsanti di azione -->
+            <div id="actionButtons" class="mt-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <button type="button" class="btn btn-secondary btn-lg w-100" onclick="annullaMissione()">
+                            <i class="fas fa-times me-2"></i>
+                            Annulla e Torna Indietro
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <button type="button" 
+                                class="btn btn-success btn-lg w-100" 
+                                id="confirmButton"
+                                onclick="confermaMissione()">
+                            <i class="fas fa-check me-2"></i>
+                            Conferma e Crea Missione
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Alert validazione -->
+                <div id="validation-alert" class="alert alert-warning mt-3" style="display: none;">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Attenzione:</strong> <span id="validation-message"></span>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Test immediato
+        console.log('Script caricato!');
+        
+        // Stato delle selezioni
+        let selectedOperatori = new Set();
+        let selectedMezzi = new Set();
+        let selectedMateriali = new Set();
+        
+        // Funzioni di gestione missione
+        function confermaMissione() {
+            console.log('Conferma missione clicked'); // Debug
+            
+            // Validazione campi obbligatori
+            const nome = document.getElementById('nome').value.trim();
+            const posizione = document.getElementById('posizione').value.trim();
+            const obiettivo = document.getElementById('obiettivo').value.trim();
+            
+            console.log('Dati form:', {nome, posizione, obiettivo}); // Debug
+            
+            if (!nome) {
+                showValidationError('Il nome della missione è obbligatorio.');
+                return;
+            }
+            
+            if (!posizione) {
+                showValidationError('La posizione della missione è obbligatoria.');
+                return;
+            }
+            
+            if (!obiettivo) {
+                showValidationError('L\'obiettivo della missione è obbligatorio.');
+                return;
+            }
+            
+            // Validazione squadra
+            if (selectedOperatori.size === 0) {
+                showValidationError('Devi assegnare almeno un operatore alla missione.');
+                return;
+            }
+            
+            // Validazione capo squadra
+            let hasCaposquadra = false;
+            selectedOperatori.forEach(id => {
+                const ruolo = document.getElementById('role-' + id).value;
+                if (ruolo === 'Caposquadra') {
+                    hasCaposquadra = true;
+                }
+            });
+            
+            if (!hasCaposquadra) {
+                showValidationError('La squadra deve avere almeno un Capo Squadra.');
+                return;
+            }
+            
+            console.log('Validazioni superate'); // Debug
+            
+            // Nasconde alert di validazione
+            hideValidationError();
+            
+            // Conferma dell'utente
+            if (!confirm('Sei sicuro di voler creare questa missione? L\'operazione non può essere annullata.')) {
+                return;
+            }
+            
+            console.log('Conferma utente OK, preparando form'); // Debug
+            
+            // Prepara e invia il form
+            preparaEInviaForm();
+        }
+        
+        function preparaEInviaForm() {
+            console.log('Preparando form per invio'); // Debug
+            
+            const form = document.getElementById('missionForm');
+            
+            // Rimuove eventuali input nascosti precedenti
+            const oldHiddenInputs = form.querySelectorAll('input[name^="selected_"]');
+            oldHiddenInputs.forEach(input => input.remove());
+            
+            console.log('Operatori selezionati:', Array.from(selectedOperatori)); // Debug
+            console.log('Mezzi selezionati:', Array.from(selectedMezzi)); // Debug
+            console.log('Materiali selezionati:', Array.from(selectedMateriali)); // Debug
+            
+            // Aggiunge operatori selezionati con ruoli
+            selectedOperatori.forEach(id => {
+                const ruolo = document.getElementById('role-' + id).value;
+                
+                // Input per operatore
+                const operatoreInput = document.createElement('input');
+                operatoreInput.type = 'hidden';
+                operatoreInput.name = 'selected_operatori';
+                operatoreInput.value = id;
+                form.appendChild(operatoreInput);
+                
+                // Input per ruolo
+                const ruoloInput = document.createElement('input');
+                ruoloInput.type = 'hidden';
+                ruoloInput.name = 'ruolo_operatore_' + id;
+                ruoloInput.value = ruolo;
+                form.appendChild(ruoloInput);
+                
+                console.log('Aggiunto operatore:', id, 'ruolo:', ruolo); // Debug
+            });
+            
+            // Aggiunge mezzi selezionati
+            selectedMezzi.forEach(targa => {
+                const mezzoInput = document.createElement('input');
+                mezzoInput.type = 'hidden';
+                mezzoInput.name = 'selected_mezzi';
+                mezzoInput.value = targa;
+                form.appendChild(mezzoInput);
+                
+                console.log('Aggiunto mezzo:', targa); // Debug
+            });
+            
+            // Aggiunge materiali selezionati
+            selectedMateriali.forEach(id => {
+                const materialeInput = document.createElement('input');
+                materialeInput.type = 'hidden';
+                materialeInput.name = 'selected_materiali';
+                materialeInput.value = id;
+                form.appendChild(materialeInput);
+                
+                console.log('Aggiunto materiale:', id); // Debug
+            });
+            
+            // Cambia l'action del form per POST
+            form.method = 'POST';
+            
+            // Disabilita il pulsante per evitare doppi submit
+            const confirmBtn = document.getElementById('confirmButton');
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creazione in corso...';
+            
+            console.log('Form preparato, inviando...'); // Debug
+            
+            // Invia il form
+            form.submit();
+        }
+        
+        function annullaMissione() {
+            if (confirm('Sei sicuro di voler annullare? Tutte le selezioni andranno perse.')) {
+                window.location.href = '${contextPath}/admin/richieste/convalidate';
+            }
+        }
+        
+        function showValidationError(message) {
+            const alert = document.getElementById('validation-alert');
+            const messageSpan = document.getElementById('validation-message');
+            messageSpan.textContent = message;
+            alert.style.display = 'block';
+            
+            // Scroll verso l'alert
+            alert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        function hideValidationError() {
+            const alert = document.getElementById('validation-alert');
+            alert.style.display = 'none';
+        }
+        
+        // Contatori caratteri
+        function updateCharCounter(inputId, counterId, maxLength) {
+            const input = document.getElementById(inputId);
+            const counter = document.getElementById(counterId);
+            
+            function update() {
+                const length = input.value.length;
+                counter.textContent = length;
+                
+                // Cambia colore in base alla lunghezza
+                const parent = counter.parentElement;
+                parent.classList.remove('text-warning', 'text-danger');
+                
+                if (length > maxLength * 0.8) {
+                    parent.classList.add('text-warning');
+                }
+                if (length > maxLength * 0.95) {
+                    parent.classList.add('text-danger');
+                }
+            }
+            
+            input.addEventListener('input', update);
+            input.addEventListener('keyup', update);
+            update(); // Chiamata iniziale
+        }
+        
+        // Toggle sezioni collassabili
+        function toggleSection(sectionName) {
+            const content = document.getElementById(sectionName + '-content');
+            const button = document.getElementById(sectionName + '-btn');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                button.classList.remove('collapsed');
+            } else {
+                content.style.display = 'none';
+                button.classList.add('collapsed');
+            }
+        }
+        
+        // Gestione selezione operatori
+        function toggleOperatore(id) {
+            const checkbox = document.getElementById('op-' + id);
+            checkbox.checked = !checkbox.checked;
+            updateOperatoreSelection(id);
+        }
+        
+        function updateOperatoreSelection(id) {
+            const checkbox = document.getElementById('op-' + id);
+            const card = checkbox.closest('.resource-card');
+            
+            if (checkbox.checked) {
+                selectedOperatori.add(id);
+                card.classList.add('selected');
+            } else {
+                selectedOperatori.delete(id);
+                card.classList.remove('selected');
+            }
+            
+            updateSummary();
+        }
+        
+        // Gestione selezione mezzi
+        function toggleMezzo(targa) {
+            const checkbox = document.getElementById('mezzo-' + targa);
+            checkbox.checked = !checkbox.checked;
+            updateMezzoSelection(targa);
+        }
+        
+        function updateMezzoSelection(targa) {
+            const checkbox = document.getElementById('mezzo-' + targa);
+            const card = checkbox.closest('.resource-card');
+            
+            if (checkbox.checked) {
+                selectedMezzi.add(targa);
+                card.classList.add('selected');
+            } else {
+                selectedMezzi.delete(targa);
+                card.classList.remove('selected');
+            }
+            
+            updateSummary();
+        }
+        
+        // Gestione selezione materiali
+        function toggleMateriale(id) {
+            const checkbox = document.getElementById('mat-' + id);
+            checkbox.checked = !checkbox.checked;
+            updateMaterialeSelection(id);
+        }
+        
+        function updateMaterialeSelection(id) {
+            const checkbox = document.getElementById('mat-' + id);
+            const card = checkbox.closest('.resource-card');
+            
+            if (checkbox.checked) {
+                selectedMateriali.add(id);
+                card.classList.add('selected');
+            } else {
+                selectedMateriali.delete(id);
+                card.classList.remove('selected');
+            }
+            
+            updateSummary();
+        }
+        
+        // Aggiorna riepilogo selezioni
+        function updateSummary() {
+            const summaryDiv = document.getElementById('selection-summary');
+            
+            if (selectedOperatori.size === 0 && selectedMezzi.size === 0 && selectedMateriali.size === 0) {
+                summaryDiv.innerHTML = `
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Seleziona le risorse dalle sezioni sopra per visualizzare il riepilogo.
+                    </div>
+                `;
+                return;
+            }
+            
+            let summaryHTML = '<div class="selection-summary">';
+            summaryHTML += '<h5><i class="fas fa-clipboard-list me-2"></i>Risorse Selezionate</h5>';
+            
+            // Operatori selezionati
+            if (selectedOperatori.size > 0) {
+                summaryHTML += '<div class="summary-item">';
+                summaryHTML += '<span><i class="fas fa-users me-2"></i>Operatori:</span>';
+                summaryHTML += '<span class="badge bg-success">' + selectedOperatori.size + ' selezionati</span>';
+                summaryHTML += '</div>';
+                
+                selectedOperatori.forEach(id => {
+                    const operatoreCard = document.getElementById('op-' + id).closest('.resource-card');
+                    const nome = operatoreCard.querySelector('.resource-name').textContent;
+                    const ruolo = document.getElementById('role-' + id).value;
+                    summaryHTML += '<div style="margin-left: 2rem; font-size: 0.9rem; color: #666;">';
+                    summaryHTML += '• ' + nome + ' (' + ruolo + ')';
+                    summaryHTML += '</div>';
+                });
+            }
+            
+            // Mezzi selezionati
+            if (selectedMezzi.size > 0) {
+                summaryHTML += '<div class="summary-item">';
+                summaryHTML += '<span><i class="fas fa-truck me-2"></i>Mezzi:</span>';
+                summaryHTML += '<span class="badge bg-warning">' + selectedMezzi.size + ' selezionati</span>';
+                summaryHTML += '</div>';
+                
+                selectedMezzi.forEach(targa => {
+                    const mezzoCard = document.getElementById('mezzo-' + targa).closest('.resource-card');
+                    const nome = mezzoCard.querySelector('.resource-name').textContent;
+                    summaryHTML += '<div style="margin-left: 2rem; font-size: 0.9rem; color: #666;">';
+                    summaryHTML += '• ' + nome + ' (' + targa + ')';
+                    summaryHTML += '</div>';
+                });
+            }
+            
+            // Materiali selezionati
+            if (selectedMateriali.size > 0) {
+                summaryHTML += '<div class="summary-item">';
+                summaryHTML += '<span><i class="fas fa-toolbox me-2"></i>Materiali:</span>';
+                summaryHTML += '<span class="badge bg-info">' + selectedMateriali.size + ' selezionati</span>';
+                summaryHTML += '</div>';
+                
+                selectedMateriali.forEach(id => {
+                    const materialeCard = document.getElementById('mat-' + id).closest('.resource-card');
+                    const nome = materialeCard.querySelector('.resource-name').textContent;
+                    summaryHTML += '<div style="margin-left: 2rem; font-size: 0.9rem; color: #666;">';
+                    summaryHTML += '• ' + nome;
+                    summaryHTML += '</div>';
+                });
+            }
+            
+            // Totale risorse
+            const totalResources = selectedOperatori.size + selectedMezzi.size + selectedMateriali.size;
+            summaryHTML += '<div class="summary-item">';
+            summaryHTML += '<span><strong>Totale Risorse Assegnate:</strong></span>';
+            summaryHTML += '<span class="badge bg-primary">' + totalResources + '</span>';
+            summaryHTML += '</div>';
+            
+            summaryHTML += '</div>';
+            
+            summaryDiv.innerHTML = summaryHTML;
+        }
+        
+        // Inizializza contatori e altre funzioni
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM caricato!');
+            
+            updateCharCounter('nome', 'nomeCount', 45);
+            updateCharCounter('posizione', 'posizioneCount', 100);
+            updateCharCounter('obiettivo', 'obiettivoCount', 45);
+            
+            // Previeni il click del checkbox quando si clicca sulla card
+            document.querySelectorAll('.selection-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            });
+            
+            // Previeni il click della card quando si seleziona il ruolo
+            document.querySelectorAll('.role-selector').forEach(selector => {
+                selector.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            });
+            
+            // Aggiorna riepilogo quando cambia il ruolo
+            document.querySelectorAll('select[id^="role-"]').forEach(select => {
+                select.addEventListener('change', updateSummary);
+            });
+            
+            // Test pulsante
+            const confirmBtn = document.getElementById('confirmButton');
+            if (confirmBtn) {
+                console.log('Pulsante conferma trovato!');
+            } else {
+                console.error('Pulsante conferma NON trovato!');
+            }
+        });
+    </script>
+    <#include "common/footer.ftl.html">
+
+</body>
+</html>

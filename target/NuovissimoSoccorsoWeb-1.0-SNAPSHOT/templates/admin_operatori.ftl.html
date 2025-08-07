@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Operatori - Sistema Soccorso</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .content-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .stats-summary {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table thead th {
+            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+            color: white;
+            border: none;
+            font-weight: 600;
+            padding: 1rem;
+        }
+        
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+            transform: scale(1.01);
+        }
+        
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .badge-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .badge-disponibile {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-occupato {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .btn-action {
+            margin: 0 0.2rem;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+        
+        .breadcrumb-item a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: white;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .action-buttons {
+            margin-bottom: 1.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .table-responsive {
+                font-size: 0.9rem;
+            }
+            
+            .btn-action {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <#include "common/header.ftl.html">
+
+    <div class="container">
+        <!-- Messaggi -->
+        <#if success_message??>
+            <div class="alert alert-success" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Successo:</strong> ${success_message}
+            </div>
+        </#if>
+        
+        <#if error_message??>
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Errore:</strong> ${error_message}
+            </div>
+        </#if>
+
+        <!-- Statistiche -->
+        <div class="stats-summary">
+            <div class="row">
+                <div class="col-md-8">
+                    <h4 class="mb-2">
+                        <i class="fas fa-chart-bar me-2"></i>Statistiche Operatori
+                    </h4>
+                    <p class="mb-1">
+                        Totale operatori registrati: <strong>${total_operatori!0}</strong>
+                    </p>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <span class="badge-status badge-disponibile">
+                                <i class="fas fa-check-circle me-1"></i>
+                                Disponibili: ${operatori_disponibili_count!0}
+                            </span>
+                        </div>
+                        <div class="col-md-6">
+                            <span class="badge-status badge-occupato">
+                                <i class="fas fa-exclamation-circle me-1"></i>
+                                Occupati: ${operatori_occupati_count!0}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="mt-2">
+                        <i class="fas fa-users" style="font-size: 2rem; opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Azioni -->
+        <div class="content-card">
+            <div class="action-buttons">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h3 class="mb-0">
+                            <i class="fas fa-list me-2"></i>Lista Operatori
+                        </h3>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <a href="${contextPath}/admin/registrazione" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Nuovo Operatore
+                        </a>
+                        <button class="btn btn-outline-secondary" onclick="window.location.reload()">
+                            <i class="fas fa-sync-alt me-2"></i>Aggiorna
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabella Operatori -->
+            <#if operatori?? && (operatori?size > 0)>
+                <div class="table-container">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">
+                                    <i class="fas fa-hashtag me-1"></i>ID
+                                </th>
+                                <th scope="col">
+                                    <i class="fas fa-user me-1"></i>Nome Completo
+                                </th>
+                                <th scope="col">
+                                    <i class="fas fa-envelope me-1"></i>Email
+                                </th>
+                                <th scope="col">
+                                    <i class="fas fa-id-card me-1"></i>Codice Fiscale
+                                </th>
+                                <th scope="col">
+                                    <i class="fas fa-info-circle me-1"></i>Stato
+                                </th>
+                                <th scope="col" class="text-center">
+                                    <i class="fas fa-cogs me-1"></i>Azioni
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <#list operatori as operatore>
+                                <tr>
+                                    <td>
+                                        <strong>${operatore.id}</strong>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                <i class="fas fa-user-circle" style="font-size: 1.5rem; color: #6c757d;"></i>
+                                            </div>
+                                            <div>
+                                                <strong>${operatore.nome} ${operatore.cognome}</strong>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-envelope me-2 text-muted"></i>
+                                        ${operatore.email}
+                                    </td>
+                                    <td>
+                                        <code>${operatore.codiceFiscale!"N/A"}</code>
+                                    </td>
+                                    <td>
+                                        <#assign disponibile = operatori_disponibilita[operatore.id?string]!true>
+                                        <#if disponibile>
+                                            <span class="badge-status badge-disponibile">
+                                                <i class="fas fa-check-circle me-1"></i>Disponibile
+                                            </span>
+                                        <#else>
+                                            <span class="badge-status badge-occupato">
+                                                <i class="fas fa-exclamation-circle me-1"></i>Occupato
+                                            </span>
+                                        </#if>
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="${contextPath}/admin/operatori/${operatore.id}" 
+                                           class="btn btn-outline-info btn-action" 
+                                           title="Visualizza dettagli">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </#list>
+                        </tbody>
+                    </table>
+                </div>
+            <#else>
+                <!-- Stato vuoto -->
+                <div class="empty-state">
+                    <i class="fas fa-users"></i>
+                    <h4>Nessun operatore trovato</h4>
+                    <p class="text-muted">Non ci sono operatori registrati nel sistema.</p>
+                </div>
+            </#if>
+        </div>
+
+        <!-- Torna alla Dashboard -->
+        <div class="text-center mb-4">
+            <a href="${contextPath}/admin/dashboard" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Torna alla Dashboard
+            </a>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Animazione di entrata per le righe della tabella
+        document.addEventListener('DOMContentLoaded', function() {
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach((row, index) => {
+                row.style.opacity = '0';
+                row.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    row.style.transition = 'all 0.5s ease-out';
+                    row.style.opacity = '1';
+                    row.style.transform = 'translateY(0)';
+                }, index * 50);
+            });
+        });
+    </script>
+    
+    <#include "common/footer.ftl.html">
+
+</body>
+</html>

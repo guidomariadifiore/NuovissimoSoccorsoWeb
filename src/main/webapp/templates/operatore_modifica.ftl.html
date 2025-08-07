@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestisci Profilo - Sistema Soccorso</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .section-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            border-left: 5px solid transparent;
+        }
+        
+        .anagrafica-card {
+            border-left-color: #3498db;
+        }
+        
+        .patenti-card {
+            border-left-color: #e74c3c;
+        }
+        
+        .abilita-card {
+            border-left-color: #27ae60;
+        }
+        
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .info-label {
+            font-size: 0.875rem;
+            color: #6c757d;
+            font-weight: 600;
+        }
+        
+        .info-value {
+            font-size: 1rem;
+            color: #2c3e50;
+            font-weight: 500;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .current-items {
+            background: #e8f5e8;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .current-items h6 {
+            color: #27ae60;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+        
+        .items-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .item-badge {
+            background: #27ae60;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .item-badge.patente {
+            background: #e74c3c;
+        }
+        
+        .item-badge.abilita {
+            background: #27ae60;
+        }
+        
+        .selection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .checkbox-item:hover {
+            border-color: #f39c12;
+            background: #fff8e1;
+        }
+        
+        .checkbox-item.checked {
+            border-color: #27ae60;
+            background: #e8f5e8;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            margin: 0;
+            transform: scale(1.2);
+        }
+        
+        .checkbox-label {
+            font-weight: 500;
+            color: #2c3e50;
+            cursor: pointer;
+        }
+        
+        .btn-save {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            border: none;
+            color: white;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+            color: white;
+        }
+        
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+        
+        .breadcrumb-item a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: white;
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            padding: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .selection-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+        }
+        
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        
+        .fade-in:nth-child(1) { animation-delay: 0.1s; }
+        .fade-in:nth-child(2) { animation-delay: 0.2s; }
+        .fade-in:nth-child(3) { animation-delay: 0.3s; }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <#include "common/header.ftl.html">
+
+    <div class="container">
+        <!-- Messaggi -->
+        <#if success_message??>
+            <div class="alert alert-success" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Successo:</strong> ${success_message}
+            </div>
+        </#if>
+        
+        <#if error_message??>
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Errore:</strong> ${error_message}
+            </div>
+        </#if>
+
+        <!-- Anagrafica (Read Only) -->
+        <div class="section-card anagrafica-card fade-in">
+            <h3 class="section-title">
+                <i class="fas fa-user-circle"></i>
+                Dati Anagrafici
+            </h3>
+            
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Nome</span>
+                    <span class="info-value">${operatore.nome!"Non specificato"}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Cognome</span>
+                    <span class="info-value">${operatore.cognome!"Non specificato"}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Email</span>
+                    <span class="info-value">${operatore.email!"Non specificata"}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Codice Fiscale</span>
+                    <span class="info-value">${operatore.codiceFiscale!"Non specificato"}</span>
+                </div>
+            </div>
+            
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Nota:</strong> Per modificare i dati anagrafici contatta l'amministratore del sistema.
+            </div>
+        </div>
+
+        <!-- Gestione Patenti -->
+        <div class="section-card patenti-card fade-in">
+            <h3 class="section-title">
+                <i class="fas fa-id-badge"></i>
+                Patenti di Guida
+            </h3>
+            
+            <!-- Patenti Attuali -->
+            <div class="current-items">
+                <h6><i class="fas fa-check-circle me-2"></i>Patenti Attuali</h6>
+                <#if patenti_operatore?? && (patenti_operatore?size > 0)>
+                    <div class="items-list">
+                        <#list patenti_operatore as patente>
+                            <span class="item-badge patente">${patente.toDBString()}</span>
+                        </#list>
+                    </div>
+                <#else>
+                    <div class="empty-state">Nessuna patente presente</div>
+                </#if>
+            </div>
+            
+            <!-- Form Patenti -->
+            <form method="POST" action="${contextPath}/operatore/modifica">
+                <input type="hidden" name="action" value="update_patenti">
+                
+                <h6 class="mb-3">Seleziona le patenti che possiedi:</h6>
+                
+                <div class="selection-grid">
+                    <#if tutte_le_patenti??>
+                        <#list tutte_le_patenti as patente>
+                            <label class="checkbox-item">
+                                <input type="checkbox" 
+                                       name="patenti" 
+                                       value="${patente.toDBString()}"
+                                       <#if patenti_operatore??>
+                                           <#list patenti_operatore as patenteCurrent>
+                                               <#if patenteCurrent.toDBString() == patente.toDBString()>checked</#if>
+                                           </#list>
+                                       </#if>>
+                                <span class="checkbox-label">${patente.toDBString()}</span>
+                            </label>
+                        </#list>
+                    <#else>
+                        <div class="empty-state">Nessuna patente disponibile</div>
+                    </#if>
+                </div>
+                
+                <div class="text-end">
+                    <button type="submit" class="btn btn-save">
+                        <i class="fas fa-save me-2"></i>Salva Patenti
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Gestione Abilità -->
+        <div class="section-card abilita-card fade-in">
+            <h3 class="section-title">
+                <i class="fas fa-tools"></i>
+                Abilità Professionali
+            </h3>
+            
+            <!-- Abilità Attuali -->
+            <div class="current-items">
+                <h6><i class="fas fa-check-circle me-2"></i>Abilità Attuali</h6>
+                <#if abilita_operatore?? && (abilita_operatore?size > 0)>
+                    <div class="items-list">
+                        <#list abilita_operatore as abilita>
+                            <span class="item-badge abilita">${abilita.tipo.name()}</span>
+                        </#list>
+                    </div>
+                <#else>
+                    <div class="empty-state">Nessuna abilità presente</div>
+                </#if>
+            </div>
+            
+            <!-- Form Abilità -->
+            <form method="POST" action="${contextPath}/operatore/modifica">
+                <input type="hidden" name="action" value="update_abilita">
+                
+                <h6 class="mb-3">Seleziona le abilità che possiedi:</h6>
+                
+                <div class="selection-grid">
+                    <#if tutte_le_abilita??>
+                        <#list tutte_le_abilita as abilita>
+                            <label class="checkbox-item">
+                                <input type="checkbox" 
+                                       name="abilita" 
+                                       value="${abilita.id?c}"
+                                       <#if abilita_operatore??>
+                                           <#list abilita_operatore as abilitaCurrent>
+                                               <#if abilitaCurrent.id == abilita.id>checked</#if>
+                                           </#list>
+                                       </#if>>
+                                <span class="checkbox-label">${abilita.tipo.name()}</span>
+                            </label>
+                        </#list>
+                    <#else>
+                        <div class="empty-state">Nessuna abilità disponibile</div>
+                    </#if>
+                </div>
+                
+                <div class="text-end">
+                    <button type="submit" class="btn btn-save">
+                        <i class="fas fa-save me-2"></i>Salva Abilità
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Footer Actions -->
+        <div class="text-center mt-5 mb-4">
+            <a href="${contextPath}/operatore/dashboard" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Torna alla Dashboard
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gestione visiva dei checkbox
+            const checkboxItems = document.querySelectorAll('.checkbox-item');
+            
+            checkboxItems.forEach(item => {
+                const checkbox = item.querySelector('input[type="checkbox"]');
+                
+                // Imposta stato iniziale
+                if (checkbox.checked) {
+                    item.classList.add('checked');
+                }
+                
+                // Gestisci cambiamenti
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        item.classList.add('checked');
+                    } else {
+                        item.classList.remove('checked');
+                    }
+                });
+                
+                // Gestisci click sull'intera area
+                item.addEventListener('click', function(e) {
+                    if (e.target !== checkbox) {
+                        checkbox.checked = !checkbox.checked;
+                        checkbox.dispatchEvent(new Event('change'));
+                    }
+                });
+            });
+            
+            // Conferma prima del salvataggio
+            const saveButtons = document.querySelectorAll('.btn-save');
+            saveButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const form = this.closest('form');
+                    const action = form.querySelector('input[name="action"]').value;
+                    const checkboxes = form.querySelectorAll('input[type="checkbox"]:checked');
+                    
+                    let message = '';
+                    if (action === 'update_patenti') {
+                        message = 'Confermi di voler aggiornare le patenti? (' + checkboxes.length + ' selezionate)';
+                    } else if (action === 'update_abilita') {
+                        message = 'Confermi di voler aggiornare le abilità? (' + checkboxes.length + ' selezionate)';
+                    }
+                    
+                    if (!confirm(message)) {
+                        e.preventDefault();
+                    }
+                });
+            });
+            
+            // Log per debug
+            console.log('Pagina modifica operatore caricata');
+            console.log('Patenti attuali: ${(patenti_operatore?size)!0}');
+            console.log('Abilità attuali: ${(abilita_operatore?size)!0}');
+        });
+    </script>
+    
+    <#include "common/footer.ftl.html">
+
+</body>
+</html>
