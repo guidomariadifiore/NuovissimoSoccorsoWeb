@@ -50,32 +50,9 @@
         <res-auth>Container</res-auth>
     </resource-ref>
     
-    <!-- ========== CONFIGURAZIONE JAX-RS (REST API) ========== -->
-    <servlet>
-        <servlet-name>jersey-servlet</servlet-name>
-        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
-        <init-param>
-            <param-name>jersey.config.server.provider.packages</param-name>
-            <param-value>webengineering.nuovissimosoccorsoweb.rest</param-value>
-        </init-param>
-        <init-param>
-            <param-name>jersey.config.server.provider.classnames</param-name>
-            <param-value>
-                com.fasterxml.jackson.jakarta.rs.json.JacksonJsonProvider,
-                webengineering.nuovissimosoccorsoweb.rest.config.ObjectMapperContextResolver,
-                webengineering.nuovissimosoccorsoweb.rest.security.CORSFilter,
-                webengineering.nuovissimosoccorsoweb.rest.security.AuthenticationFilter,
-                webengineering.nuovissimosoccorsoweb.rest.exception.AppExceptionMapper
-            </param-value>
-        </init-param>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-    
-    <!-- Mapping REST API su /api/* -->
-    <servlet-mapping>
-        <servlet-name>jersey-servlet</servlet-name>
-        <url-pattern>/api/*</url-pattern>
-    </servlet-mapping>
+    <!-- ========== CONFIGURAZIONE JAX-RS (REST API) - Versione Semplificata ========== -->
+    <!-- Jersey si auto-configura usando la classe JerseyConfig con @ApplicationPath -->
+    <!-- Non serve configurazione servlet esplicita nel web.xml -->
     
     <!-- ========== FILTRI AUTENTICAZIONE MVC ========== -->
     <filter>
