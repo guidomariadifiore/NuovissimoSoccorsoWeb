@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoccorsoWeb REST API - Client di Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .section h2 {
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        input[type="email"], input[type="password"], input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        button:hover {
+            background: #5a6fd8;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .response-area {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .success {
+            color: #28a745;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        
+        .error {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        
+        .info {
+            color: #0c5460;
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+        }
+        
+        .auth-status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .logged-out {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .logged-in {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚑 SoccorsoWeb REST API</h1>
+        <p>Client di Test per le API REST</p>
+    </div>
+
+    <!-- Status di autenticazione -->
+    <div id="authStatus" class="auth-status logged-out">
+        ❌ Non autenticato
+    </div>
+
+    <!-- Sezione 1: Autenticazione -->
+    <div class="section">
+        <h2>🔐 1. Login/Logout (Operazione richiesta)</h2>
+        
+        <div class="two-column">
+            <div>
+                <h3>Login</h3>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" value="admin@soccorso.it" placeholder="Inserisci email">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" value="admin123" placeholder="Inserisci password">
+                </div>
+                <button onclick="doLogin()">Effettua Login</button>
+                <button onclick="verifyToken()" id="verifyBtn" disabled>Verifica Token</button>
+                <button onclick="doLogout()" id="logoutBtn" disabled>Logout</button>
+            </div>
+            
+            <div>
+                <h3>Credenziali di Test</h3>
+                <p><strong>Admin:</strong> admin@soccorso.it / admin123</p>
+                <p><strong>Operatore:</strong> operatore@soccorso.it / op123</p>
+                <p><strong>Utente:</strong> utente@soccorso.it / user123</p>
+            </div>
+        </div>
+        
+        <div class="response-area" id="authResponse">
+            Risultato dell'autenticazione apparirà qui...
+        </div>
+    </div>
+
+    <!-- Sezione 2: Inserimento Richiesta -->
+    <div class="section">
+        <h2>📋 2. Inserimento Richiesta di Soccorso (Operazione richiesta)</h2>
+        
+        <div class="form-group">
+            <label for="descrizione">Descrizione emergenza:</label>
+            <textarea id="descrizione" rows="3" placeholder="Descrivi l'emergenza...">Incendio in appartamento al secondo piano, presenza di feriti</textarea>
+        </div>
+        
+        <div class="two-column">
+            <div class="form-group">
+                <label for="indirizzo">Indirizzo:</label>
+                <input type="text" id="indirizzo" value="Via Roma 123, L'Aquila" placeholder="Indirizzo dell'emergenza">
+            </div>
+            <div class="form-group">
+                <label for="telefono">Telefono contatto:</label>
+                <input type="text" id="telefono" value="3401234567" placeholder="Numero di telefono">
+            </div>
+        </div>
+        
+        <button onclick="inserisciRichiesta()" id="richiestaBtn" disabled>Inserisci Richiesta</button>
+        
+        <div class="response-area" id="richiestaResponse">
+            Risultato dell'inserimento richiesta apparirà qui...
+        </div>
+    </div>
+
+    <!-- Sezione 4: Lista Richieste -->
+    <div class="section">
+        <h2>📋 4. Lista Richieste di Soccorso (Operazione richiesta)</h2>
+        
+        <div class="two-column">
+            <div>
+                <div class="form-group">
+                    <label for="filtroStato">Filtra per stato:</label>
+                    <select id="filtroStato" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        <option value="">Tutte</option>
+                        <option value="ATTIVA">Attive</option>
+                        <option value="IN_CORSO">In corso</option>
+                        <option value="CHIUSA">Chiuse</option>
+                        <option value="IGNORATA">Ignorate</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <div class="form-group">
+                    <label for="pagina">Pagina:</label>
+                    <input type="number" id="pagina" value="1" min="1" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+            </div>
+        </div>
+        
+        <button onclick="getListaRichieste()" id="listaBtn" disabled>Carica Lista</button>
+        
+        <div class="response-area" id="listaResponse">
+            Lista delle richieste apparirà qui...
+        </div>
+    </div>
+
+    <!-- Sezione 6: Lista Operatori -->
+    <div class="section">
+        <h2>👨‍🚒 6. Lista Operatori Liberi (Operazione richiesta)</h2>
+        
+        <button onclick="getOperatoriLiberi()" id="operatoriBtn" disabled>Carica Operatori Liberi</button>
+        
+        <div class="response-area" id="operatoriResponse">
+            Lista degli operatori liberi apparirà qui...
+        </div>
+    </div>
+
+    <!-- Sezione Test Vari -->
+    <div class="section">
+        <h2>🧪 Test Vari</h2>
+        
+        <button onclick="testHealth()">Test Health Check</button>
+        <button onclick="testCORS()">Test CORS</button>
+        <button onclick="clearAllResponses()">Pulisci Tutte le Risposte</button>
+        
+        <div class="response-area" id="testResponse">
+            Risultati dei test vari...
+        </div>
+    </div>
+
+    <script>
+        // Configurazione API
+        const API_BASE_URL = 'http://localhost:8080/nuovissimo-soccorso-web-1.0-SNAPSHOT/api';
+        let authToken = null;
+        let currentUser = null;
+
+        // Utility function per le chiamate API
+        async function apiCall(endpoint, options = {}) {
+            const url = `${API_BASE_URL}${endpoint}`;
+            
+            const defaultOptions = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            };
+            
+            // Aggiungi token se disponibile
+            if (authToken) {
+                defaultOptions.headers['Authorization'] = `Bearer ${authToken}`;
+            }
+            
+            const finalOptions = {
+                ...defaultOptions,
+                ...options,
+                headers: {
+                    ...defaultOptions.headers,
+                    ...options.headers
+                }
+            };
+            
+            try {
+                const response = await fetch(url, finalOptions);
+                const data = await response.json();
+                
+                return {
+                    ok: response.ok,
+                    status: response.status,
+                    data: data,
+                    headers: response.headers
+                };
+            } catch (error) {
+                return {
+                    ok: false,
+                    status: 0,
+                    data: { error: 'NETWORK_ERROR', message: error.message },
+                    headers: null
+                };
+            }
+        }
+
+        // Funzioni di autenticazione
+        async function doLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                showResponse('authResponse', 'Inserisci email e password', 'error');
+                return;
+            }
+            
+            showResponse('authResponse', 'Autenticazione in corso...', 'info');
+            
+            const result = await apiCall('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({ email, password })
+            });
+            
+            if (result.ok && result.data.success) {
+                authToken = result.data.token;
+                currentUser = result.data.user;
+                updateAuthStatus(true);
+                showResponse('authResponse', 
+                    `✅ Login riuscito!\nUtente: ${currentUser.email}\nRuolo: ${currentUser.role}\nToken: ${authToken.substring(0, 50)}...`, 
+                    'success');
+            } else {
+                updateAuthStatus(false);
+                showResponse('authResponse', 
+                    `❌ Login fallito: ${result.data.message || 'Errore sconosciuto'}`, 
+                    'error');
+            }
+        }
+
+        async function doLogout() {
+            if (!authToken) {
+                showResponse('authResponse', 'Non sei autenticato', 'error');
+                return;
+            }
+            
+            const result = await apiCall('/auth/logout', {
+                method: 'DELETE'
+            });
+            
+            authToken = null;
+            currentUser = null;
+            updateAuthStatus(false);
+            
+            showResponse('authResponse', '✅ Logout effettuato', 'success');
+        }
+
+        async function verifyToken() {
+            if (!authToken) {
+                showResponse('authResponse', 'Nessun token da verificare', 'error');
+                return;
+            }
+            
+            const result = await apiCall('/auth/verify');
+            
+            if (result.ok && result.data.valid) {
+                showResponse('authResponse', 
+                    `✅ Token valido!\nUtente: ${result.data.user.email}\nRuolo: ${result.data.user.role}`, 
+                    'success');
+            } else {
+                showResponse('authResponse', 
+                    `❌ Token non valido: ${result.data.message || 'Token scaduto o malformato'}`, 
+                    'error');
+                authToken = null;
+                currentUser = null;
+                updateAuthStatus(false);
+            }
+        }
+
+        // Funzioni per le altre operazioni (placeholder per ora)
+        async function inserisciRichiesta() {
+            showResponse('richiestaResponse', '🚧 Endpoint non ancora implementato - TODO', 'info');
+        }
+
+        async function getListaRichieste() {
+            showResponse('listaResponse', '🚧 Endpoint non ancora implementato - TODO', 'info');
+        }
+
+        async function getOperatoriLiberi() {
+            showResponse('operatoriResponse', '🚧 Endpoint non ancora implementato - TODO', 'info');
+        }
+
+        // Funzioni di test
+        async function testHealth() {
+            showResponse('testResponse', 'Testing basic connectivity...', 'info');
+            
+            const result = await fetch(`${API_BASE_URL}/auth/login`, {
+                method: 'OPTIONS'
+            });
+            
+            if (result.ok) {
+                showResponse('testResponse', '✅ API raggiungibile, CORS configurato correttamente', 'success');
+            } else {
+                showResponse('testResponse', `❌ Problema di connettività: ${result.status}`, 'error');
+            }
+        }
+
+        async function testCORS() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': window.location.origin,
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
+                });
+                
+                showResponse('testResponse', 
+                    `✅ Test CORS completato\nStatus: ${response.status}\nHeaders CORS: ${response.headers.get('Access-Control-Allow-Origin')}`, 
+                    'success');
+            } catch (error) {
+                showResponse('testResponse', `❌ Errore CORS: ${error.message}`, 'error');
+            }
+        }
+
+        // Utility functions
+        function updateAuthStatus(isLoggedIn) {
+            const statusEl = document.getElementById('authStatus');
+            const buttons = ['verifyBtn', 'logoutBtn', 'richiestaBtn', 'listaBtn', 'operatoriBtn'];
+            
+            if (isLoggedIn) {
+                statusEl.textContent = `✅ Autenticato come: ${currentUser.email} (${currentUser.role})`;
+                statusEl.className = 'auth-status logged-in';
+                buttons.forEach(btnId => document.getElementById(btnId).disabled = false);
+            } else {
+                statusEl.textContent = '❌ Non autenticato';
+                statusEl.className = 'auth-status logged-out';
+                buttons.forEach(btnId => document.getElementById(btnId).disabled = true);
+            }
+        }
+
+        function showResponse(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `response-area ${type}`;
+        }
+
+        function clearAllResponses() {
+            const responseAreas = document.querySelectorAll('.response-area');
+            responseAreas.forEach(area => {
+                area.textContent = 'Pulito...';
+                area.className = 'response-area';
+            });
+        }
+
+        // Inizializzazione
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthStatus(false);
+            showResponse('authResponse', 'Pronto per il test di autenticazione...');
+            showResponse('richiestaResponse', 'Pronto per il test di inserimento richiesta...');
+            showResponse('listaResponse', 'Pronto per il test di lista richieste...');
+            showResponse('operatoriResponse', 'Pronto per il test di lista operatori...');
+            showResponse('testResponse', 'Pronto per i test di connettività...');
+        });
+    </script>
+</body>
+</html>
