@@ -7,10 +7,13 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import webengineering.nuovissimosoccorsoweb.rest.security.JWTHelper;
 import webengineering.nuovissimosoccorsoweb.rest.security.Secured;
+import webengineering.nuovissimosoccorsoweb.rest.service.AuthService;
 
 /**
  * Resource REST per la gestione dell'autenticazione.
  * Endpoint: /api/auth/*
+ * 
+ * Solo per amministratori e operatori.
  * 
  * @author YourName
  */
@@ -33,27 +36,39 @@ public class AuthResource {
     @Path("login")
     public Response login(LoginRequest loginRequest) {
         try {
+            // DEBUG: Log della richiesta ricevuta
+            System.out.println("=== DEBUG LOGIN ===");
+            System.out.println("LoginRequest ricevuto: " + loginRequest);
+            if (loginRequest != null) {
+                System.out.println("Email: " + loginRequest.getEmail());
+                System.out.println("Password: " + (loginRequest.getPassword() != null ? "[PRESENTE]" : "[NULL]"));
+            }
+            
             // Validazione input
             if (loginRequest == null || 
                 loginRequest.getEmail() == null || loginRequest.getEmail().trim().isEmpty() ||
                 loginRequest.getPassword() == null || loginRequest.getPassword().trim().isEmpty()) {
                 
+                System.out.println("Validazione fallita: dati mancanti");
                 return Response.status(Response.Status.BAD_REQUEST)
                         .entity(new LoginResponse(false, "Email e password sono richiesti", null, null))
                         .build();
             }
             
-            // TODO: Qui dovrai integrare con il tuo sistema di autenticazione esistente
-            // Per ora simuliamo la validazione
-            UserInfo user = validateUser(loginRequest.getEmail(), loginRequest.getPassword());
+            // Usa AuthService che integra con il database reale
+            AuthService.UserInfo authResult = AuthService.getInstance()
+                .authenticateUser(loginRequest.getEmail(), loginRequest.getPassword());
             
-            if (user == null) {
+            if (authResult == null) {
                 return Response.status(Response.Status.UNAUTHORIZED)
                         .entity(new LoginResponse(false, "Credenziali non valide", null, null))
                         .build();
             }
             
-            // Genera token JWT
+            // Converti il risultato in UserInfo per la risposta
+            UserInfo user = new UserInfo(authResult.getId(), authResult.getEmail(), authResult.getRole());
+            
+            // Genera token JWT (converte int to Long per compatibilità)
             String token = JWTHelper.generateToken((long) user.getId(), user.getEmail(), user.getRole());
             
             // Risposta di successo
@@ -107,22 +122,15 @@ public class AuthResource {
     }
     
     /**
-     * Metodo per validare le credenziali utente.
-     * TODO: Integrare con il tuo sistema di autenticazione esistente.
+     * Endpoint di test per verificare che JSON funzioni.
+     * GET /api/auth/test
      */
-    private UserInfo validateUser(String email, String password) {
-        // PLACEHOLDER - Sostituire con la logica reale di validazione
-        // Dovrai integrare con il tuo data layer esistente
-        
-        if ("admin@soccorso.it".equals(email) && "admin123".equals(password)) {
-            return new UserInfo(1, email, "ADMIN");
-        } else if ("operatore@soccorso.it".equals(email) && "op123".equals(password)) {
-            return new UserInfo(2, email, "OPERATORE");
-        } else if ("utente@soccorso.it".equals(email) && "user123".equals(password)) {
-            return new UserInfo(3, email, "UTENTE");
-        }
-        
-        return null; // Credenziali non valide
+    @GET
+    @Path("test")
+    public Response test() {
+        return Response.ok()
+                .entity("{\"message\":\"REST API funziona!\",\"timestamp\":" + System.currentTimeMillis() + "}")
+                .build();
     }
     
     // ========== CLASSI DTO (Data Transfer Objects) ==========
@@ -212,11 +220,12 @@ public class AuthResource {
     
     /**
      * Classe per rappresentare le informazioni dell'utente.
+     * Solo amministratori e operatori.
      */
     public static class UserInfo {
-        private int id;
-        private String email;
-        private String role;
+        private final int id;
+        private final String email;
+        private final String role; // "ADMIN" o "OPERATORE"
         
         public UserInfo(int id, String email, String role) {
             this.id = id;

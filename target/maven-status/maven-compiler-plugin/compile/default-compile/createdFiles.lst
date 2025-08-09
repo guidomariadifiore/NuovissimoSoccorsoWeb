@@ -50,6 +50,7 @@ webengineering\nuovissimosoccorsoweb\dao\impl\PatenteDAO_MySQL.class
 webengineering\nuovissimosoccorsoweb\controller\AdminNuovoMaterialeController$ValidationResult.class
 webengineering\framework\data\DataCache.class
 webengineering\nuovissimosoccorsoweb\dao\OperatoreHaAbilitaDAO.class
+webengineering\nuovissimosoccorsoweb\rest\service\AuthService$UserInfo.class
 webengineering\nuovissimosoccorsoweb\rest\exception\AppExceptionMapper.class
 webengineering\nuovissimosoccorsoweb\dao\impl\MezzoDAO_MySQL.class
 webengineering\nuovissimosoccorsoweb\controller\VisualizzaEmail.class
@@ -139,6 +140,7 @@ webengineering\nuovissimosoccorsoweb\util\RateLimiter$RateLimiterStats.class
 webengineering\framework\controller\AbstractBaseController.class
 webengineering\nuovissimosoccorsoweb\dao\impl\AmministratoreDAO_MySQL.class
 webengineering\nuovissimosoccorsoweb\controller\AdminMaterialiController$MissioneConDettagli.class
+webengineering\nuovissimosoccorsoweb\rest\service\AuthService.class
 webengineering\nuovissimosoccorsoweb\model\impl\proxy\MaterialeProxy.class
 webengineering\nuovissimosoccorsoweb\dao\RichiestaSoccorsoDAO.class
 webengineering\nuovissimosoccorsoweb\model\impl\MaterialeImpl.class

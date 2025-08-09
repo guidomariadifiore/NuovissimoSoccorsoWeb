@@ -126,6 +126,7 @@ C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\we
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\security\JWTAuthenticationFilter.java
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\security\JWTHelper.java
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\security\Secured.java
+C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\service\AuthService.java
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\SoccorsoDataLayer.java
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\util\AuthenticationFilter.java
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\util\RateLimiter.java

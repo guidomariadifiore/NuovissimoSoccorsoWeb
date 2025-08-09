@@ -317,12 +317,7 @@
         <url-pattern>/operatore/storico</url-pattern>
     </servlet-mapping>
 
-    <!-- Root redirect -->
-    <servlet-mapping>
-        <servlet-name>RedirectServlet</servlet-name>
-        <url-pattern>/</url-pattern>
-    </servlet-mapping>
-    
+    <!-- Root redirect - SOLO per percorsi specifici -->
     <servlet-mapping>
         <servlet-name>RedirectServlet</servlet-name>
         <url-pattern>/index.html</url-pattern>
@@ -331,6 +326,37 @@
     <servlet-mapping>
         <servlet-name>RedirectServlet</servlet-name>
         <url-pattern>/index.jsp</url-pattern>
+    </servlet-mapping>
+    
+    <!-- Servlet per servire file statici - delegato al default servlet di Tomcat -->
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>*.html</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>*.css</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>*.js</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>*.png</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>*.jpg</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>*.ico</url-pattern>
     </servlet-mapping>
     
     <!-- Welcome file -->
