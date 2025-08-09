@@ -17,7 +17,7 @@ import java.util.Date;
 public class JWTHelper {
     
     // Chiave segreta per firmare i token
-    private static final String SECRET_KEY = "qlx1<`D1jI6AMnKZ<0r_4(*P.{]'3iLmDl6[q(MW=@kD07p>n}7.1S^A^gePUqs";
+    private static final String SECRET_KEY = "(UcKKX),sGf|tR?4?B5A+q-=K7*o[s6VtE7[rRkWI6jmx:[3H/D@DA1KMJ)#T=KD";
     private static final SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     
     // Durata del token: 24 ore 

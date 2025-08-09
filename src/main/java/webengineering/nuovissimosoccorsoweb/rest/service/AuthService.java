@@ -17,7 +17,6 @@ import webengineering.nuovissimosoccorsoweb.dao.OperatoreDAO;
  * Servizio di autenticazione che integra con il sistema MVC esistente.
  * Usa lo stesso DataLayer e logica di autenticazione del progetto principale.
  * 
- * @author YourName
  */
 public class AuthService {
     
@@ -77,14 +76,18 @@ public class AuthService {
     }
     
     /**
-     * Crea DataLayer come nel progetto MVC.
+     * Crea DataLayer.
      */
-    private SoccorsoDataLayer createDataLayer() throws NamingException, SQLException {
+    private SoccorsoDataLayer createDataLayer() throws NamingException, SQLException, DataException {
         InitialContext ctx = new InitialContext();
         DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/soccorso");
-        return new SoccorsoDataLayer(ds);
-    }
-    
+        SoccorsoDataLayer dataLayer = new SoccorsoDataLayer(ds);
+
+        // Inizializza i DAO
+        dataLayer.init();
+
+        return dataLayer;
+    }    
     /**
      * Autentica come amministratore (stesso codice del Login.java).
      */
@@ -94,7 +97,7 @@ public class AuthService {
             Amministratore admin = adminDAO.getAmministratoreByEmail(email);
             
             if (admin != null) {
-                // Prova prima PBKDF2, poi SHA (come nel progetto originale)
+                // Prova prima PBKDF2, poi SHA
                 boolean passwordValid = false;
                 try {
                     passwordValid = webengineering.framework.security.SecurityHelpers.checkPasswordHashPBKDF2(password, admin.getPassword());
@@ -109,7 +112,7 @@ public class AuthService {
                 
                 if (passwordValid) {
                     return new UserInfo(
-                        admin.getId(),  // ← Corretto: getId() invece di getKey()
+                        admin.getId(),  
                         admin.getEmail(),
                         "ADMIN",
                         admin.getNome() + " " + admin.getCognome()
@@ -131,7 +134,7 @@ public class AuthService {
             Operatore operatore = operatoreDAO.getOperatoreByEmail(email);
             
             if (operatore != null) {
-                // Prova prima PBKDF2, poi SHA (come nel progetto originale)
+                // Prova prima PBKDF2, poi SHA
                 boolean passwordValid = false;
                 try {
                     passwordValid = webengineering.framework.security.SecurityHelpers.checkPasswordHashPBKDF2(password, operatore.getPassword());
@@ -146,7 +149,7 @@ public class AuthService {
                 
                 if (passwordValid) {
                     return new UserInfo(
-                        operatore.getId(),  // ← Corretto: getId() invece di getKey()
+                        operatore.getId(), 
                         operatore.getEmail(),
                         "OPERATORE",
                         operatore.getNome() + " " + operatore.getCognome()
