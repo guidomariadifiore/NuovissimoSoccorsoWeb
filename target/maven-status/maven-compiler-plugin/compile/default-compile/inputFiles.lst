@@ -119,9 +119,13 @@ C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\we
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\model\TipoPatente.java
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\model\User.java
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\config\JerseyConfig.java
+C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\dto\RichiestaDTO.java
+C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\dto\RichiestaRequest.java
+C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\dto\RichiestaResponse.java
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\exception\AppExceptionMapper.java
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\exception\JacksonExceptionMapper.java
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\resources\AuthResource.java
+C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\resources\RichiesteResource.java
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\security\CORSFilter.java
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\security\JWTAuthenticationFilter.java
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\security\JWTHelper.java

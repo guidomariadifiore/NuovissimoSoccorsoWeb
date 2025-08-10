@@ -45,6 +45,7 @@ webengineering\nuovissimosoccorsoweb\model\impl\proxy\MezzoProxy.class
 webengineering\nuovissimosoccorsoweb\controller\AdminNuovoMaterialeController.class
 webengineering\nuovissimosoccorsoweb\dao\impl\MaterialeDAO_MySQL.class
 webengineering\nuovissimosoccorsoweb\dao\MaterialeDAO.class
+webengineering\nuovissimosoccorsoweb\rest\dto\RichiestaDTO.class
 webengineering\nuovissimosoccorsoweb\controller\RichiesteListController.class
 webengineering\nuovissimosoccorsoweb\dao\impl\PatenteDAO_MySQL.class
 webengineering\nuovissimosoccorsoweb\controller\AdminNuovoMaterialeController$ValidationResult.class
@@ -123,6 +124,7 @@ webengineering\nuovissimosoccorsoweb\controller\AdminMezziController.class
 webengineering\nuovissimosoccorsoweb\controller\OperatoreStoricoController$MissioneConDettagli.class
 webengineering\nuovissimosoccorsoweb\model\impl\proxy\MissioneUtilizzaMezzoProxy.class
 webengineering\nuovissimosoccorsoweb\controller\Login$UserInfo.class
+webengineering\nuovissimosoccorsoweb\rest\resources\RichiesteResource.class
 webengineering\nuovissimosoccorsoweb\model\AggiornaMateriale.class
 webengineering\framework\data\DataItem.class
 webengineering\nuovissimosoccorsoweb\model\InfoMissione.class
@@ -139,9 +141,11 @@ webengineering\nuovissimosoccorsoweb\dao\AbilitaDAO.class
 webengineering\nuovissimosoccorsoweb\util\RateLimiter$RateLimiterStats.class
 webengineering\framework\controller\AbstractBaseController.class
 webengineering\nuovissimosoccorsoweb\dao\impl\AmministratoreDAO_MySQL.class
+webengineering\nuovissimosoccorsoweb\rest\dto\RichiestaResponse.class
 webengineering\nuovissimosoccorsoweb\controller\AdminMaterialiController$MissioneConDettagli.class
 webengineering\nuovissimosoccorsoweb\rest\service\AuthService.class
 webengineering\nuovissimosoccorsoweb\model\impl\proxy\MaterialeProxy.class
 webengineering\nuovissimosoccorsoweb\dao\RichiestaSoccorsoDAO.class
 webengineering\nuovissimosoccorsoweb\model\impl\MaterialeImpl.class
+webengineering\nuovissimosoccorsoweb\rest\dto\RichiestaRequest.class
 webengineering\framework\result\FailureResult.class

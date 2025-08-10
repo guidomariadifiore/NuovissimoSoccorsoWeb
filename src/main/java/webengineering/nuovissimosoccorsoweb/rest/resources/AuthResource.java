@@ -95,7 +95,7 @@ public class AuthResource {
     @Secured
     public Response logout() {
         // Con JWT stateless, il logout è gestito lato client
-        // Il token viene semplicemente rimosso dal client
+        // Il token viene semplicemente rimosso dal client, NON è la cosa più sicura del mondo perché rimane valido fino alla sua scadenza naturale
         return Response.ok()
                 .entity(new LogoutResponse(true, "Logout effettuato con successo"))
                 .build();

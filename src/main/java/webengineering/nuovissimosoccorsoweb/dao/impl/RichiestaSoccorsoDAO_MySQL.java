@@ -150,31 +150,44 @@ public class RichiestaSoccorsoDAO_MySQL extends DAO implements RichiestaSoccorso
     }
 
 
-    @Override
-    public void storeRichiesta(RichiestaSoccorso richiesta) throws DataException {
-        try (PreparedStatement stmt = dataLayer.getConnection().prepareStatement(
-                "INSERT INTO richiesta_soccorso (stato, coordinate, indirizzo, descrizione, stringa, nome, foto, ip, email_s, nome_s, id_am) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
-            stmt.setString(1, richiesta.getStato());
-            stmt.setString(2, richiesta.getCoordinate());
-            stmt.setString(3, richiesta.getIndirizzo());
-            stmt.setString(4, richiesta.getDescrizione());
-            stmt.setString(5, richiesta.getStringa());
-            stmt.setString(6, richiesta.getNome());
-            stmt.setString(7, richiesta.getFoto());
-            stmt.setString(8, richiesta.getIp());
-            stmt.setString(9, richiesta.getEmailSegnalante());
-            stmt.setString(10, richiesta.getNomeSegnalante());
-            if (richiesta.getIdAmministratore() > 0) {
-                stmt.setInt(11, richiesta.getIdAmministratore());
-            } else {
-                stmt.setNull(11, Types.INTEGER);
-            }
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new DataException("Errore nel salvataggio richiesta", e);
+@Override
+public void storeRichiesta(RichiestaSoccorso richiesta) throws DataException {
+    try (PreparedStatement stmt = dataLayer.getConnection().prepareStatement(
+            "INSERT INTO richiesta_soccorso (stato, coordinate, indirizzo, descrizione, stringa, nome, foto, ip, email_s, nome_s, id_am) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            Statement.RETURN_GENERATED_KEYS)) {
+        
+        stmt.setString(1, richiesta.getStato());
+        stmt.setString(2, richiesta.getCoordinate());
+        stmt.setString(3, richiesta.getIndirizzo());
+        stmt.setString(4, richiesta.getDescrizione());
+        stmt.setString(5, richiesta.getStringa());
+        stmt.setString(6, richiesta.getNome());
+        stmt.setString(7, richiesta.getFoto());
+        stmt.setString(8, richiesta.getIp());
+        stmt.setString(9, richiesta.getEmailSegnalante());
+        stmt.setString(10, richiesta.getNomeSegnalante());
+        
+        if (richiesta.getIdAmministratore() > 0) {
+            stmt.setInt(11, richiesta.getIdAmministratore());
+        } else {
+            stmt.setNull(11, Types.INTEGER);
         }
+        
+        int rowsAffected = stmt.executeUpdate();
+        
+        // Recupera l'ID generato automaticamente
+        if (rowsAffected > 0) {
+            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    richiesta.setCodice(generatedKeys.getInt(1));
+                }
+            }
+        }
+        
+    } catch (SQLException e) {
+        throw new DataException("Errore nel salvataggio richiesta", e);
     }
-
+}
     @Override
     public void deleteRichiesta(int codice) throws DataException {
         try (PreparedStatement stmt = dataLayer.getConnection().prepareStatement(
