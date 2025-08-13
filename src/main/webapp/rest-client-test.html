@@ -138,6 +138,58 @@
                     grid-template-columns: 1fr;
                 }
             }
+             .button-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin: 15px 0;
+    }
+    
+    .button-row button {
+        flex: 1;
+        min-width: 150px;
+        padding: 12px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    
+    /* Pulsante convalida verde */
+    .button-row button[style*="background-color: #28a745"] {
+        color: white;
+    }
+    
+    .button-row button[style*="background-color: #28a745"]:hover {
+        background-color: #218838 !important;
+        transform: translateY(-2px);
+    }
+    
+    /* Stili per risposte con warning */
+    .response-area.warning {
+        background-color: #fff3cd;
+        border-color: #ffeaa7;
+        color: #856404;
+    }
+    
+    /* Miglioramento per i form a due colonne */
+    .two-column {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin: 15px 0;
+    }
+    
+    @media (max-width: 768px) {
+        .two-column {
+            grid-template-columns: 1fr;
+        }
+        
+        .button-row {
+            flex-direction: column;
+        }
+    }
         </style>
     </head>
     <body>
@@ -270,6 +322,44 @@
                 Lista delle richieste apparirà qui...
             </div>
         </div>
+<!-- Sezione da aggiungere alla pagina rest-client-test.html dopo la sezione Inserimento Richiesta -->
+
+        <!-- Sezione 5: Convalida Richiesta -->
+        <div class="section">
+            <h2>✅ 5. Convalida Richiesta di Soccorso</h2>
+            <p>
+                <em>Test dell'endpoint di convalida: POST /api/richieste/{id}/convalida?token=...</em><br>
+                <strong>Nota:</strong> Questo endpoint NON richiede autenticazione (il link è pubblico nell'email).
+            </p>
+
+            <div class="two-column">
+                <div>
+                    <div class="form-group">
+                        <label for="convalidaId">ID Richiesta:</label>
+                        <input type="number" id="convalidaId" placeholder="Es: 123" min="1" 
+                               style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                </div>
+                <div>
+                    <div class="form-group">
+                        <label for="convalidaToken">Token di Convalida:</label>
+                        <input type="text" id="convalidaToken" placeholder="Es: abc123def456..." 
+                               style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-row">
+                <button onclick="doConvalida()" style="background-color: #28a745;">✅ Convalida Richiesta</button>
+                <button onclick="fillConvalidaExample()">📋 Esempio Dati</button>
+                <button onclick="clearConvalidaForm()">🧹 Pulisci Form</button>
+            </div>
+
+            <div class="response-area" id="convalidaResponse">
+                Risultato della convalida apparirà qui...
+            </div>
+        </div>
+
 
         <!-- Sezione 6: Lista Operatori -->
         <div class="section">
@@ -476,11 +566,11 @@
                 }
             }
 
-            function showResponse(elementId, message, type = 'info') {
-                const element = document.getElementById(elementId);
-                element.textContent = message;
-                element.className = `response-area ${type}`;
-            }
+           function showResponse(elementId, message, type = 'info') {
+        const element = document.getElementById(elementId);
+        element.textContent = message;
+        element.className = `response-area ${type}`;
+    }
 
             function clearAllResponses() {
                 const responseAreas = document.querySelectorAll('.response-area');
@@ -603,13 +693,121 @@
 
             // Inizializzazione
             document.addEventListener('DOMContentLoaded', function () {
-                updateAuthStatus(false);
-                showResponse('authResponse', 'Pronto per il test di autenticazione...');
-                showResponse('richiestaResponse', 'Pronto per il test di inserimento richiesta...');
-                showResponse('listaResponse', 'Pronto per il test di lista richieste...');
-                showResponse('operatoriResponse', 'Pronto per il test di lista operatori...');
-                showResponse('testResponse', 'Pronto per i test di connettività...');
-            });
+        updateAuthStatus(false);
+        showResponse('authResponse', 'Pronto per il test di autenticazione...');
+        showResponse('richiestaResponse', 'Pronto per il test di inserimento richiesta...');
+        showResponse('convalidaResponse', 'Pronto per il test di convalida richiesta...');
+        showResponse('listaResponse', 'Pronto per il test di lista richieste...');
+        showResponse('operatoriResponse', 'Pronto per il test di lista operatori...');
+        showResponse('testResponse', 'Pronto per i test di connettività...');
+    });
+
+          
+// Aggiungi queste funzioni al JavaScript esistente della pagina rest-client-test.html
+
+            // Funzione per effettuare la convalida
+            async function doConvalida() {
+                const id = document.getElementById('convalidaId').value;
+                const token = document.getElementById('convalidaToken').value;
+
+                if (!id || !token) {
+                    showResponse('convalidaResponse', 'Inserisci sia ID che token di convalida', 'error');
+                    return;
+                }
+
+                if (id <= 0) {
+                    showResponse('convalidaResponse', 'ID richiesta deve essere maggiore di 0', 'error');
+                    return;
+                }
+
+                if (token.trim().length < 10) {
+                    showResponse('convalidaResponse', 'Token troppo corto. Verifica di aver inserito il token completo.', 'error');
+                    return;
+                }
+
+                showResponse('convalidaResponse', 'Convalida in corso...', 'info');
+
+                try {
+                    // NOTA: Questo endpoint NON usa apiCall() perché non richiede autenticazione
+                    const url = `${API_BASE_URL}/richieste/${id}/convalida?token=${encodeURIComponent(token)}`;
+                    
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        const richiesta = data.richiesta;
+                        const message = `✅ ${data.message}\n\n` +
+                                      `Dettagli richiesta convalidata:\n` +
+                                      `• ID: ${richiesta.codice}\n` +
+                                      `• Stato: ${richiesta.stato}\n` +
+                                      `• Indirizzo: ${richiesta.indirizzo}\n` +
+                                      `• Segnalante: ${richiesta.nomeSegnalante}\n` +
+                                      `• Email: ${richiesta.emailSegnalante}\n` +
+                                      `• Descrizione: ${richiesta.descrizione.substring(0, 100)}${richiesta.descrizione.length > 100 ? '...' : ''}`;
+                        
+                        showResponse('convalidaResponse', message, 'success');
+                    } else {
+                        // Gestione errori specifici
+                        let errorMessage = data.message || 'Errore sconosciuto durante la convalida';
+                        
+                        if (response.status === 400) {
+                            if (data.message && data.message.includes('già')) {
+                                errorMessage = `⚠️ ${data.message}`;
+                                showResponse('convalidaResponse', errorMessage, 'warning');
+                                return;
+                            }
+                        } else if (response.status === 404) {
+                            errorMessage = '❌ Richiesta non trovata. Verifica l\'ID inserito.';
+                        } else if (response.status === 500) {
+                            errorMessage = '❌ Errore interno del server. Riprova più tardi.';
+                        }
+                        
+                        showResponse('convalidaResponse', errorMessage, 'error');
+                    }
+                } catch (error) {
+                    showResponse('convalidaResponse', `❌ Errore di rete: ${error.message}`, 'error');
+                }
+            }
+
+            // Funzione per riempire con dati di esempio
+            function fillConvalidaExample() {
+                document.getElementById('convalidaId').value = "1";
+                document.getElementById('convalidaToken').value = "exemplo-token-123456789abcdef";
+                
+                showResponse('convalidaResponse', 
+                    '📋 Form riempito con dati di esempio.\n\n' +
+                    '⚠️ IMPORTANTE: Questi sono dati di esempio!\n' +
+                    '• L\'ID e il token devono corrispondere a una richiesta reale\n' +
+                    '• Il token viene inviato via email al segnalante\n' +
+                    '• La richiesta deve essere in stato PENDING_VALIDATION', 
+                    'info');
+            }
+
+            // Funzione per pulire il form di convalida
+            function clearConvalidaForm() {
+                document.getElementById('convalidaId').value = "";
+                document.getElementById('convalidaToken').value = "";
+                showResponse('convalidaResponse', 'Form di convalida pulito. Pronto per nuovi dati...', 'info');
+            }
+
+            // Aggiorna anche la funzione clearAllResponses() per includere la nuova sezione
+            function clearAllResponses() {
+                const responseAreas = ['authResponse', 'richiestaResponse', 'convalidaResponse', 'listaResponse', 'operatoriResponse', 'testResponse'];
+                responseAreas.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.textContent = 'Sezione pulita...';
+                        element.className = 'response-area';
+                    }
+                });
+            }
         </script>
     </body>
 </html>
