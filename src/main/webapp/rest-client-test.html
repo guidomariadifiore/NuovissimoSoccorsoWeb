@@ -527,7 +527,7 @@
                     return;
                 }
 
-                // Prepara il payload con tutti i campi (SENZA telefono)
+                // Prepara il payload con tutti i campi
                 const richiestaData = {
                     descrizione: descrizione.trim(),
                     indirizzo: indirizzo.trim(),
@@ -541,12 +541,11 @@
                 try {
                     showResponse('richiestaResponse', '🔄 Invio richiesta di soccorso...', 'info');
 
-                    // CHIAMATA REALE all'endpoint REST
+                    // Chiamata all'endpoint REST
                     const response = await fetch(`${API_BASE_URL}/richieste`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
-                                    // NON serve Authorization header - nessuna autenticazione richiesta!
                         },
                         body: JSON.stringify(richiestaData)
                     });

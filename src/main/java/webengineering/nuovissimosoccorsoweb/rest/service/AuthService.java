@@ -1,7 +1,7 @@
 package webengineering.nuovissimosoccorsoweb.rest.service;
 
 import webengineering.nuovissimosoccorsoweb.SoccorsoDataLayer;
-import webengineering.nuovissimosoccorsoweb.model.*;
+import webengineering.nuovissimosoccorsoweb.service.AuthenticationService;
 import webengineering.framework.data.DataException;
 
 import javax.naming.InitialContext;
@@ -10,18 +10,42 @@ import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import webengineering.nuovissimosoccorsoweb.dao.AmministratoreDAO;
-import webengineering.nuovissimosoccorsoweb.dao.OperatoreDAO;
 
 /**
- * Servizio di autenticazione che integra con il sistema MVC esistente.
- * Usa lo stesso DataLayer e logica di autenticazione del progetto principale.
- * 
+ * AuthService REST - ora usa il servizio condiviso invece di duplicare codice.
  */
 public class AuthService {
     
     private static final Logger logger = Logger.getLogger(AuthService.class.getName());
     private static AuthService instance;
+    
+    // Adapter class per compatibilità con il codice REST esistente
+    public static class UserInfo {
+        private final int id;
+        private final String email;
+        private final String role;
+        private final String fullName;
+        
+        public UserInfo(int id, String email, String role, String fullName) {
+            this.id = id;
+            this.email = email;
+            this.role = role;
+            this.fullName = fullName;
+        }
+        
+        // Costruttore da AuthenticationService.UserInfo
+        public UserInfo(AuthenticationService.UserInfo authInfo) {
+            this.id = authInfo.getId();
+            this.email = authInfo.getEmail();
+            this.role = authInfo.getRole();
+            this.fullName = authInfo.getFullName();
+        }
+        
+        public int getId() { return id; }
+        public String getEmail() { return email; }
+        public String getRole() { return role; }
+        public String getFullName() { return fullName; }
+    }
     
     private AuthService() {}
     
@@ -33,32 +57,22 @@ public class AuthService {
     }
     
     /**
-     * Autentica un utente usando lo stesso sistema del progetto MVC.
-     * 
-     * @param email Email dell'utente
-     * @param password Password in chiaro
-     * @return UserInfo se autenticazione riuscita, null altrimenti
+     * Autentica un utente - codice condiviso con MVC
      */
     public UserInfo authenticateUser(String email, String password) {
         SoccorsoDataLayer dataLayer = null;
         
         try {
-            // Ottieni DataSource (stesso modo del progetto MVC)
             dataLayer = createDataLayer();
             
-            // Autenticazione amministratori
-            UserInfo adminInfo = authenticateAdmin(email, password, dataLayer);
-            if (adminInfo != null) {
-                return adminInfo;
+            AuthenticationService.UserInfo authResult = 
+                AuthenticationService.authenticateUser(email, password, dataLayer);
+            
+            if (authResult != null) {
+                // Converte al formato REST UserInfo
+                return new UserInfo(authResult);
             }
             
-            // Autenticazione operatori
-            UserInfo operatorInfo = authenticateOperator(email, password, dataLayer);
-            if (operatorInfo != null) {
-                return operatorInfo;
-            }
-            
-            // Nessuna autenticazione riuscita
             return null;
             
         } catch (Exception ex) {
@@ -76,112 +90,13 @@ public class AuthService {
     }
     
     /**
-     * Crea DataLayer.
+     * Crea DataLayer (metodo helper).
      */
     private SoccorsoDataLayer createDataLayer() throws NamingException, SQLException, DataException {
         InitialContext ctx = new InitialContext();
         DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/soccorso");
         SoccorsoDataLayer dataLayer = new SoccorsoDataLayer(ds);
-
-        // Inizializza i DAO
         dataLayer.init();
-
         return dataLayer;
-    }    
-    /**
-     * Autentica come amministratore (stesso codice del Login.java).
-     */
-    private UserInfo authenticateAdmin(String email, String password, SoccorsoDataLayer dataLayer) {
-        try {
-            AmministratoreDAO adminDAO = dataLayer.getAmministratoreDAO();
-            Amministratore admin = adminDAO.getAmministratoreByEmail(email);
-            
-            if (admin != null) {
-                // Prova prima PBKDF2, poi SHA
-                boolean passwordValid = false;
-                try {
-                    passwordValid = webengineering.framework.security.SecurityHelpers.checkPasswordHashPBKDF2(password, admin.getPassword());
-                } catch (Exception e) {
-                    // Se PBKDF2 fallisce, prova SHA
-                    try {
-                        passwordValid = webengineering.framework.security.SecurityHelpers.checkPasswordHashSHA(password, admin.getPassword());
-                    } catch (Exception e2) {
-                        logger.log(Level.WARNING, "Errore verifica password admin: " + e2.getMessage());
-                    }
-                }
-                
-                if (passwordValid) {
-                    return new UserInfo(
-                        admin.getId(),  
-                        admin.getEmail(),
-                        "ADMIN",
-                        admin.getNome() + " " + admin.getCognome()
-                    );
-                }
-            }
-        } catch (DataException ex) {
-            logger.log(Level.WARNING, "Errore autenticazione admin: " + ex.getMessage(), ex);
-        }
-        return null;
-    }
-    
-    /**
-     * Autentica come operatore (stesso codice del Login.java).
-     */
-    private UserInfo authenticateOperator(String email, String password, SoccorsoDataLayer dataLayer) {
-        try {
-            OperatoreDAO operatoreDAO = dataLayer.getOperatoreDAO();
-            Operatore operatore = operatoreDAO.getOperatoreByEmail(email);
-            
-            if (operatore != null) {
-                // Prova prima PBKDF2, poi SHA
-                boolean passwordValid = false;
-                try {
-                    passwordValid = webengineering.framework.security.SecurityHelpers.checkPasswordHashPBKDF2(password, operatore.getPassword());
-                } catch (Exception e) {
-                    // Se PBKDF2 fallisce, prova SHA
-                    try {
-                        passwordValid = webengineering.framework.security.SecurityHelpers.checkPasswordHashSHA(password, operatore.getPassword());
-                    } catch (Exception e2) {
-                        logger.log(Level.WARNING, "Errore verifica password operatore: " + e2.getMessage());
-                    }
-                }
-                
-                if (passwordValid) {
-                    return new UserInfo(
-                        operatore.getId(), 
-                        operatore.getEmail(),
-                        "OPERATORE",
-                        operatore.getNome() + " " + operatore.getCognome()
-                    );
-                }
-            }
-        } catch (DataException ex) {
-            logger.log(Level.WARNING, "Errore autenticazione operatore: " + ex.getMessage(), ex);
-        }
-        return null;
-    }
-    
-    /**
-     * Classe per le informazioni utente (compatibile con AuthResource).
-     */
-    public static class UserInfo {
-        private final int id;
-        private final String email;
-        private final String role;
-        private final String fullName;
-        
-        public UserInfo(int id, String email, String role, String fullName) {
-            this.id = id;
-            this.email = email;
-            this.role = role;
-            this.fullName = fullName;
-        }
-        
-        // Getter
-        public int getId() { return id; }
-        public String getEmail() { return email; }
-        public String getRole() { return role; }
-        public String getFullName() { return fullName; }
     }
 }
