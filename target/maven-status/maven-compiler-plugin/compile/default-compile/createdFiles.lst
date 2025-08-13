@@ -99,6 +99,8 @@ webengineering\nuovissimosoccorsoweb\model\impl\InfoMissioneImpl.class
 webengineering\nuovissimosoccorsoweb\model\impl\proxy\AbilitaProxy.class
 webengineering\nuovissimosoccorsoweb\model\OperatoreHaAbilita.class
 webengineering\framework\result\SplitSlashesFmkExt.class
+webengineering\nuovissimosoccorsoweb\rest\resources\RichiesteResource$ConvalidaResponse.class
+webengineering\nuovissimosoccorsoweb\service\ConvalidaService$ConvalidaResult.class
 webengineering\framework\result\StandardDataModelFiller.class
 webengineering\nuovissimosoccorsoweb\model\impl\MissioneUtilizzaMezzoImpl.class
 webengineering\nuovissimosoccorsoweb\model\PartecipazioneSquadra.class
@@ -137,6 +139,7 @@ webengineering\nuovissimosoccorsoweb\model\RichiestaSoccorso.class
 webengineering\nuovissimosoccorsoweb\model\impl\OperatoreImpl.class
 webengineering\nuovissimosoccorsoweb\model\Operatore.class
 webengineering\nuovissimosoccorsoweb\model\Patenti.class
+webengineering\nuovissimosoccorsoweb\rest\dto\ConvalidaResponse.class
 webengineering\nuovissimosoccorsoweb\model\Missione.class
 webengineering\nuovissimosoccorsoweb\model\impl\RichiestaSoccorsoImpl.class
 webengineering\nuovissimosoccorsoweb\controller\ConfermaRichiesta.class
@@ -148,6 +151,7 @@ webengineering\framework\controller\AbstractBaseController.class
 webengineering\nuovissimosoccorsoweb\dao\impl\AmministratoreDAO_MySQL.class
 webengineering\nuovissimosoccorsoweb\rest\dto\RichiestaResponse.class
 webengineering\nuovissimosoccorsoweb\controller\AdminMaterialiController$MissioneConDettagli.class
+webengineering\nuovissimosoccorsoweb\service\ConvalidaService.class
 webengineering\nuovissimosoccorsoweb\rest\service\AuthService.class
 webengineering\nuovissimosoccorsoweb\model\impl\proxy\MaterialeProxy.class
 webengineering\nuovissimosoccorsoweb\dao\RichiestaSoccorsoDAO.class

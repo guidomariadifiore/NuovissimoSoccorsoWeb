@@ -15,6 +15,7 @@ import javax.naming.InitialContext;
 import javax.sql.DataSource;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import webengineering.nuovissimosoccorsoweb.service.ConvalidaService;
 
 /**
  * Resource REST per la gestione delle richieste di soccorso.
@@ -166,4 +167,142 @@ public class RichiesteResource {
         dto.setIdAmministratore(richiesta.getIdAmministratore() > 0 ? richiesta.getIdAmministratore() : null);
         return dto;
     }
+    // Aggiungi questo metodo in RichiesteResource.java
+
+/**
+ * Endpoint per convalidare una richiesta di soccorso.
+ * POST /api/richieste/{id}/convalida?token=...
+ * 
+ * NON richiede autenticazione (il link è pubblico nell'email)
+ * 
+ * @param id ID della richiesta da convalidare
+ * @param token Token di convalida (dalla email)
+ * @return Risultato della convalida
+ */
+@POST
+@Path("{id}/convalida")
+public Response convalidaRichiesta(@PathParam("id") int id, @QueryParam("token") String token) {
+    SoccorsoDataLayer dataLayer = null;
+    
+    try {
+        logger.info("=== CONVALIDA RICHIESTA SOCCORSO ===");
+        logger.info("ID: " + id + ", Token: " + (token != null ? token.substring(0, Math.min(token.length(), 10)) + "..." : "null"));
+        
+        // Validazione input base
+        if (token == null || token.trim().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new ConvalidaResponse(false, "Token di convalida mancante", null))
+                    .build();
+        }
+        
+        if (id <= 0) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new ConvalidaResponse(false, "ID richiesta non valido", null))
+                    .build();
+        }
+        
+        // Crea DataLayer
+        dataLayer = createDataLayer();
+        
+        // USA IL SERVICE CONDIVISO - zero duplicazione!
+        ConvalidaService.ConvalidaResult result = 
+            ConvalidaService.convalidaRichiestaById(id, token, dataLayer);
+        
+        if (result.isSuccess()) {
+            // Successo - richiesta convalidata
+            ConvalidaResponse response = new ConvalidaResponse(
+                true,
+                result.getMessage(),
+                mapToRichiestaDTO(result.getRichiesta())
+            );
+            
+            return Response.ok(response).build();
+            
+        } else if ("warning".equals(result.getStatus())) {
+            // Warning - già convalidata (non è un errore grave)
+            ConvalidaResponse response = new ConvalidaResponse(
+                true, // success=true perché la richiesta è comunque convalidata
+                result.getMessage(),
+                result.getRichiesta() != null ? mapToRichiestaDTO(result.getRichiesta()) : null
+            );
+            
+            return Response.ok(response).build();
+            
+        } else {
+            // Errore - determina status HTTP appropriato
+            Response.Status status = getHttpStatusFromConvalidaError(result.getErrorCode());
+            
+            ConvalidaResponse response = new ConvalidaResponse(
+                false,
+                result.getMessage(),
+                null
+            );
+            
+            return Response.status(status).entity(response).build();
+        }
+        
+    } catch (Exception e) {
+        logger.log(Level.SEVERE, "Errore nell'endpoint convalida richiesta", e);
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(new ConvalidaResponse(false, "Errore interno del server", null))
+                .build();
+    } finally {
+        if (dataLayer != null) {
+            try {
+                dataLayer.destroy();
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Errore chiusura DataLayer", e);
+            }
+        }
+    }
+}
+
+/**
+ * Mappa errori di convalida a status HTTP.
+ */
+private Response.Status getHttpStatusFromConvalidaError(String errorCode) {
+    if (errorCode == null) return Response.Status.INTERNAL_SERVER_ERROR;
+    
+    switch (errorCode) {
+        case "INVALID_TOKEN":
+        case "ID_MISMATCH":
+        case "INVALID_STATE":
+            return Response.Status.BAD_REQUEST;
+        case "TOKEN_NOT_FOUND":
+            return Response.Status.NOT_FOUND;
+        case "DATABASE_ERROR":
+        case "INTERNAL_ERROR":
+        default:
+            return Response.Status.INTERNAL_SERVER_ERROR;
+    }
+}
+
+// ========== DTO per la convalida ==========
+
+/**
+ * DTO per la risposta di convalida.
+ */
+public static class ConvalidaResponse {
+    private boolean success;
+    private String message;
+    private RichiestaDTO richiesta;
+    
+    public ConvalidaResponse() {}
+    
+    public ConvalidaResponse(boolean success, String message, RichiestaDTO richiesta) {
+        this.success = success;
+        this.message = message;
+        this.richiesta = richiesta;
+    }
+    
+    // Getter e Setter
+    public boolean isSuccess() { return success; }
+    public void setSuccess(boolean success) { this.success = success; }
+    
+    public String getMessage() { return message; }
+    public void setMessage(String message) { this.message = message; }
+    
+    public RichiestaDTO getRichiesta() { return richiesta; }
+    public void setRichiesta(RichiestaDTO richiesta) { this.richiesta = richiesta; }
+}
 }

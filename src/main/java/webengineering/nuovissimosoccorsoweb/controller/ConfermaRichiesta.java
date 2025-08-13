@@ -10,74 +10,58 @@ import webengineering.framework.result.TemplateManagerException;
 import webengineering.nuovissimosoccorsoweb.SoccorsoDataLayer;
 import webengineering.framework.data.DataException;
 import webengineering.nuovissimosoccorsoweb.model.RichiestaSoccorso;
+import webengineering.nuovissimosoccorsoweb.service.ConvalidaService;
 
 public class ConfermaRichiesta extends SoccorsoBaseController {
     
     private static final Logger logger = Logger.getLogger(ConfermaRichiesta.class.getName());
     
     @Override
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException {
-        
-        String token = request.getParameter("token");
-        
-        if (token == null || token.trim().isEmpty()) {
-            // Token mancante - mostra errore
-            showConfirmationResult(request, response, "error", "Token di conferma mancante o non valido.", null);
+
+
+protected void processRequest(HttpServletRequest request, HttpServletResponse response) 
+        throws ServletException {
+    
+    String token = request.getParameter("token");
+    
+    if (token == null || token.trim().isEmpty()) {
+        // Token mancante - mostra errore
+        showConfirmationResult(request, response, "error", "Token di conferma mancante o non valido.", null);
+        return;
+    }
+    
+    try {
+        // Ottieni il DataLayer
+        SoccorsoDataLayer dataLayer = (SoccorsoDataLayer) request.getAttribute("datalayer");
+        if (dataLayer == null) {
+            logger.severe("DataLayer non disponibile nella request");
+            showConfirmationResult(request, response, "error", "Errore di sistema. Riprova più tardi.", null);
             return;
         }
         
-        try {
-            // Ottieni il DataLayer
-            SoccorsoDataLayer dataLayer = (SoccorsoDataLayer) request.getAttribute("datalayer");
-            if (dataLayer == null) {
-                logger.severe("DataLayer non disponibile nella request");
-                showConfirmationResult(request, response, "error", "Errore di sistema. Riprova più tardi.", null);
-                return;
-            }
-            
-            // Cerca la richiesta per token
-            RichiestaSoccorso richiesta = dataLayer.getRichiestaSoccorsoDAO().getRichiestaByStringaValidazione(token.trim());
-            
-            if (richiesta == null) {
-                // Token non trovato
-                logger.warning("Tentativo di conferma con token non valido: " + token);
-                showConfirmationResult(request, response, "error", "Token di conferma non valido o scaduto.", null);
-                return;
-            }
-            
-            // Verifica se la richiesta è già stata convalidata
-            if ("Convalidata".equals(richiesta.getStato())) {
-                logger.info("Richiesta già convalidata - Token: " + token + ", Codice: " + richiesta.getCodice());
-                showConfirmationResult(request, response, "warning", "Questa richiesta è già stata confermata in precedenza.", richiesta);
-                return;
-            }
-            
-            // Verifica se la richiesta è nello stato corretto per essere convalidata
-            if (!"Inviata".equals(richiesta.getStato())) {
-                logger.warning("Tentativo di conferma richiesta in stato non valido: " + richiesta.getStato() + " - Token: " + token);
-                showConfirmationResult(request, response, "error", "Questa richiesta non può essere confermata (stato: " + richiesta.getStato() + ").", richiesta);
-                return;
-            }
-            
-            // Aggiorna lo stato della richiesta
-            updateRichiestaStato(dataLayer, richiesta.getCodice(), "Convalidata");
-            
-            // Log dell'operazione
-            logger.info("Richiesta confermata con successo - Codice: " + richiesta.getCodice() + 
-                       ", Token: " + token + ", Segnalante: " + richiesta.getNomeSegnalante());
-            
-            // Mostra successo
-            showConfirmationResult(request, response, "success", "Richiesta confermata con successo!", richiesta);
-            
-        } catch (DataException ex) {
-            logger.log(Level.SEVERE, "Errore database durante conferma richiesta", ex);
-            showConfirmationResult(request, response, "error", "Errore nel database. Riprova più tardi.", null);
-        } catch (Exception ex) {
-            logger.log(Level.SEVERE, "Errore generico durante conferma richiesta", ex);
-            showConfirmationResult(request, response, "error", "Errore di sistema. Riprova più tardi.", null);
+        // USA IL SERVICE CONDIVISO - zero duplicazione!
+        ConvalidaService.ConvalidaResult result = 
+            ConvalidaService.convalidaRichiestaByToken(token.trim(), dataLayer);
+        
+        if (result.isSuccess()) {
+            // Successo - richiesta convalidata
+            showConfirmationResult(request, response, "success", result.getMessage(), result.getRichiesta());
+        } else if ("warning".equals(result.getStatus())) {
+            // Warning - già convalidata
+            showConfirmationResult(request, response, "warning", result.getMessage(), result.getRichiesta());
+        } else {
+            // Errore
+            showConfirmationResult(request, response, "error", result.getMessage(), result.getRichiesta());
         }
+        
+    } catch (Exception ex) {
+        logger.log(Level.SEVERE, "Errore generico durante conferma richiesta", ex);
+        showConfirmationResult(request, response, "error", "Errore di sistema. Riprova più tardi.", null);
     }
+}
+
+// Aggiungi questo import all'inizio del file:
+// import webengineering.nuovissimosoccorsoweb.service.ConvalidaService;
     
     // Aggiorna lo stato della richiesta nel database
     private void updateRichiestaStato(SoccorsoDataLayer dataLayer, int codiceRichiesta, String nuovoStato) 
