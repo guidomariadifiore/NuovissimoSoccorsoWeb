@@ -54,8 +54,7 @@ public class RichiestaSoccorsoDAO_MySQL extends DAO implements RichiestaSoccorso
     @Override
     public List<RichiestaSoccorso> getAllRichieste() throws DataException {
         List<RichiestaSoccorso> result = new ArrayList<>();
-        try (Statement stmt = dataLayer.getConnection().createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT * FROM richiesta_soccorso")) {
+        try (Statement stmt = dataLayer.getConnection().createStatement(); ResultSet rs = stmt.executeQuery("SELECT * FROM richiesta_soccorso")) {
             while (rs.next()) {
                 result.add(makeRichiesta(rs));
             }
@@ -131,7 +130,7 @@ public class RichiestaSoccorsoDAO_MySQL extends DAO implements RichiestaSoccorso
         }
         return r;
     }
-    
+
     @Override
     public void updateStato(int codice, String nuovoStato) throws DataException {
         try (PreparedStatement stmt = dataLayer.getConnection().prepareStatement(
@@ -149,45 +148,45 @@ public class RichiestaSoccorsoDAO_MySQL extends DAO implements RichiestaSoccorso
         }
     }
 
+    @Override
+    public void storeRichiesta(RichiestaSoccorso richiesta) throws DataException {
+        try (PreparedStatement stmt = dataLayer.getConnection().prepareStatement(
+                "INSERT INTO richiesta_soccorso (stato, coordinate, indirizzo, descrizione, stringa, nome, foto, ip, email_s, nome_s, id_am) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                Statement.RETURN_GENERATED_KEYS)) {
 
-@Override
-public void storeRichiesta(RichiestaSoccorso richiesta) throws DataException {
-    try (PreparedStatement stmt = dataLayer.getConnection().prepareStatement(
-            "INSERT INTO richiesta_soccorso (stato, coordinate, indirizzo, descrizione, stringa, nome, foto, ip, email_s, nome_s, id_am) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            Statement.RETURN_GENERATED_KEYS)) {
-        
-        stmt.setString(1, richiesta.getStato());
-        stmt.setString(2, richiesta.getCoordinate());
-        stmt.setString(3, richiesta.getIndirizzo());
-        stmt.setString(4, richiesta.getDescrizione());
-        stmt.setString(5, richiesta.getStringa());
-        stmt.setString(6, richiesta.getNome());
-        stmt.setString(7, richiesta.getFoto());
-        stmt.setString(8, richiesta.getIp());
-        stmt.setString(9, richiesta.getEmailSegnalante());
-        stmt.setString(10, richiesta.getNomeSegnalante());
-        
-        if (richiesta.getIdAmministratore() > 0) {
-            stmt.setInt(11, richiesta.getIdAmministratore());
-        } else {
-            stmt.setNull(11, Types.INTEGER);
-        }
-        
-        int rowsAffected = stmt.executeUpdate();
-        
-        // Recupera l'ID generato automaticamente
-        if (rowsAffected > 0) {
-            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    richiesta.setCodice(generatedKeys.getInt(1));
+            stmt.setString(1, richiesta.getStato());
+            stmt.setString(2, richiesta.getCoordinate());
+            stmt.setString(3, richiesta.getIndirizzo());
+            stmt.setString(4, richiesta.getDescrizione());
+            stmt.setString(5, richiesta.getStringa());
+            stmt.setString(6, richiesta.getNome());
+            stmt.setString(7, richiesta.getFoto());
+            stmt.setString(8, richiesta.getIp());
+            stmt.setString(9, richiesta.getEmailSegnalante());
+            stmt.setString(10, richiesta.getNomeSegnalante());
+
+            if (richiesta.getIdAmministratore() > 0) {
+                stmt.setInt(11, richiesta.getIdAmministratore());
+            } else {
+                stmt.setNull(11, Types.INTEGER);
+            }
+
+            int rowsAffected = stmt.executeUpdate();
+
+            // Recupera l'ID generato automaticamente
+            if (rowsAffected > 0) {
+                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        richiesta.setCodice(generatedKeys.getInt(1));
+                    }
                 }
             }
+
+        } catch (SQLException e) {
+            throw new DataException("Errore nel salvataggio richiesta", e);
         }
-        
-    } catch (SQLException e) {
-        throw new DataException("Errore nel salvataggio richiesta", e);
     }
-}
+
     @Override
     public void deleteRichiesta(int codice) throws DataException {
         try (PreparedStatement stmt = dataLayer.getConnection().prepareStatement(
@@ -197,5 +196,116 @@ public void storeRichiesta(RichiestaSoccorso richiesta) throws DataException {
         } catch (SQLException e) {
             throw new DataException("Errore nell'eliminazione richiesta", e);
         }
+    }
+
+    @Override
+    public List<RichiestaSoccorso> getRichiesteWithPagination(String stato, int offset, int limit) throws DataException {
+        List<RichiestaSoccorso> result = new ArrayList<>();
+
+        String sql;
+        if (stato != null && !stato.trim().isEmpty()) {
+            sql = "SELECT * FROM richiesta_soccorso WHERE stato = ? ORDER BY codice DESC LIMIT ? OFFSET ?";
+        } else {
+            sql = "SELECT * FROM richiesta_soccorso ORDER BY codice DESC LIMIT ? OFFSET ?";
+        }
+
+        try (PreparedStatement stmt = dataLayer.getConnection().prepareStatement(sql)) {
+            int paramIndex = 1;
+
+            if (stato != null && !stato.trim().isEmpty()) {
+                stmt.setString(paramIndex++, stato);
+            }
+            stmt.setInt(paramIndex++, limit);
+            stmt.setInt(paramIndex, offset);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    result.add(makeRichiesta(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataException("Errore nel recupero richieste con paginazione", e);
+        }
+
+        return result;
+    }
+
+    @Override
+    public int countRichiesteByStato(String stato) throws DataException {
+        String sql;
+        if (stato != null && !stato.trim().isEmpty()) {
+            sql = "SELECT COUNT(*) FROM richiesta_soccorso WHERE stato = ?";
+        } else {
+            sql = "SELECT COUNT(*) FROM richiesta_soccorso";
+        }
+
+        try (PreparedStatement stmt = dataLayer.getConnection().prepareStatement(sql)) {
+            if (stato != null && !stato.trim().isEmpty()) {
+                stmt.setString(1, stato);
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataException("Errore nel conteggio richieste per stato", e);
+        }
+
+        return 0;
+    }
+
+    @Override
+    public List<RichiestaSoccorso> getRichiesteChiuseByLivelloSuccesso(int maxLivelloSuccesso, int offset, int limit) throws DataException {
+        List<RichiestaSoccorso> result = new ArrayList<>();
+
+        // Query che fa JOIN con info_missione per ottenere il livello di successo
+        String sql = """
+        SELECT r.* FROM richiesta_soccorso r 
+        INNER JOIN info_missione im ON r.codice = im.codice_missione 
+        WHERE r.stato = 'Chiusa' AND im.livello_successo < ? 
+        ORDER BY r.codice DESC 
+        LIMIT ? OFFSET ?
+        """;
+
+        try (PreparedStatement stmt = dataLayer.getConnection().prepareStatement(sql)) {
+            stmt.setInt(1, maxLivelloSuccesso);
+            stmt.setInt(2, limit);
+            stmt.setInt(3, offset);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    result.add(makeRichiesta(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataException("Errore nel recupero richieste chiuse per livello successo", e);
+        }
+
+        return result;
+    }
+
+    @Override
+    public int countRichiesteChiuseByLivelloSuccesso(int maxLivelloSuccesso) throws DataException {
+        String sql = """
+        SELECT COUNT(*) FROM richiesta_soccorso r 
+        INNER JOIN info_missione im ON r.codice = im.codice_missione 
+        WHERE r.stato = 'Chiusa' AND im.livello_successo < ?
+        """;
+
+        try (PreparedStatement stmt = dataLayer.getConnection().prepareStatement(sql)) {
+            stmt.setInt(1, maxLivelloSuccesso);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataException("Errore nel conteggio richieste chiuse per livello successo", e);
+        }
+
+        return 0;
     }
 }

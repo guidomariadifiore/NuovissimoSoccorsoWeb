@@ -50,9 +50,8 @@
         <res-auth>Container</res-auth>
     </resource-ref>
     
-    <!-- ========== CONFIGURAZIONE JAX-RS (REST API) - Versione Semplificata ========== -->
+    <!-- ========== CONFIGURAZIONE JAX-RS (REST API) ========== -->
     <!-- Jersey si auto-configura usando la classe JerseyConfig con @ApplicationPath -->
-    <!-- Non serve configurazione servlet esplicita nel web.xml -->
     
     <!-- ========== FILTRI AUTENTICAZIONE MVC ========== -->
     <filter>
@@ -71,7 +70,7 @@
     </filter-mapping>
     
     <!-- ========== SERVLET MVC ESISTENTI ========== -->
-    <!-- Servlet essenziali -->
+    <!-- Servlet -->
     <servlet>
         <servlet-name>Login</servlet-name>
         <servlet-class>webengineering.nuovissimosoccorsoweb.controller.Login</servlet-class>
