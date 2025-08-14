@@ -252,7 +252,7 @@
                 </div>
                 <div class="form-group">
                     <label for="nome">Nome:</label>
-                    <input type="text" id="nome" value="Mario Rossi" placeholder="Il tuo nome" required>
+                    <input type="text" id="nome" value="Incendio in appartamento" placeholder="Oggetto dell'emergenza" required>
                 </div>
             </div>
 
@@ -290,6 +290,43 @@
                 Risultato dell'inserimento richiesta apparirà qui...
             </div>
         </div>
+        
+                <!-- Sezione 3: Convalida Richiesta -->
+        <div class="section">
+            <h2>✅ 3. Convalida Richiesta di Soccorso</h2>
+            <p>
+                <em>Test dell'endpoint di convalida: POST /api/richieste/{id}/convalida?token=...</em><br>
+                <strong>Nota:</strong> Questo endpoint NON richiede autenticazione (il link è pubblico nell'email).
+            </p>
+
+            <div class="two-column">
+                <div>
+                    <div class="form-group">
+                        <label for="convalidaId">ID Richiesta:</label>
+                        <input type="number" id="convalidaId" placeholder="Es: 123" min="1" 
+                               style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                </div>
+                <div>
+                    <div class="form-group">
+                        <label for="convalidaToken">Token di Convalida:</label>
+                        <input type="text" id="convalidaToken" placeholder="Es: abc123def456..." 
+                               style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-row">
+                <button onclick="doConvalida()" style="background-color: #28a745;">✅ Convalida Richiesta</button>
+                <button onclick="fillConvalidaExample()">📋 Esempio Dati</button>
+                <button onclick="clearConvalidaForm()">🧹 Pulisci Form</button>
+            </div>
+
+            <div class="response-area" id="convalidaResponse">
+                Risultato della convalida apparirà qui...
+            </div>
+        </div>
+
 
         <!-- Sezione 4: Lista Richieste -->
         <div class="section">
@@ -324,41 +361,6 @@
         </div>
 <!-- Sezione da aggiungere alla pagina rest-client-test.html dopo la sezione Inserimento Richiesta -->
 
-        <!-- Sezione 5: Convalida Richiesta -->
-        <div class="section">
-            <h2>✅ 5. Convalida Richiesta di Soccorso</h2>
-            <p>
-                <em>Test dell'endpoint di convalida: POST /api/richieste/{id}/convalida?token=...</em><br>
-                <strong>Nota:</strong> Questo endpoint NON richiede autenticazione (il link è pubblico nell'email).
-            </p>
-
-            <div class="two-column">
-                <div>
-                    <div class="form-group">
-                        <label for="convalidaId">ID Richiesta:</label>
-                        <input type="number" id="convalidaId" placeholder="Es: 123" min="1" 
-                               style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                    </div>
-                </div>
-                <div>
-                    <div class="form-group">
-                        <label for="convalidaToken">Token di Convalida:</label>
-                        <input type="text" id="convalidaToken" placeholder="Es: abc123def456..." 
-                               style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                    </div>
-                </div>
-            </div>
-
-            <div class="button-row">
-                <button onclick="doConvalida()" style="background-color: #28a745;">✅ Convalida Richiesta</button>
-                <button onclick="fillConvalidaExample()">📋 Esempio Dati</button>
-                <button onclick="clearConvalidaForm()">🧹 Pulisci Form</button>
-            </div>
-
-            <div class="response-area" id="convalidaResponse">
-                Risultato della convalida apparirà qui...
-            </div>
-        </div>
 
 
         <!-- Sezione 6: Lista Operatori -->
