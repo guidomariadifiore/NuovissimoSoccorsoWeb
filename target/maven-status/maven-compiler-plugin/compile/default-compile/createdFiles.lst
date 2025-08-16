@@ -10,6 +10,7 @@ webengineering\nuovissimosoccorsoweb\controller\OperatoreStoricoController.class
 webengineering\nuovissimosoccorsoweb\model\impl\proxy\PatentiProxy.class
 webengineering\nuovissimosoccorsoweb\rest\config\JerseyConfig.class
 webengineering\nuovissimosoccorsoweb\model\impl\proxy\UserProxy.class
+webengineering\nuovissimosoccorsoweb\rest\dto\MissioneDTO.class
 webengineering\nuovissimosoccorsoweb\controller\RegistrazioneNuovoUtente.class
 webengineering\nuovissimosoccorsoweb\dao\AggiornaMezzoDAO.class
 webengineering\nuovissimosoccorsoweb\controller\SoccorsoBaseController.class
@@ -26,8 +27,10 @@ webengineering\nuovissimosoccorsoweb\rest\resources\AuthResource$UserInfo.class
 webengineering\nuovissimosoccorsoweb\controller\NuovaMissioneController.class
 webengineering\nuovissimosoccorsoweb\dao\impl\OperatoreHaAbilitaDAO_MySQL.class
 webengineering\nuovissimosoccorsoweb\service\RichiestaService.class
+webengineering\nuovissimosoccorsoweb\rest\resources\MissioniResource.class
 webengineering\nuovissimosoccorsoweb\model\impl\MissioneUtilizzaMaterialeImpl.class
 webengineering\nuovissimosoccorsoweb\util\RateLimiter.class
+webengineering\nuovissimosoccorsoweb\rest\dto\MissioneRequest.class
 webengineering\nuovissimosoccorsoweb\service\AuthenticationService$UserInfo.class
 webengineering\nuovissimosoccorsoweb\model\impl\proxy\AmministratoreProxy.class
 webengineering\nuovissimosoccorsoweb\service\AuthenticationService.class
@@ -42,6 +45,7 @@ webengineering\nuovissimosoccorsoweb\model\impl\MezzoImpl.class
 webengineering\nuovissimosoccorsoweb\service\OperatoriQueryService$OperatoreInfo.class
 webengineering\nuovissimosoccorsoweb\service\RichiestaService$RichiestaInput.class
 webengineering\framework\data\OptimisticLockException.class
+webengineering\nuovissimosoccorsoweb\rest\dto\MissioneResponse.class
 webengineering\nuovissimosoccorsoweb\model\impl\OperatoreHaPatenteImpl.class
 webengineering\nuovissimosoccorsoweb\controller\AdminOperatoriController$MissioneConDettagli.class
 webengineering\nuovissimosoccorsoweb\model\impl\proxy\MissioneProxy.class
@@ -124,6 +128,7 @@ webengineering\nuovissimosoccorsoweb\dao\impl\OperatoreDAO_MySQL.class
 webengineering\nuovissimosoccorsoweb\dao\MezzoDAO.class
 webengineering\framework\result\TemplateManagerException.class
 webengineering\nuovissimosoccorsoweb\model\impl\proxy\OperatoreProxy.class
+webengineering\nuovissimosoccorsoweb\service\MissioniService.class
 webengineering\nuovissimosoccorsoweb\controller\Home.class
 webengineering\nuovissimosoccorsoweb\controller\OperatoreMissioniController.class
 webengineering\framework\data\DataLayer.class

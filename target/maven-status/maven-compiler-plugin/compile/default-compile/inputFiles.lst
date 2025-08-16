@@ -122,6 +122,9 @@ C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineeri
 C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\dto\ConvalidaResponse.java
 C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\dto\ErrorResponse.java
 C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\dto\ListaRichiesteResponse.java
+C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\dto\MissioneDTO.java
+C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\dto\MissioneRequest.java
+C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\dto\MissioneResponse.java
 C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\dto\OperatoreDTO.java
 C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\dto\RichiestaDTO.java
 C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\dto\RichiestaRequest.java
@@ -129,6 +132,7 @@ C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineeri
 C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\exception\AppExceptionMapper.java
 C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\exception\JacksonExceptionMapper.java
 C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\resources\AuthResource.java
+C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\resources\MissioniResource.java
 C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\resources\OperatoriQueryResource.java
 C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\resources\RichiesteQueryResource.java
 C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\resources\RichiesteResource.java
@@ -139,6 +143,7 @@ C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineeri
 C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\service\AuthService.java
 C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\service\AuthenticationService.java
 C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\service\ConvalidaService.java
+C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\service\MissioniService.java
 C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\service\OperatoriQueryService.java
 C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\service\RichiestaService.java
 C:\Users\beatr\Documents\GitHub\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\service\RichiesteQueryService.java
