@@ -189,6 +189,52 @@
                 .button-row {
                     flex-direction: column;
                 }
+
+/* Stili per i pulsanti operatori */
+.button-row button[style*="background-color: #28a745"] {
+    color: white;
+}
+
+.button-row button[style*="background-color: #28a745"]:hover {
+    background-color: #218838 !important;
+}
+
+.button-row button[style*="background-color: #17a2b8"] {
+    color: white;
+}
+
+.button-row button[style*="background-color: #17a2b8"]:hover {
+    background-color: #138496 !important;
+}
+
+.button-row button[style*="background-color: #6f42c1"] {
+    color: white;
+}
+
+.button-row button[style*="background-color: #6f42c1"]:hover {
+    background-color: #5a32a3 !important;
+}
+
+.button-row button[style*="background-color: #fd7e14"] {
+    color: white;
+}
+
+.button-row button[style*="background-color: #fd7e14"]:hover {
+    background-color: #e8681a !important;
+}
+
+/* Responsive per i pulsanti operatori */
+@media (max-width: 768px) {
+    .button-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .button-row button {
+        min-width: auto;
+        font-size: 12px;
+        padding: 8px 12px;
+    }
             }
         </style>
     </head>
@@ -294,10 +340,7 @@
         <!-- Sezione 3: Convalida Richiesta -->
         <div class="section">
             <h2>✅ 3. Convalida Richiesta di Soccorso</h2>
-            <p>
-                <em>Test dell'endpoint di convalida: POST /api/richieste/{id}/convalida?token=...</em><br>
-                <strong>Nota:</strong> Questo endpoint NON richiede autenticazione (il link è pubblico nell'email).
-            </p>
+           
 
             <div class="two-column">
                 <div>
@@ -330,11 +373,8 @@
 
         <!-- Sezione 4: Lista Richieste di Soccorso -->
         <div class="section">
-            <h2>📋 6. Lista Richieste di Soccorso (Operazione richiesta)</h2>
-            <p>
-                <em>Test degli endpoint di lista: GET /api/richieste?stato=...&page=...&size=...</em><br>
-                <strong>Nota:</strong> Richiede autenticazione. Solo gli ADMIN possono vedere tutte le richieste.
-            </p>
+            <h2>📋 4. Lista Richieste di Soccorso (Operazione richiesta)</h2>
+        
 
             <div class="two-column">
                 <div>
@@ -385,11 +425,29 @@
 
 
 
-        <!-- Sezione 6: Lista Operatori -->
+        <!-- Sezione 6: Lista Operatori attalmente liberi -->
         <div class="section">
-            <h2>👨‍🚒 6. Lista Operatori Liberi (Operazione richiesta)</h2>
+            <h2>👨‍🚒 6. Lista Operatori Attualmente Liberi (Operazione richiesta)</h2>
+           
 
-            <button onclick="getOperatoriLiberi()" id="operatoriBtn" disabled>Carica Operatori Liberi</button>
+            <div class="button-row">
+                <button onclick="getOperatoriLiberiConDettagli()" id="operatoriBtn" disabled style="background-color: #28a745;">
+                    👨‍🚒 Operatori Liberi
+                </button>
+                <button onclick="getDettagliOperatoreSpecifico()" id="dettagliOperatoreBtn" disabled style="background-color: #fd7e14;">
+                    🔍 Cerca Operatore per ID
+                </button>
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <em>💡 Informazioni sui test:</em>
+                </label>
+                <ul style="margin: 10px 0; padding-left: 20px; font-size: 14px; color: #666;">
+                    <li><strong>Operatori Liberi:</strong> Mostra operatori non impegnati in missioni attive con dettagli completi</li>
+                    <li><strong>Cerca Operatore per ID:</strong> Informazioni dettagliate di un operatore specifico (utile per debug)</li>
+                </ul>
+            </div>
 
             <div class="response-area" id="operatoriResponse">
                 Lista degli operatori liberi apparirà qui...
@@ -577,16 +635,28 @@
             // Utility functions
             function updateAuthStatus(isLoggedIn) {
                 const statusEl = document.getElementById('authStatus');
-                const buttons = ['verifyBtn', 'logoutBtn', 'listaBtn', 'operatoriBtn'];
+                const buttons = [
+                    'verifyBtn', 
+                    'logoutBtn', 
+                    'listaBtn', 
+                    'operatoriBtn',           // Pulsante principale operatori liberi
+                    'dettagliOperatoreBtn'    // Cerca operatore per ID
+                ];
 
                 if (isLoggedIn) {
                     statusEl.textContent = `✅ Autenticato come: ${currentUser.email} (${currentUser.role})`;
                     statusEl.className = 'auth-status logged-in';
-                    buttons.forEach(btnId => document.getElementById(btnId).disabled = false);
+                    buttons.forEach(btnId => {
+                        const btn = document.getElementById(btnId);
+                        if (btn) btn.disabled = false;
+                    });
                 } else {
                     statusEl.textContent = '❌ Non autenticato';
                     statusEl.className = 'auth-status logged-out';
-                    buttons.forEach(btnId => document.getElementById(btnId).disabled = true);
+                    buttons.forEach(btnId => {
+                        const btn = document.getElementById(btnId);
+                        if (btn) btn.disabled = true;
+                    });
                 }
             }
 
@@ -596,12 +666,25 @@
                 element.className = `response-area ${type}`;
             }
 
-            function clearAllResponses() {
-                const responseAreas = document.querySelectorAll('.response-area');
-                responseAreas.forEach(area => {
-                    area.textContent = 'Pulito...';
-                    area.className = 'response-area';
+            unction clearAllResponses() {
+                const responseAreas = [
+                    'authResponse', 
+                    'richiestaResponse', 
+                    'convalidaResponse', 
+                    'listaResponse', 
+                    'operatoriResponse', 
+                    'testResponse'
+                ];
+                
+                responseAreas.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.textContent = 'Sezione pulita...';
+                        element.className = 'response-area';
+                    }
                 });
+                
+                showResponse('testResponse', '🧹 Tutte le sezioni sono state pulite!', 'success');
             }
 
 // Funzione di test per inserire una richiesta di soccorso (AGGIORNATA)
