@@ -190,1306 +190,1340 @@
                     flex-direction: column;
                 }
 
-/* Stili per i pulsanti operatori */
-.button-row button[style*="background-color: #28a745"] {
-    color: white;
-}
+                /* Stili per i pulsanti operatori */
+                .button-row button[style*="background-color: #28a745"] {
+                    color: white;
+                }
 
-.button-row button[style*="background-color: #28a745"]:hover {
-    background-color: #218838 !important;
-}
+                .button-row button[style*="background-color: #28a745"]:hover {
+                    background-color: #218838 !important;
+                }
 
-.button-row button[style*="background-color: #17a2b8"] {
-    color: white;
-}
+                .button-row button[style*="background-color: #17a2b8"] {
+                    color: white;
+                }
 
-.button-row button[style*="background-color: #17a2b8"]:hover {
-    background-color: #138496 !important;
-}
+                .button-row button[style*="background-color: #17a2b8"]:hover {
+                    background-color: #138496 !important;
+                }
 
-.button-row button[style*="background-color: #6f42c1"] {
-    color: white;
-}
+                .button-row button[style*="background-color: #6f42c1"] {
+                    color: white;
+                }
 
-.button-row button[style*="background-color: #6f42c1"]:hover {
-    background-color: #5a32a3 !important;
-}
+                .button-row button[style*="background-color: #6f42c1"]:hover {
+                    background-color: #5a32a3 !important;
+                }
 
-.button-row button[style*="background-color: #fd7e14"] {
-    color: white;
-}
+                .button-row button[style*="background-color: #fd7e14"] {
+                    color: white;
+                }
 
-.button-row button[style*="background-color: #fd7e14"]:hover {
-    background-color: #e8681a !important;
-}
+                .button-row button[style*="background-color: #fd7e14"]:hover {
+                    background-color: #e8681a !important;
+                }
 
-/* Responsive per i pulsanti operatori */
-@media (max-width: 768px) {
-    .button-row {
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-    }
-    
-    .button-row button {
-        min-width: auto;
-        font-size: 12px;
-        padding: 8px 12px;
-    }
-            }
-        </style>
-    </head>
-    <body>
-        <div class="header">
-            <h1>🚑 SoccorsoWeb REST API</h1>
-            <p>Client di Test per le API REST</p>
-        </div>
+                /* Responsive per i pulsanti operatori */
+                @media (max-width: 768px) {
+                    .button-row {
+                        grid-template-columns: 1fr 1fr;
+                        gap: 10px;
+                    }
 
-        <!-- Status di autenticazione -->
-        <div id="authStatus" class="auth-status logged-out">
-            ❌ Non autenticato
-        </div>
+                    .button-row button {
+                        min-width: auto;
+                        font-size: 12px;
+                        padding: 8px 12px;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>🚑 SoccorsoWeb REST API</h1>
+                <p>Client di Test per le API REST</p>
+            </div>
 
-        <!-- Sezione 1: Autenticazione -->
-        <div class="section">
-            <h2>🔐 1. Login/Logout (Operazione richiesta)</h2>
+            <!-- Status di autenticazione -->
+            <div id="authStatus" class="auth-status logged-out">
+                ❌ Non autenticato
+            </div>
 
-            <div class="two-column">
-                <div>
-                    <h3>Login</h3>
-                    <div class="form-group">
-                        <label for="email">Email:</label>
-                        <input type="email" id="email" value="admin@soccorso.it" placeholder="Inserisci email">
+            <!-- Sezione 1: Autenticazione -->
+            <div class="section">
+                <h2>🔐 1. Login/Logout (Operazione richiesta)</h2>
+
+                <div class="two-column">
+                    <div>
+                        <h3>Login</h3>
+                        <div class="form-group">
+                            <label for="email">Email:</label>
+                            <input type="email" id="email" value="admin@soccorso.it" placeholder="Inserisci email">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password:</label>
+                            <input type="password" id="password" value="admin123" placeholder="Inserisci password">
+                        </div>
+                        <button onclick="doLogin()">Effettua Login</button>
+                        <button onclick="verifyToken()" id="verifyBtn" disabled>Verifica Token</button>
+                        <button onclick="doLogout()" id="logoutBtn" disabled>Logout</button>
                     </div>
-                    <div class="form-group">
-                        <label for="password">Password:</label>
-                        <input type="password" id="password" value="admin123" placeholder="Inserisci password">
-                    </div>
-                    <button onclick="doLogin()">Effettua Login</button>
-                    <button onclick="verifyToken()" id="verifyBtn" disabled>Verifica Token</button>
-                    <button onclick="doLogout()" id="logoutBtn" disabled>Logout</button>
-                </div>
 
-                <div>
-                    <h3>Credenziali di Test</h3>
-                    <p><strong>Admin:</strong> admin@soccorso.it / admin123</p>
-                    <p><strong>Operatore:</strong> operatore@soccorso.it / op123</p>
-                    <p><strong>Utente:</strong> utente@soccorso.it / user123</p>
-                </div>
-            </div>
-
-            <div class="response-area" id="authResponse">
-                Risultato dell'autenticazione apparirà qui...
-            </div>
-        </div>
-
-        <!-- Sezione 2: Inserimento Richiesta di Soccorso (CORRETTA) -->
-        <div class="section">
-            <h2>🆘 2. Inserimento Richiesta di Soccorso (NO AUTH richiesta)</h2>
-
-            <div class="form-group">
-                <label for="descrizione">Descrizione emergenza:</label>
-                <textarea id="descrizione" rows="3" placeholder="Descrivi l'emergenza...">Incendio in appartamento al secondo piano, presenza di feriti</textarea>
-            </div>
-
-            <div class="two-column">
-                <div class="form-group">
-                    <label for="indirizzo">Indirizzo:</label>
-                    <input type="text" id="indirizzo" value="Via Roma 123, L'Aquila" placeholder="Indirizzo dell'emergenza" required>
-                </div>
-                <div class="form-group">
-                    <label for="nome">Nome:</label>
-                    <input type="text" id="nome" value="Incendio in appartamento" placeholder="Oggetto dell'emergenza" required>
-                </div>
-            </div>
-
-            <div class="two-column">
-                <div class="form-group">
-                    <label for="emailSegnalante">Email segnalante:</label>
-                    <input type="email" id="emailSegnalante" value="mario.rossi@example.com" placeholder="La tua email" required>
-                </div>
-                <div class="form-group">
-                    <label for="nomeSegnalante">Nome completo segnalante:</label>
-                    <input type="text" id="nomeSegnalante" value="Mario Rossi" placeholder="Nome e cognome del segnalante" required>
-                </div>
-            </div>
-
-            <div class="two-column">
-                <div class="form-group">
-                    <label for="coordinate">Coordinate GPS (opzionale):</label>
-                    <input type="text" id="coordinate" placeholder="42.3598, 13.3986" title="Formato: latitudine, longitudine">
-                </div>
-                <div class="form-group">
-                    <label for="foto">URL Foto (opzionale):</label>
-                    <input type="url" id="foto" placeholder="https://esempio.com/foto-emergenza.jpg" title="Link a una foto dell'emergenza">
-                </div>
-            </div>
-
-            <div style="margin: 20px 0;">
-                <button onclick="fillTestData()" style="background: #17a2b8; margin-right: 10px;">📝 Compila Dati Test</button>
-                <button onclick="clearForm()" style="background: #6c757d;">🧹 Pulisci Form</button>
-            </div>
-
-            <!-- QUESTO PULSANTE È SEMPRE ATTIVO (NO AUTH) -->
-            <button onclick="inserisciRichiesta()" id="richiestaBtn">🆘 Inserisci Richiesta</button>
-
-            <div class="response-area" id="richiestaResponse">
-                Risultato dell'inserimento richiesta apparirà qui...
-            </div>
-        </div>
-
-        <!-- Sezione 3: Convalida Richiesta -->
-        <div class="section">
-            <h2>✅ 3. Convalida Richiesta di Soccorso</h2>
-           
-
-            <div class="two-column">
-                <div>
-                    <div class="form-group">
-                        <label for="convalidaId">ID Richiesta:</label>
-                        <input type="number" id="convalidaId" placeholder="Es: 123" min="1" 
-                               style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    <div>
+                        <h3>Credenziali di Test</h3>
+                        <p><strong>Admin:</strong> admin@soccorso.it / admin123</p>
+                        <p><strong>Operatore:</strong> operatore@soccorso.it / op123</p>
+                        <p><strong>Utente:</strong> utente@soccorso.it / user123</p>
                     </div>
                 </div>
-                <div>
-                    <div class="form-group">
-                        <label for="convalidaToken">Token di Convalida:</label>
-                        <input type="text" id="convalidaToken" placeholder="Es: abc123def456..." 
-                               style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                    </div>
+
+                <div class="response-area" id="authResponse">
+                    Risultato dell'autenticazione apparirà qui...
                 </div>
             </div>
 
-            <div class="button-row">
-                <button onclick="doConvalida()" style="background-color: #28a745;">✅ Convalida Richiesta</button>
-                <button onclick="fillConvalidaExample()">📋 Esempio Dati</button>
-                <button onclick="clearConvalidaForm()">🧹 Pulisci Form</button>
-            </div>
+            <!-- Sezione 2: Inserimento Richiesta di Soccorso (CORRETTA) -->
+            <div class="section">
+                <h2>🆘 2. Inserimento Richiesta di Soccorso (NO AUTH richiesta)</h2>
 
-            <div class="response-area" id="convalidaResponse">
-                Risultato della convalida apparirà qui...
-            </div>
-        </div>
-
-
-        <!-- Sezione 4: Lista Richieste di Soccorso -->
-        <div class="section">
-            <h2>📋 4. Lista Richieste di Soccorso (Operazione richiesta)</h2>
-        
-
-            <div class="two-column">
-                <div>
-                    <div class="form-group">
-                        <label for="filtroStato">Filtra per stato:</label>
-                        <select id="filtroStato" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                            <option value="">Tutte</option>
-                            <option value="ATTIVA">Attive</option>
-                            <option value="IN_CORSO">In corso</option>
-                            <option value="CHIUSA">Chiuse</option>
-                            <option value="IGNORATA">Ignorate</option>
-                            <option value="CONVALIDATA">Convalidate</option>
-                            <option value="ANNULLATA">Annullate</option>
-                        </select>
-                    </div>
-                </div>
-                <div>
-                    <div class="form-group">
-                        <label for="pagina">Pagina:</label>
-                        <input type="number" id="pagina" value="1" min="1" max="100" 
-                               style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                    </div>
-                </div>
-            </div>
-
-            <div class="button-row">
-                <button onclick="getListaRichieste()" id="listaBtn" disabled style="background-color: #007bff;">📋 Carica Lista</button>
-                <button onclick="getRichiesteNonPositive()" id="nonPositiveBtn" disabled style="background-color: #dc3545;">🚫 Richieste Non Positive</button>
-                <button onclick="testFiltriVeloci()" style="background-color: #17a2b8;">🚀 Test Filtri</button>
-            </div>
-
-            <div class="form-group">
-                <label>
-                    <em>💡 Suggerimenti per il test:</em>
-                </label>
-                <ul style="margin: 10px 0; padding-left: 20px; font-size: 14px; color: #666;">
-                    <li><strong>Lista completa:</strong> Lascia "Stato" vuoto e clicca "Carica Lista"</li>
-                    <li><strong>Filtro per stato:</strong> Seleziona uno stato specifico (es. "Attive")</li>
-                    <li><strong>Paginazione:</strong> Cambia il numero di pagina e ricarica</li>
-                    <li><strong>Richieste problematiche:</strong> Usa "Richieste Non Positive" per vedere quelle con livello < 5</li>
-                </ul>
-            </div>
-
-            <div class="response-area" id="listaResponse">
-                Lista delle richieste apparirà qui...
-            </div>
-        </div>
-
-
-
-        <!-- Sezione 6: Lista Operatori attalmente liberi -->
-        <div class="section">
-            <h2>👨‍🚒 6. Lista Operatori Attualmente Liberi (Operazione richiesta)</h2>
-           
-
-            <div class="button-row">
-                <button onclick="getOperatoriLiberiConDettagli()" id="operatoriBtn" disabled style="background-color: #28a745;">
-                    👨‍🚒 Operatori Liberi
-                </button>
-                <button onclick="getDettagliOperatoreSpecifico()" id="dettagliOperatoreBtn" disabled style="background-color: #fd7e14;">
-                    🔍 Cerca Operatore per ID
-                </button>
-            </div>
-
-            <div class="form-group">
-                <label>
-                    <em>💡 Informazioni sui test:</em>
-                </label>
-                <ul style="margin: 10px 0; padding-left: 20px; font-size: 14px; color: #666;">
-                    <li><strong>Operatori Liberi:</strong> Mostra operatori non impegnati in missioni attive con dettagli completi</li>
-                    <li><strong>Cerca Operatore per ID:</strong> Informazioni dettagliate di un operatore specifico (utile per debug)</li>
-                </ul>
-            </div>
-
-            <div class="response-area" id="operatoriResponse">
-                Lista degli operatori liberi apparirà qui...
-            </div>
-        </div>
-
-
-        <!-- Sezione 7: Creazione Missione -->
-        <div class="section">
-            <h2>🎯 7. Creazione di una Missione (Operazione richiesta)</h2>
-            <p>
-                <strong>Nota:</strong> Solo gli amministratori possono creare missioni.
-            </p>
-
-            <!-- Pulsanti principali -->
-            <div class="button-row">
-                <button onclick="mostraRichiesteAttive()" id="richiesteAttiveBtn" disabled style="background-color: #17a2b8;">
-                    📋 Vedi Richieste Attive
-                </button>
-                <button onclick="mostraFormCreazioneMissione()" id="mostraFormBtn" disabled style="background-color: #28a745;">
-                    🎯 Crea Missione
-                </button>
-            </div>
-
-            <!-- Sezione Richieste Attive (inizialmente nascosta) -->
-            <div id="sezionRichiesteAttive" style="display: none; margin-top: 20px;">
-                <h3>📋 Richieste Attive Disponibili</h3>
-                <p style="color: #666; font-size: 14px;">
-                    Queste sono le richieste in stato "ATTIVA" per cui puoi creare una missione:
-                </p>
-                <div class="response-area" id="richiesteAttiveResponse">
-                    Lista richieste attive...
-                </div>
-            </div>
-
-            <!-- Sezione Form Creazione Missione (inizialmente nascosta) -->
-            <div id="sezionFormMissione" style="display: none; margin-top: 20px;">
-                <h3>🎯 Crea Nuova Missione</h3>
-                
-                <!-- Info orario -->
-                <div style="background-color: #e9ecef; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
-                    <strong>🕒 Orario di creazione:</strong> 
-                    <span id="orarioCreazione" style="color: #495057;">-</span>
-                    <br>
-                    <small style="color: #666;">L'orario verrà registrato automaticamente quando crei la missione</small>
-                </div>
-
-                <!-- Form campi missione -->
                 <div class="form-group">
-                    <label for="richiestaIdMissione">ID Richiesta di Soccorso: <span style="color: red;">*</span></label>
-                    <input type="number" id="richiestaIdMissione" min="1" placeholder="Es: 123" 
-                           style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                    <small style="color: #666;">ID della richiesta per cui creare la missione (deve essere in stato ATTIVA)</small>
+                    <label for="descrizione">Descrizione emergenza:</label>
+                    <textarea id="descrizione" rows="3" placeholder="Descrivi l'emergenza...">Incendio in appartamento al secondo piano, presenza di feriti</textarea>
                 </div>
+
+                <div class="two-column">
+                    <div class="form-group">
+                        <label for="indirizzo">Indirizzo:</label>
+                        <input type="text" id="indirizzo" value="Via Roma 123, L'Aquila" placeholder="Indirizzo dell'emergenza" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nome">Nome:</label>
+                        <input type="text" id="nome" value="Incendio in appartamento" placeholder="Oggetto dell'emergenza" required>
+                    </div>
+                </div>
+
+                <div class="two-column">
+                    <div class="form-group">
+                        <label for="emailSegnalante">Email segnalante:</label>
+                        <input type="email" id="emailSegnalante" value="mario.rossi@example.com" placeholder="La tua email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nomeSegnalante">Nome completo segnalante:</label>
+                        <input type="text" id="nomeSegnalante" value="Mario Rossi" placeholder="Nome e cognome del segnalante" required>
+                    </div>
+                </div>
+
+                <div class="two-column">
+                    <div class="form-group">
+                        <label for="coordinate">Coordinate GPS (opzionale):</label>
+                        <input type="text" id="coordinate" placeholder="42.3598, 13.3986" title="Formato: latitudine, longitudine">
+                    </div>
+                    <div class="form-group">
+                        <label for="foto">URL Foto (opzionale):</label>
+                        <input type="url" id="foto" placeholder="https://esempio.com/foto-emergenza.jpg" title="Link a una foto dell'emergenza">
+                    </div>
+                </div>
+
+                <div style="margin: 20px 0;">
+                    <button onclick="fillTestData()" style="background: #17a2b8;
+                            margin-right: 10px;">📝 Compila Dati Test</button>
+                    <button onclick="clearForm()" style="background: #6c757d;">🧹 Pulisci Form</button>
+                </div>
+
+                <!-- QUESTO PULSANTE È SEMPRE ATTIVO (NO AUTH) -->
+                <button onclick="inserisciRichiesta()" id="richiestaBtn">🆘 Inserisci Richiesta</button>
+
+                <div class="response-area" id="richiestaResponse">
+                    Risultato dell'inserimento richiesta apparirà qui...
+                </div>
+            </div>
+
+            <!-- Sezione 3: Convalida Richiesta -->
+            <div class="section">
+                <h2>✅ 3. Convalida Richiesta di Soccorso</h2>
+
 
                 <div class="two-column">
                     <div>
                         <div class="form-group">
-                            <label for="nomeMissione">Nome Missione: <span style="color: red;">*</span></label>
-                            <input type="text" id="nomeMissione" placeholder="Es: Intervento Incendio Via Roma" 
-                                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                            <label for="convalidaId">ID Richiesta:</label>
+                            <input type="number" id="convalidaId" placeholder="Es: 123" min="1" 
+                                   style="width: 100%;
+                                   padding: 10px;
+                                   border: 1px solid #ddd;
+                                   border-radius: 5px;">
                         </div>
                     </div>
                     <div>
                         <div class="form-group">
-                            <label for="posizioneMissione">Posizione: <span style="color: red;">*</span></label>
-                            <input type="text" id="posizioneMissione" placeholder="Es: Via Roma 123, L'Aquila" 
-                                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                            <label for="convalidaToken">Token di Convalida:</label>
+                            <input type="text" id="convalidaToken" placeholder="Es: abc123def456..." 
+                                   style="width: 100%;
+                                   padding: 10px;
+                                   border: 1px solid #ddd;
+                                   border-radius: 5px;">
                         </div>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="obiettivoMissione">Obiettivo: <span style="color: red;">*</span></label>
-                    <textarea id="obiettivoMissione" rows="3" placeholder="Descrivi l'obiettivo della missione..." 
-                              style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"></textarea>
-                </div>
-
-                <div class="two-column">
-                    <div>
-                        <div class="form-group">
-                            <label for="operatoriMissione">Operatori (IDs): <span style="color: red;">*</span></label>
-                            <input type="text" id="operatoriMissione" placeholder="Es: 1,2,3" 
-                                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                            <small style="color: #666;">Lista degli ID operatori separati da virgola</small>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="form-group">
-                            <label for="mezziMissione">Mezzi (IDs) - Opzionale:</label>
-                            <input type="text" id="mezziMissione" placeholder="Es: 1,2" 
-                                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                            <small style="color: #666;">Lista degli ID mezzi separati da virgola</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="materialiMissione">Materiali (IDs) - Opzionale:</label>
-                    <input type="text" id="materialiMissione" placeholder="Es: 1,2,3" 
-                           style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                    <small style="color: #666;">Lista degli ID materiali separati da virgola</small>
-                </div>
-
-                <!-- Pulsanti azione form -->
                 <div class="button-row">
-                    <button onclick="creaMissione()" id="creaMissioneBtn" disabled style="background-color: #dc3545;">
-                        🚀 Crea Missione
-                    </button>
-                    <button onclick="clearMissioneForm()" style="background-color: #6c757d;">
-                        🧹 Pulisci Form
-                    </button>
-                    <button onclick="nascondiFormMissione()" style="background-color: #6c757d;">
-                        ❌ Chiudi Form
-                    </button>
+                    <button onclick="doConvalida()" style="background-color: #28a745;">✅ Convalida Richiesta</button>
+                    <button onclick="fillConvalidaExample()">📋 Esempio Dati</button>
+                    <button onclick="clearConvalidaForm()">🧹 Pulisci Form</button>
                 </div>
 
-                <!-- Info validazione -->
-                <div style="background-color: #d1ecf1; padding: 15px; border-radius: 5px; margin-top: 15px;">
-                    <h5 style="margin: 0 0 10px 0; color: #0c5460;">💡 Requisiti per la creazione:</h5>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #0c5460;">
-                        <li><strong>ID Richiesta:</strong> Deve essere una richiesta esistente in stato "ATTIVA"</li>
-                        <li><strong>Operatori:</strong> Almeno un operatore è obbligatorio (devono essere disponibili)</li>
-                        <li><strong>Mezzi/Materiali:</strong> Opzionali, se specificati devono essere disponibili</li>
-                        <li><strong>Campi obbligatori:</strong> Contrassegnati con <span style="color: red;">*</span></li>
+                <div class="response-area" id="convalidaResponse">
+                    Risultato della convalida apparirà qui...
+                </div>
+            </div>
+
+
+            <!-- Sezione 4: Lista Richieste di Soccorso -->
+            <div class="section">
+                <h2>📋 4. Lista Richieste di Soccorso (Operazione richiesta)</h2>
+
+
+                <div class="two-column">
+                    <div>
+                        <div class="form-group">
+                            <label for="filtroStato">Filtra per stato:</label>
+                            <select id="filtroStato" style="width: 100%;
+                                    padding: 10px;
+                                    border: 1px solid #ddd;
+                                    border-radius: 5px;">
+                                <option value="">Tutte</option>
+                                <option value="ATTIVA">Attive</option>
+                                <option value="IN_CORSO">In corso</option>
+                                <option value="CHIUSA">Chiuse</option>
+                                <option value="IGNORATA">Ignorate</option>
+                                <option value="CONVALIDATA">Convalidate</option>
+                                <option value="ANNULLATA">Annullate</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="form-group">
+                            <label for="pagina">Pagina:</label>
+                            <input type="number" id="pagina" value="1" min="1" max="100" 
+                                   style="width: 100%;
+                                   padding: 10px;
+                                   border: 1px solid #ddd;
+                                   border-radius: 5px;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-row">
+                    <button onclick="getListaRichieste()" id="listaBtn" disabled style="background-color: #007bff;">📋 Carica Lista</button>
+                    <button onclick="getRichiesteNonPositive()" id="nonPositiveBtn" disabled style="background-color: #dc3545;">🚫 Richieste Non Positive</button>
+                    <button onclick="testFiltriVeloci()" style="background-color: #17a2b8;">🚀 Test Filtri</button>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <em>💡 Suggerimenti per il test:</em>
+                    </label>
+                    <ul style="margin: 10px 0;
+                        padding-left: 20px;
+                        font-size: 14px;
+                        color: #666;">
+                        <li><strong>Lista completa:</strong> Lascia "Stato" vuoto e clicca "Carica Lista"</li>
+                        <li><strong>Filtro per stato:</strong> Seleziona uno stato specifico (es. "Attive")</li>
+                        <li><strong>Paginazione:</strong> Cambia il numero di pagina e ricarica</li>
+                        <li><strong>Richieste problematiche:</strong> Usa "Richieste Non Positive" per vedere quelle con livello < 5</li>
                     </ul>
                 </div>
+
+                <div class="response-area" id="listaResponse">
+                    Lista delle richieste apparirà qui...
+                </div>
             </div>
 
-            <!-- Area di risposta generale -->
-            <div class="response-area" id="missioneResponse">
-                Usa i pulsanti sopra per vedere le richieste attive o creare una missione...
+
+
+            <!-- Sezione 6: Lista Operatori attalmente liberi -->
+            <div class="section">
+                <h2>👨‍🚒 6. Lista Operatori Attualmente Liberi (Operazione richiesta)</h2>
+
+
+                <div class="button-row">
+                    <button onclick="getOperatoriLiberiConDettagli()" id="operatoriBtn" disabled style="background-color: #28a745;">
+                        👨‍🚒 Operatori Liberi
+                    </button>
+                    <button onclick="getDettagliOperatoreSpecifico()" id="dettagliOperatoreBtn" disabled style="background-color: #fd7e14;">
+                        🔍 Cerca Operatore per ID
+                    </button>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <em>💡 Informazioni sui test:</em>
+                    </label>
+                    <ul style="margin: 10px 0;
+                        padding-left: 20px;
+                        font-size: 14px;
+                        color: #666;">
+                        <li><strong>Operatori Liberi:</strong> Mostra operatori non impegnati in missioni attive con dettagli completi</li>
+                        <li><strong>Cerca Operatore per ID:</strong> Informazioni dettagliate di un operatore specifico (utile per debug)</li>
+                    </ul>
+                </div>
+
+                <div class="response-area" id="operatoriResponse">
+                    Lista degli operatori liberi apparirà qui...
+                </div>
             </div>
-        </div>
-        <!-- Sezione Test Vari -->
-        <div class="section">
-            <h2>🧪 Test Vari</h2>
 
-            <button onclick="testHealth()">Test Health Check</button>
-            <button onclick="testCORS()">Test CORS</button>
-            <button onclick="clearAllResponses()">Pulisci Tutte le Risposte</button>
 
-            <div class="response-area" id="testResponse">
-                Risultati dei test vari...
+            <!-- Sezione 7: Creazione Missione -->
+            <div class="section">
+                <h2>🎯 7. Creazione di una Missione (Operazione richiesta)</h2>
+                <p>
+                    <strong>Nota:</strong> Solo gli amministratori possono creare missioni.
+                </p>
+
+                <!-- Pulsanti principali -->
+                <div class="button-row">
+                    <button onclick="mostraRichiesteAttive()" id="richiesteAttiveBtn" disabled style="background-color: #17a2b8;">
+                        📋 Vedi Richieste Attive
+                    </button>
+                    <button onclick="mostraFormCreazioneMissione()" id="mostraFormBtn" disabled style="background-color: #28a745;">
+                        🎯 Crea Missione
+                    </button>
+                </div>
+
+                <!-- Sezione Richieste Attive (inizialmente nascosta) -->
+                <div id="sezionRichiesteAttive" style="display: none;
+                     margin-top: 20px;">
+                    <h3>📋 Richieste Attive Disponibili</h3>
+                    <p style="color: #666;
+                       font-size: 14px;">
+                        Queste sono le richieste in stato "ATTIVA" per cui puoi creare una missione:
+                    </p>
+                    <div class="response-area" id="richiesteAttiveResponse">
+                        Lista richieste attive...
+                    </div>
+                </div>
+
+                <!-- Sezione Form Creazione Missione (inizialmente nascosta) -->
+                <div id="sezionFormMissione" style="display: none;
+                     margin-top: 20px;">
+                    <h3>🎯 Crea Nuova Missione</h3>
+
+                    <!-- Info orario -->
+                    <div style="background-color: #e9ecef;
+                         padding: 15px;
+                         border-radius: 5px;
+                         margin-bottom: 20px;">
+                        <strong>🕒 Orario di creazione:</strong> 
+                        <span id="orarioCreazione" style="color: #495057;">-</span>
+                        <br>
+                        <small style="color: #666;">L'orario verrà registrato automaticamente quando crei la missione</small>
+                    </div>
+
+                    <!-- Form campi missione -->
+                    <div class="form-group">
+                        <label for="richiestaIdMissione">ID Richiesta di Soccorso: <span style="color: red;">*</span></label>
+                        <input type="number" id="richiestaIdMissione" min="1" placeholder="Es: 123" 
+                               style="width: 100%;
+                               padding: 10px;
+                               border: 1px solid #ddd;
+                               border-radius: 5px;">
+                        <small style="color: #666;">ID della richiesta per cui creare la missione (deve essere in stato ATTIVA)</small>
+                    </div>
+
+                    <div class="two-column">
+                        <div>
+                            <div class="form-group">
+                                <label for="nomeMissione">Nome Missione: <span style="color: red;">*</span></label>
+                                <input type="text" id="nomeMissione" placeholder="Es: Intervento Incendio Via Roma" 
+                                       style="width: 100%;
+                                       padding: 10px;
+                                       border: 1px solid #ddd;
+                                       border-radius: 5px;">
+                            </div>
+                        </div>
+                        <div>
+                            <div class="form-group">
+                                <label for="posizioneMissione">Posizione: <span style="color: red;">*</span></label>
+                                <input type="text" id="posizioneMissione" placeholder="Es: Via Roma 123, L'Aquila" 
+                                       style="width: 100%;
+                                       padding: 10px;
+                                       border: 1px solid #ddd;
+                                       border-radius: 5px;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="obiettivoMissione">Obiettivo: <span style="color: red;">*</span></label>
+                        <textarea id="obiettivoMissione" rows="3" placeholder="Descrivi l'obiettivo della missione..." 
+                                  style="width: 100%;
+                                  padding: 10px;
+                                  border: 1px solid #ddd;
+                                  border-radius: 5px;"></textarea>
+                    </div>
+
+                    <div class="two-column">
+                        <div>
+                            <div class="form-group">
+                                <label for="operatoriMissione">Operatori (IDs): <span style="color: red;">*</span></label>
+                                <input type="text" id="operatoriMissione" placeholder="Es: 1,2,3" 
+                                       style="width: 100%;
+                                       padding: 10px;
+                                       border: 1px solid #ddd;
+                                       border-radius: 5px;">
+                                <small style="color: #666;">Lista degli ID operatori separati da virgola</small>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="form-group">
+                                <label for="mezziMissione">Mezzi (IDs) - Opzionale:</label>
+                                <input type="text" id="mezziMissione" placeholder="Es: 1,2" 
+                                       style="width: 100%;
+                                       padding: 10px;
+                                       border: 1px solid #ddd;
+                                       border-radius: 5px;">
+                                <small style="color: #666;">Lista degli ID mezzi separati da virgola</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="materialiMissione">Materiali (IDs) - Opzionale:</label>
+                        <input type="text" id="materialiMissione" placeholder="Es: 1,2,3" 
+                               style="width: 100%;
+                               padding: 10px;
+                               border: 1px solid #ddd;
+                               border-radius: 5px;">
+                        <small style="color: #666;">Lista degli ID materiali separati da virgola</small>
+                    </div>
+
+                    <!-- Pulsanti azione form -->
+                    <div class="button-row">
+                        <button onclick="creaMissione()" id="creaMissioneBtn" disabled style="background-color: #dc3545;">
+                            🚀 Crea Missione
+                        </button>
+                        <button onclick="clearMissioneForm()" style="background-color: #6c757d;">
+                            🧹 Pulisci Form
+                        </button>
+                        <button onclick="nascondiFormMissione()" style="background-color: #6c757d;">
+                            ❌ Chiudi Form
+                        </button>
+                    </div>
+
+                    <!-- Info validazione -->
+                    <div style="background-color: #d1ecf1;
+                         padding: 15px;
+                         border-radius: 5px;
+                         margin-top: 15px;">
+                        <h5 style="margin: 0 0 10px 0;
+                            color: #0c5460;">💡 Requisiti per la creazione:</h5>
+                        <ul style="margin: 0;
+                            padding-left: 20px;
+                            font-size: 14px;
+                            color: #0c5460;">
+                            <li><strong>ID Richiesta:</strong> Deve essere una richiesta esistente in stato "ATTIVA"</li>
+                            <li><strong>Operatori:</strong> Almeno un operatore è obbligatorio (devono essere disponibili)</li>
+                            <li><strong>Mezzi/Materiali:</strong> Opzionali, se specificati devono essere disponibili</li>
+                            <li><strong>Campi obbligatori:</strong> Contrassegnati con <span style="color: red;">*</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Area di risposta generale -->
+                <div class="response-area" id="missioneResponse">
+                    Usa i pulsanti sopra per vedere le richieste attive o creare una missione...
+                </div>
             </div>
-        </div>
+            <!-- Sezione Test Vari -->
+            <div class="section">
+                <h2>🧪 Test Vari</h2>
 
-        <script>
-            // Configurazione API
-            const API_BASE_URL = 'http://localhost:8080/nuovissimo-soccorso-web-1.0-SNAPSHOT/api';
-            let authToken = null;
-            let currentUser = null;
+                <button onclick="testHealth()">Test Health Check</button>
+                <button onclick="testCORS()">Test CORS</button>
+                <button onclick="clearAllResponses()">Pulisci Tutte le Risposte</button>
 
-            // Utility function per le chiamate API
-            async function apiCall(endpoint, options = {}) {
-                const url = `${API_BASE_URL}${endpoint}`;
+                <div class="response-area" id="testResponse">
+                    Risultati dei test vari...
+                </div>
+            </div>
 
-                const defaultOptions = {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
-                };
+            <script>
+                // Configurazione API
+                const API_BASE_URL = 'http://localhost:8080/nuovissimo-soccorso-web-1.0-SNAPSHOT/api';
+                let authToken = null;
+                let currentUser = null;
 
-                // Aggiungi token se disponibile
-                if (authToken) {
-                    defaultOptions.headers['Authorization'] = `Bearer ${authToken}`;
-                }
+                // Utility function per le chiamate API
+                async function apiCall(endpoint, options = {}) {
+                    const url = `${API_BASE_URL}${endpoint}`;
 
-                const finalOptions = {
-                    ...defaultOptions,
-                    ...options,
-                    headers: {
-                        ...defaultOptions.headers,
-                        ...options.headers
-                    }
-                };
-
-                try {
-                    const response = await fetch(url, finalOptions);
-                    const data = await response.json();
-
-                    return {
-                        ok: response.ok,
-                        status: response.status,
-                        data: data,
-                        headers: response.headers
-                    };
-                } catch (error) {
-                    return {
-                        ok: false,
-                        status: 0,
-                        data: {error: 'NETWORK_ERROR', message: error.message},
-                        headers: null
-                    };
-            }
-            }
-
-            // Funzioni di autenticazione
-            async function doLogin() {
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-
-                if (!email || !password) {
-                    showResponse('authResponse', 'Inserisci email e password', 'error');
-                    return;
-                }
-
-                showResponse('authResponse', 'Autenticazione in corso...', 'info');
-
-                const result = await apiCall('/auth/login', {
-                    method: 'POST',
-                    body: JSON.stringify({email, password})
-                });
-
-                if (result.ok && result.data.success) {
-                    authToken = result.data.token;
-                    currentUser = result.data.user;
-                    updateAuthStatus(true);
-                    showResponse('authResponse',
-                            `✅ Login riuscito!\nUtente: ${currentUser.email}\nRuolo: ${currentUser.role}\nToken: ${authToken.substring(0, 50)}...`,
-                            'success');
-                } else {
-                    updateAuthStatus(false);
-                    showResponse('authResponse',
-                            `❌ Login fallito: ${result.data.message || 'Errore sconosciuto'}`,
-                            'error');
-                }
-            }
-
-            async function doLogout() {
-                if (!authToken) {
-                    showResponse('authResponse', 'Non sei autenticato', 'error');
-                    return;
-                }
-
-                const result = await apiCall('/auth/logout', {
-                    method: 'DELETE'
-                });
-
-                authToken = null;
-                currentUser = null;
-                updateAuthStatus(false);
-
-                showResponse('authResponse', '✅ Logout effettuato', 'success');
-            }
-
-            async function verifyToken() {
-                if (!authToken) {
-                    showResponse('authResponse', 'Nessun token da verificare', 'error');
-                    return;
-                }
-
-                const result = await apiCall('/auth/verify');
-
-                if (result.ok && result.data.valid) {
-                    showResponse('authResponse',
-                            `✅ Token valido!\nUtente: ${result.data.user.email}\nRuolo: ${result.data.user.role}`,
-                            'success');
-                } else {
-                    showResponse('authResponse',
-                            `❌ Token non valido: ${result.data.message || 'Token scaduto o malformato'}`,
-                            'error');
-                    authToken = null;
-                    currentUser = null;
-                    updateAuthStatus(false);
-                }
-            }
-
-
-            async function getListaRichieste() {
-                showResponse('listaResponse', '🚧 Endpoint non ancora implementato - TODO', 'info');
-            }
-
-            async function getOperatoriLiberi() {
-                showResponse('operatoriResponse', '🚧 Endpoint non ancora implementato - TODO', 'info');
-            }
-
-            // Funzioni di test
-            async function testHealth() {
-                showResponse('testResponse', 'Testing basic connectivity...', 'info');
-
-                const result = await fetch(`${API_BASE_URL}/auth/login`, {
-                    method: 'OPTIONS'
-                });
-
-                if (result.ok) {
-                    showResponse('testResponse', '✅ API raggiungibile, CORS configurato correttamente', 'success');
-                } else {
-                    showResponse('testResponse', `❌ Problema di connettività: ${result.status}`, 'error');
-                }
-            }
-
-            async function testCORS() {
-                try {
-                    const response = await fetch(`${API_BASE_URL}/auth/login`, {
-                        method: 'OPTIONS',
-                        headers: {
-                            'Origin': window.location.origin,
-                            'Access-Control-Request-Method': 'POST',
-                            'Access-Control-Request-Headers': 'Content-Type'
-                        }
-                    });
-
-                    showResponse('testResponse',
-                            `✅ Test CORS completato\nStatus: ${response.status}\nHeaders CORS: ${response.headers.get('Access-Control-Allow-Origin')}`,
-                            'success');
-                } catch (error) {
-                    showResponse('testResponse', `❌ Errore CORS: ${error.message}`, 'error');
-                }
-            }
-
-            // Utility functions
-            function updateAuthStatus(isLoggedIn) {
-                const statusEl = document.getElementById('authStatus');
-                const buttons = [
-                    'verifyBtn', 
-                    'logoutBtn', 
-                    'listaBtn', 
-                    'operatoriBtn',           // Pulsante principale operatori liberi
-                    'dettagliOperatoreBtn'    // Cerca operatore per ID
-                ];
-
-                if (isLoggedIn) {
-                    statusEl.textContent = `✅ Autenticato come: ${currentUser.email} (${currentUser.role})`;
-                    statusEl.className = 'auth-status logged-in';
-                    buttons.forEach(btnId => {
-                        const btn = document.getElementById(btnId);
-                        if (btn) btn.disabled = false;
-                    });
-                } else {
-                    statusEl.textContent = '❌ Non autenticato';
-                    statusEl.className = 'auth-status logged-out';
-                    buttons.forEach(btnId => {
-                        const btn = document.getElementById(btnId);
-                        if (btn) btn.disabled = true;
-                    });
-                }
-            }
-
-            function showResponse(elementId, message, type = 'info') {
-                const element = document.getElementById(elementId);
-                element.textContent = message;
-                element.className = `response-area ${type}`;
-            }
-
-            unction clearAllResponses() {
-                const responseAreas = [
-                    'authResponse', 
-                    'richiestaResponse', 
-                    'convalidaResponse', 
-                    'listaResponse', 
-                    'operatoriResponse', 
-                    'testResponse'
-                ];
-                
-                responseAreas.forEach(id => {
-                    const element = document.getElementById(id);
-                    if (element) {
-                        element.textContent = 'Sezione pulita...';
-                        element.className = 'response-area';
-                    }
-                });
-                
-                showResponse('testResponse', '🧹 Tutte le sezioni sono state pulite!', 'success');
-            }
-
-// Funzione di test per inserire una richiesta di soccorso (AGGIORNATA)
-            async function inserisciRichiesta() {
-                // Leggi tutti i campi dal form
-                const descrizione = document.getElementById('descrizione').value;
-                const indirizzo = document.getElementById('indirizzo').value;
-                const nome = document.getElementById('nome').value;
-                const emailSegnalante = document.getElementById('emailSegnalante').value;
-                const nomeSegnalante = document.getElementById('nomeSegnalante').value;
-                const coordinate = document.getElementById('coordinate').value;
-                const foto = document.getElementById('foto').value;
-
-                // Valida input obbligatori
-                if (!descrizione || descrizione.trim().length < 10) {
-                    showResponse('richiestaResponse', '❌ La descrizione deve essere di almeno 10 caratteri', 'error');
-                    return;
-                }
-
-                if (!indirizzo || indirizzo.trim().length < 5) {
-                    showResponse('richiestaResponse', '❌ L\'indirizzo è obbligatorio e deve essere valido', 'error');
-                    return;
-                }
-
-                if (!nome || nome.trim().length < 2) {
-                    showResponse('richiestaResponse', '❌ Il nome è obbligatorio', 'error');
-                    return;
-                }
-
-                if (!emailSegnalante || !emailSegnalante.includes('@')) {
-                    showResponse('richiestaResponse', '❌ L\'email del segnalante è obbligatoria e deve essere valida', 'error');
-                    return;
-                }
-
-                if (!nomeSegnalante || nomeSegnalante.trim().length < 2) {
-                    showResponse('richiestaResponse', '❌ Il nome del segnalante è obbligatorio', 'error');
-                    return;
-                }
-
-                // Prepara il payload con tutti i campi
-                const richiestaData = {
-                    descrizione: descrizione.trim(),
-                    indirizzo: indirizzo.trim(),
-                    nome: nome.trim(),
-                    emailSegnalante: emailSegnalante.trim(),
-                    nomeSegnalante: nomeSegnalante.trim(),
-                    coordinate: coordinate.trim() || null, // Opzionale
-                    foto: foto.trim() || null               // Opzionale
-                };
-
-                try {
-                    showResponse('richiestaResponse', '🔄 Invio richiesta di soccorso...', 'info');
-
-                    // Chiamata all'endpoint REST
-                    const response = await fetch(`${API_BASE_URL}/richieste`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(richiestaData)
-                    });
-
-                    const result = await response.json();
-
-                    if (response.ok && result.success) {
-                        showResponse('richiestaResponse',
-                                `✅ ${result.message}\n\n` +
-                                `📋 Codice Richiesta: ${result.richiesta.codice}\n` +
-                                `📍 Stato: ${result.richiesta.stato}\n` +
-                                `👤 Nome: ${result.richiesta.nome}\n` +
-                                `📧 Email: ${result.richiesta.emailSegnalante}\n` +
-                                `🏠 Indirizzo: ${result.richiesta.indirizzo}\n` +
-                                `🔗 Codice Validazione: ${result.richiesta.stringaValidazione}\n` +
-                                `${result.richiesta.coordinate ? `🌍 Coordinate: ${result.richiesta.coordinate}\n` : ''}` +
-                                `${result.richiesta.foto ? `📷 Foto: ${result.richiesta.foto}\n` : ''}`,
-                                'success');
-                    } else {
-                        showResponse('richiestaResponse',
-                                `❌ Errore: ${result.message || 'Errore sconosciuto'}`,
-                                'error');
-                    }
-
-                } catch (error) {
-                    showResponse('richiestaResponse',
-                            `❌ Errore di rete: ${error.message}`,
-                            'error');
-                }
-            }
-
-// Funzione per compilare dati di test realistici
-            function fillTestData() {
-                document.getElementById('descrizione').value = "Incendio in appartamento al secondo piano, presenza di feriti. Fumo denso dalle finestre. Necessario intervento immediato di VVF e ambulanza.";
-                document.getElementById('indirizzo').value = "Via Roma 123, L'Aquila (AQ)";
-                document.getElementById('nome').value = "Mario Rossi";
-                document.getElementById('emailSegnalante').value = "mario.rossi@email.com";
-                document.getElementById('nomeSegnalante').value = "Mario Rossi";
-                document.getElementById('coordinate').value = "42.3598, 13.3986";
-                document.getElementById('foto').value = "";
-            }
-
-// Funzione per pulire il form
-            function clearForm() {
-                document.getElementById('descrizione').value = "";
-                document.getElementById('indirizzo').value = "";
-                document.getElementById('nome').value = "";
-                document.getElementById('emailSegnalante').value = "";
-                document.getElementById('nomeSegnalante').value = "";
-                document.getElementById('coordinate').value = "";
-                document.getElementById('foto').value = "";
-
-                showResponse('richiestaResponse', 'Form pulito. Pronto per nuovi dati...', 'info');
-            }
-
-            // Funzione per effettuare la convalida
-            async function doConvalida() {
-                const id = document.getElementById('convalidaId').value;
-                const token = document.getElementById('convalidaToken').value;
-
-                if (!id || !token) {
-                    showResponse('convalidaResponse', 'Inserisci sia ID che token di convalida', 'error');
-                    return;
-                }
-
-                if (id <= 0) {
-                    showResponse('convalidaResponse', 'ID richiesta deve essere maggiore di 0', 'error');
-                    return;
-                }
-
-                if (token.trim().length < 10) {
-                    showResponse('convalidaResponse', 'Token troppo corto. Verifica di aver inserito il token completo.', 'error');
-                    return;
-                }
-
-                showResponse('convalidaResponse', 'Convalida in corso...', 'info');
-
-                try {
-                    const url = `${API_BASE_URL}/richieste/${id}/convalida?token=${encodeURIComponent(token)}`;
-
-                    const response = await fetch(url, {
-                        method: 'POST',
+                    const defaultOptions = {
                         headers: {
                             'Content-Type': 'application/json',
                             'Accept': 'application/json'
                         }
-                    });
+                    };
 
-                    const data = await response.json();
+                    // Aggiungi token se disponibile
+                    if (authToken) {
+                        defaultOptions.headers['Authorization'] = `Bearer ${authToken}`;
+                    }
 
-                    if (response.ok && data.success) {
-                        const richiesta = data.richiesta;
-                        const message = `✅ ${data.message}\n\n` +
-                                `Dettagli richiesta convalidata:\n` +
-                                `• ID: ${richiesta.codice}\n` +
-                                `• Stato: ${richiesta.stato}\n` +
-                                `• Indirizzo: ${richiesta.indirizzo}\n` +
-                                `• Segnalante: ${richiesta.nomeSegnalante}\n` +
-                                `• Email: ${richiesta.emailSegnalante}\n` +
-                                `• Descrizione: ${richiesta.descrizione.substring(0, 100)}${richiesta.descrizione.length > 100 ? '...' : ''}`;
-
-                        showResponse('convalidaResponse', message, 'success');
-                    } else {
-                        // Gestione errori specifici
-                        let errorMessage = data.message || 'Errore sconosciuto durante la convalida';
-
-                        if (response.status === 400) {
-                            if (data.message && data.message.includes('già')) {
-                                errorMessage = `⚠️ ${data.message}`;
-                                showResponse('convalidaResponse', errorMessage, 'warning');
-                                return;
-                            }
-                        } else if (response.status === 404) {
-                            errorMessage = '❌ Richiesta non trovata. Verifica l\'ID inserito.';
-                        } else if (response.status === 500) {
-                            errorMessage = '❌ Errore interno del server. Riprova più tardi.';
+                    const finalOptions = {
+                        ...defaultOptions,
+                        ...options,
+                        headers: {
+                            ...defaultOptions.headers,
+                            ...options.headers
                         }
+                    };
 
-                        showResponse('convalidaResponse', errorMessage, 'error');
-                    }
-                } catch (error) {
-                    showResponse('convalidaResponse', `❌ Errore di rete: ${error.message}`, 'error');
+                    try {
+                        const response = await fetch(url, finalOptions);
+                        const data = await response.json();
+
+                        return {
+                            ok: response.ok,
+                            status: response.status,
+                            data: data,
+                            headers: response.headers
+                        };
+                    } catch (error) {
+                        return {
+                            ok: false,
+                            status: 0,
+                            data: {error: 'NETWORK_ERROR', message: error.message},
+                            headers: null
+                        };
                 }
-            }
-
-            // Funzione per riempire con dati di esempio
-            function fillConvalidaExample() {
-                document.getElementById('convalidaId').value = "1";
-                document.getElementById('convalidaToken').value = "exemplo-token-123456789abcdef";
-
-                showResponse('convalidaResponse',
-                        '📋 Form riempito con dati di esempio.\n\n' +
-                        '⚠️ IMPORTANTE: Questi sono dati di esempio!\n' +
-                        '• L\'ID e il token devono corrispondere a una richiesta reale\n' +
-                        '• Il token viene inviato via email al segnalante\n' +
-                        '• La richiesta deve essere in stato PENDING_VALIDATION',
-                        'info');
-            }
-
-            // Funzione per pulire il form di convalida
-            function clearConvalidaForm() {
-                document.getElementById('convalidaId').value = "";
-                document.getElementById('convalidaToken').value = "";
-                showResponse('convalidaResponse', 'Form di convalida pulito. Pronto per nuovi dati...', 'info');
-            }
-
-            // Aggiorna anche la funzione clearAllResponses() per includere la nuova sezione
-            function clearAllResponses() {
-                const responseAreas = ['authResponse', 'richiestaResponse', 'convalidaResponse', 'listaResponse', 'operatoriResponse', 'testResponse'];
-                responseAreas.forEach(id => {
-                    const element = document.getElementById(id);
-                    if (element) {
-                        element.textContent = 'Sezione pulita...';
-                        element.className = 'response-area';
-                    }
-                });
-            }
-
-            async function getListaRichieste() {
-                if (!authToken) {
-                    showResponse('listaResponse', 'Devi prima effettuare il login per vedere le richieste', 'error');
-                    return;
                 }
 
-                const stato = document.getElementById('filtroStato').value;
-                const pagina = parseInt(document.getElementById('pagina').value) || 1;
+                // Funzioni di autenticazione
+                async function doLogin() {
+                    const email = document.getElementById('email').value;
+                    const password = document.getElementById('password').value;
 
-                if (pagina < 1) {
-                    showResponse('listaResponse', 'Il numero di pagina deve essere >= 1', 'error');
-                    return;
-                }
-
-                showResponse('listaResponse', 'Caricamento lista richieste...', 'info');
-
-                try {
-                    // Costruisci l'URL con i parametri
-                    let url = '/richieste';
-                    const params = new URLSearchParams();
-
-                    if (stato && stato.trim() !== '') {
-                        params.append('stato', stato);
-                    }
-                    params.append('page', pagina.toString());
-                    params.append('size', '10'); // Dimensione fissa per il test
-
-                    if (params.toString()) {
-                        url += '?' + params.toString();
+                    if (!email || !password) {
+                        showResponse('authResponse', 'Inserisci email e password', 'error');
+                        return;
                     }
 
-                    const result = await apiCall(url);
+                    showResponse('authResponse', 'Autenticazione in corso...', 'info');
 
-                    if (result.ok) {
-                        const response = result.data;
-
-                        let message = `✅ Lista richieste caricata con successo!\n\n`;
-                        message += `📊 Statistiche:\n`;
-                        message += `• Totale richieste: ${response.totalElements}\n`;
-                        message += `• Pagine totali: ${response.totalPages}\n`;
-                        message += `• Pagina corrente: ${response.number + 1}\n`;
-                        message += `• Richieste in questa pagina: ${response.content.length}\n`;
-                        message += `• Prima pagina: ${response.first ? 'Sì' : 'No'}\n`;
-                        message += `• Ultima pagina: ${response.last ? 'Sì' : 'No'}\n\n`;
-
-                        if (response.content.length > 0) {
-                            message += `🔍 Prime ${Math.min(3, response.content.length)} richieste:\n`;
-                            response.content.slice(0, 3).forEach((richiesta, index) => {
-                                message += `\n${index + 1}. ID: ${richiesta.codice}\n`;
-                                message += `   • Stato: ${richiesta.stato}\n`;
-                                message += `   • Segnalante: ${richiesta.nomeSegnalante}\n`;
-                                message += `   • Indirizzo: ${richiesta.indirizzo}\n`;
-                                message += `   • Descrizione: ${richiesta.descrizione.substring(0, 80)}${richiesta.descrizione.length > 80 ? '...' : ''}\n`;
-                            });
-
-                            if (response.content.length > 3) {
-                                message += `\n... e altre ${response.content.length - 3} richieste.`;
-                            }
-                        } else {
-                            message += `📭 Nessuna richiesta trovata con i filtri specificati.`;
-                        }
-
-                        showResponse('listaResponse', message, 'success');
-                    } else {
-                        let errorMessage = `❌ Errore nel caricamento: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
-                        if (result.status === 401) {
-                            errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
-                        } else if (result.status === 403) {
-                            errorMessage = '❌ Accesso negato. Solo gli amministratori possono vedere tutte le richieste.';
-                        }
-                        showResponse('listaResponse', errorMessage, 'error');
-                    }
-                } catch (error) {
-                    showResponse('listaResponse', `❌ Errore di rete: ${error.message}`, 'error');
-                }
-            }
-
-            // Funzione per caricare le richieste non positive
-            async function getRichiesteNonPositive() {
-                if (!authToken) {
-                    showResponse('listaResponse', 'Devi prima effettuare il login', 'error');
-                    return;
-                }
-
-                const pagina = parseInt(document.getElementById('pagina').value) || 1;
-
-                if (pagina < 1) {
-                    showResponse('listaResponse', 'Il numero di pagina deve essere >= 1', 'error');
-                    return;
-                }
-
-                showResponse('listaResponse', 'Caricamento richieste non positive...', 'info');
-
-                try {
-                    const url = `/richieste/non-positive?page=${pagina}&size=10`;
-                    const result = await apiCall(url);
-
-                    if (result.ok) {
-                        const response = result.data;
-
-                        let message = `✅ Richieste non positive caricate!\n\n`;
-                        message += `📊 Statistiche:\n`;
-                        message += `• Totale richieste non positive: ${response.totalElements}\n`;
-                        message += `• Pagine totali: ${response.totalPages}\n`;
-                        message += `• Pagina corrente: ${response.number + 1}\n`;
-                        message += `• Richieste in questa pagina: ${response.content.length}\n\n`;
-
-                        if (response.content.length > 0) {
-                            message += `🔍 Richieste non positive:\n`;
-                            response.content.forEach((richiesta, index) => {
-                                message += `\n${index + 1}. ID: ${richiesta.codice}\n`;
-                                message += `   • Stato: ${richiesta.stato}\n`;
-                                message += `   • Segnalante: ${richiesta.nomeSegnalante}\n`;
-                                message += `   • Indirizzo: ${richiesta.indirizzo}\n`;
-                                message += `   • Descrizione: ${richiesta.descrizione.substring(0, 60)}...\n`;
-                            });
-                        } else {
-                            message += `🎉 Ottime notizie! Non ci sono richieste con esito non positivo.`;
-                        }
-
-                        showResponse('listaResponse', message, 'success');
-                    } else {
-                        let errorMessage = `❌ Errore nel caricamento: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
-                        if (result.status === 401) {
-                            errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
-                        } else if (result.status === 403) {
-                            errorMessage = '❌ Accesso negato. Solo gli amministratori possono vedere queste richieste.';
-                        }
-                        showResponse('listaResponse', errorMessage, 'error');
-                    }
-                } catch (error) {
-                    showResponse('listaResponse', `❌ Errore di rete: ${error.message}`, 'error');
-                }
-            }
-
-            // Funzione per testare diversi filtri rapidamente
-            function testFiltriVeloci() {
-                const filtri = [
-                    {stato: '', desc: 'tutte le richieste'},
-                    {stato: 'ATTIVA', desc: 'richieste attive'},
-                    {stato: 'CHIUSA', desc: 'richieste chiuse'},
-                    {stato: 'CONVALIDATA', desc: 'richieste convalidate'}
-                ];
-
-                let message = '🚀 Test rapido filtri disponibili:\n\n';
-                filtri.forEach((filtro, index) => {
-                    message += `${index + 1}. Stato: "${filtro.stato || 'TUTTI'}" - ${filtro.desc}\n`;
-                });
-                message += '\nModifica il filtro "Stato" e clicca "Carica Lista" per testare!';
-
-                showResponse('listaResponse', message, 'info');
-            }
-
-           // AGGIORNA la funzione updateAuthStatus esistente per i pulsanti missioni
-
-            function updateAuthStatus(isLoggedIn) {
-                const statusEl = document.getElementById('authStatus');
-                const buttons = [
-                    'verifyBtn', 
-                    'logoutBtn', 
-                    'listaBtn', 
-                    'operatoriBtn',           // Operatori liberi
-                    'dettagliOperatoreBtn',   // Cerca operatore per ID
-                    'richiesteAttiveBtn',     // Vedi richieste attive (NUOVO)
-                    'mostraFormBtn',          // Mostra form missione (NUOVO)
-                    'creaMissioneBtn'         // Crea missione (NUOVO)
-                ];
-
-                if (isLoggedIn) {
-                    statusEl.textContent = `✅ Autenticato come: ${currentUser.email} (${currentUser.role})`;
-                    statusEl.className = 'auth-status logged-in';
-                    buttons.forEach(btnId => {
-                        const btn = document.getElementById(btnId);
-                        if (btn) btn.disabled = false;
-                    });
-                } else {
-                    statusEl.textContent = '❌ Non autenticato';
-                    statusEl.className = 'auth-status logged-out';
-                    buttons.forEach(btnId => {
-                        const btn = document.getElementById(btnId);
-                        if (btn) btn.disabled = true;
-                    });
-                }
-            }
-
-            // AGGIORNA anche la funzione clearAllResponses per includere le nuove aree
-            function clearAllResponses() {
-                const responseAreas = [
-                    'authResponse', 
-                    'richiestaResponse', 
-                    'convalidaResponse', 
-                    'listaResponse', 
-                    'operatoriResponse',
-                    'missioneResponse',        // Area missioni principale (NUOVO)
-                    'richiesteAttiveResponse', // Area richieste attive (NUOVO)
-                    'testResponse'
-                ];
-                
-                responseAreas.forEach(id => {
-                    const element = document.getElementById(id);
-                    if (element) {
-                        element.textContent = 'Sezione pulita...';
-                        element.className = 'response-area';
-                    }
-                });
-                
-                // Nascondi anche le sezioni espandibili
-                document.getElementById('sezionRichiesteAttive').style.display = 'none';
-                document.getElementById('sezionFormMissione').style.display = 'none';
-                
-                showResponse('testResponse', '🧹 Tutte le sezioni sono state pulite e chiuse!', 'success');
-            }
-            // Funzione per pulire tutte le risposte (aggiornata)
-            function clearAllResponses() {
-                const responseAreas = [
-                    'authResponse',
-                    'richiestaResponse',
-                    'convalidaResponse',
-                    'listaResponse',
-                    'operatoriResponse',
-                    'testResponse'
-                ];
-
-                responseAreas.forEach(id => {
-                    const element = document.getElementById(id);
-                    if (element) {
-                        element.textContent = 'Sezione pulita...';
-                        element.className = 'response-area';
-                    }
-                });
-
-                showResponse('testResponse', '🧹 Tutte le sezioni sono state pulite!', 'success');
-            }
-
-            // Aggiorna l'inizializzazione per includere la nuova sezione
-            document.addEventListener('DOMContentLoaded', function () {
-                updateAuthStatus(false);
-                showResponse('authResponse', 'Pronto per il test di autenticazione...');
-                showResponse('richiestaResponse', 'Pronto per il test di inserimento richiesta...');
-                showResponse('convalidaResponse', 'Pronto per il test di convalida richiesta...');
-                showResponse('listaResponse', 'Pronto per il test di lista richieste...');
-                showResponse('operatoriResponse', 'Pronto per il test di lista operatori...');
-                showResponse('testResponse', 'Pronto per i test di connettività...');
-            }
-                    // AGGIUNGI QUESTE FUNZIONI al JavaScript di rest-client-test.html
-
-            // Funzione per mostrare le richieste attive
-            async function mostraRichiesteAttive() {
-                if (!authToken) {
-                    showResponse('missioneResponse', 'Devi prima effettuare il login per vedere le richieste', 'error');
-                    return;
-                }
-
-                // Nascondi form se aperto
-                document.getElementById('sezionFormMissione').style.display = 'none';
-                
-                // Mostra sezione richieste attive
-                document.getElementById('sezionRichiesteAttive').style.display = 'block';
-                
-                showResponse('richiesteAttiveResponse', 'Caricamento richieste attive...', 'info');
-
-                try {
-                    const result = await apiCall('/missioni/richieste-attive');
-
-                    if (result.ok) {
-                        const richieste = result.data;
-                        
-                        let message = `✅ Richieste attive caricate!\n\n`;
-                        message += `📊 Trovate ${richieste.length} richieste disponibili per creare missioni:\n\n`;
-                        
-                        if (richieste.length > 0) {
-                            richieste.forEach((richiesta, index) => {
-                                message += `${index + 1}. 🆔 ID: ${richiesta.codice}\n`;
-                                message += `   📋 Descrizione: ${richiesta.descrizione.substring(0, 80)}${richiesta.descrizione.length > 80 ? '...' : ''}\n`;
-                                message += `   📍 Indirizzo: ${richiesta.indirizzo}\n`;
-                                message += `   👤 Segnalante: ${richiesta.nomeSegnalante}\n`;
-                                message += `   📧 Email: ${richiesta.emailSegnalante}\n`;
-                                message += `   🚨 Stato: ${richiesta.stato}\n`;
-                                if (index < richieste.length - 1) {
-                                    message += `\n${'-'.repeat(40)}\n\n`;
-                                }
-                            });
-                            
-                            message += `\n\n💡 Usa questi ID nel form "Crea Missione" per assegnare una missione a una richiesta.`;
-                        } else {
-                            message += `📭 Non ci sono richieste attive al momento.\nTutte le richieste sono già state gestite o sono in stati diversi.`;
-                        }
-                        
-                        showResponse('richiesteAttiveResponse', message, 'success');
-                        showResponse('missioneResponse', 'Richieste attive visualizzate. Usa "Crea Missione" per creare una nuova missione.', 'info');
-                    } else {
-                        let errorMessage = `❌ Errore nel caricamento: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
-                        if (result.status === 401) {
-                            errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
-                        } else if (result.status === 403) {
-                            errorMessage = '❌ Accesso negato. Solo gli amministratori possono vedere le richieste.';
-                        }
-                        showResponse('richiesteAttiveResponse', errorMessage, 'error');
-                    }
-                } catch (error) {
-                    showResponse('richiesteAttiveResponse', `❌ Errore di rete: ${error.message}`, 'error');
-                }
-            }
-
-            // Funzione per mostrare il form di creazione missione
-            function mostraFormCreazioneMissione() {
-                if (!authToken) {
-                    showResponse('missioneResponse', 'Devi prima effettuare il login per creare missioni', 'error');
-                    return;
-                }
-
-                // Nascondi richieste attive se aperte
-                document.getElementById('sezionRichiesteAttive').style.display = 'none';
-                
-                // Mostra form
-                document.getElementById('sezionFormMissione').style.display = 'block';
-                
-                // Aggiorna orario di creazione
-                updateOrarioCreazione();
-                
-                showResponse('missioneResponse', 'Form di creazione missione aperto. Compila i campi richiesti e clicca "Crea Missione".', 'info');
-            }
-
-            // Funzione per nascondere il form
-            function nascondiFormMissione() {
-                document.getElementById('sezionFormMissione').style.display = 'none';
-                showResponse('missioneResponse', 'Form chiuso. Usa i pulsanti sopra per vedere le richieste attive o creare una missione.', 'info');
-            }
-
-            // Funzione per aggiornare l'orario di creazione
-            function updateOrarioCreazione() {
-                const now = new Date();
-                const orarioFormattato = now.toLocaleString('it-IT', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                });
-                document.getElementById('orarioCreazione').textContent = orarioFormattato;
-            }
-
-            // Funzione per creare la missione
-            async function creaMissione() {
-                if (!authToken) {
-                    showResponse('missioneResponse', 'Devi prima effettuare il login', 'error');
-                    return;
-                }
-
-                // Raccogli dati dal form
-                const richiestaId = parseInt(document.getElementById('richiestaIdMissione').value);
-                const nome = document.getElementById('nomeMissione').value.trim();
-                const posizione = document.getElementById('posizioneMissione').value.trim();
-                const obiettivo = document.getElementById('obiettivoMissione').value.trim();
-                const operatori = document.getElementById('operatoriMissione').value.trim();
-                const mezzi = document.getElementById('mezziMissione').value.trim();
-                const materiali = document.getElementById('materialiMissione').value.trim();
-
-                // Validazioni client-side
-                if (!richiestaId || richiestaId <= 0) {
-                    showResponse('missioneResponse', '❌ Inserisci un ID richiesta valido', 'error');
-                    return;
-                }
-
-                if (!nome) {
-                    showResponse('missioneResponse', '❌ Il nome della missione è obbligatorio', 'error');
-                    return;
-                }
-
-                if (!posizione) {
-                    showResponse('missioneResponse', '❌ La posizione è obbligatoria', 'error');
-                    return;
-                }
-
-                if (!obiettivo) {
-                    showResponse('missioneResponse', '❌ L\'obiettivo è obbligatorio', 'error');
-                    return;
-                }
-
-                if (!operatori) {
-                    showResponse('missioneResponse', '❌ Almeno un operatore è obbligatorio', 'error');
-                    return;
-                }
-
-                // Prepara i dati della richiesta
-                const missioneData = {
-                    richiestaId: richiestaId,
-                    nome: nome,
-                    posizione: posizione,
-                    obiettivo: obiettivo,
-                    operatori: operatori,
-                    mezzi: mezzi || null,
-                    materiali: materiali || null
-                };
-
-                showResponse('missioneResponse', 'Creazione missione in corso...', 'info');
-
-                try {
-                    const result = await apiCall('/missioni', {
+                    const result = await apiCall('/auth/login', {
                         method: 'POST',
-                        body: JSON.stringify(missioneData)
+                        body: JSON.stringify({email, password})
+                    });
+
+                    if (result.ok && result.data.success) {
+                        authToken = result.data.token;
+                        currentUser = result.data.user;
+                        updateAuthStatus(true);
+                        showResponse('authResponse',
+                                `✅ Login riuscito!\nUtente: ${currentUser.email}\nRuolo: ${currentUser.role}\nToken: ${authToken.substring(0, 50)}...`,
+                                'success');
+                    } else {
+                        updateAuthStatus(false);
+                        showResponse('authResponse',
+                                `❌ Login fallito: ${result.data.message || 'Errore sconosciuto'}`,
+                                'error');
+                    }
+                }
+
+                async function doLogout() {
+                    if (!authToken) {
+                        showResponse('authResponse', 'Non sei autenticato', 'error');
+                        return;
+                    }
+
+                    const result = await apiCall('/auth/logout', {
+                        method: 'DELETE'
+                    });
+
+                    authToken = null;
+                    currentUser = null;
+                    updateAuthStatus(false);
+
+                    showResponse('authResponse', '✅ Logout effettuato', 'success');
+                }
+
+                async function verifyToken() {
+                    if (!authToken) {
+                        showResponse('authResponse', 'Nessun token da verificare', 'error');
+                        return;
+                    }
+
+                    const result = await apiCall('/auth/verify');
+
+                    if (result.ok && result.data.valid) {
+                        showResponse('authResponse',
+                                `✅ Token valido!\nUtente: ${result.data.user.email}\nRuolo: ${result.data.user.role}`,
+                                'success');
+                    } else {
+                        showResponse('authResponse',
+                                `❌ Token non valido: ${result.data.message || 'Token scaduto o malformato'}`,
+                                'error');
+                        authToken = null;
+                        currentUser = null;
+                        updateAuthStatus(false);
+                    }
+                }
+
+
+                async function getListaRichieste() {
+                    showResponse('listaResponse', '🚧 Endpoint non ancora implementato - TODO', 'info');
+                }
+
+                async function getOperatoriLiberi() {
+                    showResponse('operatoriResponse', '🚧 Endpoint non ancora implementato - TODO', 'info');
+                }
+
+                // Funzioni di test
+                async function testHealth() {
+                    showResponse('testResponse', 'Testing basic connectivity...', 'info');
+
+                    const result = await fetch(`${API_BASE_URL}/auth/login`, {
+                        method: 'OPTIONS'
                     });
 
                     if (result.ok) {
-                        const response = result.data;
-                        
-                        let message = `✅ ${response.message}\n\n`;
-                        message += `🎯 Dettagli missione creata:\n`;
-                        message += `• Nome: ${response.missione.nome}\n`;
-                        message += `• Posizione: ${response.missione.posizione}\n`;
-                        message += `• Obiettivo: ${response.missione.obiettivo}\n`;
-                        message += `• ID Richiesta: ${response.missione.codiceRichiesta}\n`;
-                        message += `• Data/Ora Inizio: ${new Date(response.missione.dataOraInizio).toLocaleString('it-IT')}\n`;
-                        
-                        if (response.emailOperatori && response.emailOperatori.length > 0) {
-                            message += `\n📧 Email notifiche inviate a:\n`;
-                            response.emailOperatori.forEach(email => {
-                                message += `• ${email}\n`;
-                            });
-                        }
-                        
-                        showResponse('missioneResponse', message, 'success');
-                        
-                        // Pulisci il form dopo il successo
-                        clearMissioneForm();
-                        
+                        showResponse('testResponse', '✅ API raggiungibile, CORS configurato correttamente', 'success');
                     } else {
-                        let errorMessage = `❌ Errore nella creazione: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
-                        
-                        if (result.status === 400) {
-                            errorMessage = `❌ Dati non validi: ${result.data.error || 'Controlla i campi inseriti'}`;
-                        } else if (result.status === 401) {
-                            errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
-                        } else if (result.status === 403) {
-                            errorMessage = '❌ Accesso negato. Solo gli amministratori possono creare missioni.';
-                        }
-                        
-                        showResponse('missioneResponse', errorMessage, 'error');
+                        showResponse('testResponse', `❌ Problema di connettività: ${result.status}`, 'error');
                     }
-                } catch (error) {
-                    showResponse('missioneResponse', `❌ Errore di rete: ${error.message}`, 'error');
                 }
-            }
 
-            // Funzione per pulire il form
-            function clearMissioneForm() {
-                document.getElementById('richiestaIdMissione').value = '';
-                document.getElementById('nomeMissione').value = '';
-                document.getElementById('posizioneMissione').value = '';
-                document.getElementById('obiettivoMissione').value = '';
-                document.getElementById('operatoriMissione').value = '';
-                document.getElementById('mezziMissione').value = '';
-                document.getElementById('materialiMissione').value = '';
-                
-                // Aggiorna orario
-                updateOrarioCreazione();
-                
-                showResponse('missioneResponse', 'Form pulito. Compila i campi per creare una nuova missione.', 'info');
-            });
-        </script>
-    </body>
-</html>
+                async function testCORS() {
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                            method: 'OPTIONS',
+                            headers: {
+                                'Origin': window.location.origin,
+                                'Access-Control-Request-Method': 'POST',
+                                'Access-Control-Request-Headers': 'Content-Type'
+                            }
+                        });
+
+                        showResponse('testResponse',
+                                `✅ Test CORS completato\nStatus: ${response.status}\nHeaders CORS: ${response.headers.get('Access-Control-Allow-Origin')}`,
+                                'success');
+                    } catch (error) {
+                        showResponse('testResponse', `❌ Errore CORS: ${error.message}`, 'error');
+                    }
+                }
+
+                // Utility functions
+                function updateAuthStatus(isLoggedIn) {
+                    const statusEl = document.getElementById('authStatus');
+                    const buttons = [
+                        'verifyBtn',
+                        'logoutBtn',
+                        'listaBtn',
+                        'operatoriBtn', // Pulsante principale operatori liberi
+                        'dettagliOperatoreBtn'    // Cerca operatore per ID
+                    ];
+
+                    if (isLoggedIn) {
+                        statusEl.textContent = `✅ Autenticato come: ${currentUser.email} (${currentUser.role})`;
+                        statusEl.className = 'auth-status logged-in';
+                        buttons.forEach(btnId => {
+                            const btn = document.getElementById(btnId);
+                            if (btn)
+                                btn.disabled = false;
+                        });
+                    } else {
+                        statusEl.textContent = '❌ Non autenticato';
+                        statusEl.className = 'auth-status logged-out';
+                        buttons.forEach(btnId => {
+                            const btn = document.getElementById(btnId);
+                            if (btn)
+                                btn.disabled = true;
+                        });
+                    }
+                }
+
+                function showResponse(elementId, message, type = 'info') {
+                    const element = document.getElementById(elementId);
+                    element.textContent = message;
+                    element.className = `response-area ${type}`;
+                }
+
+                function clearAllResponses() {
+                    const responseAreas = [
+                        'authResponse',
+                        'richiestaResponse',
+                        'convalidaResponse',
+                        'listaResponse',
+                        'operatoriResponse',
+                        'testResponse'
+                    ];
+
+                    responseAreas.forEach(id => {
+                        const element = document.getElementById(id);
+                        if (element) {
+                            element.textContent = 'Sezione pulita...';
+                            element.className = 'response-area';
+                        }
+                    });
+
+                    showResponse('testResponse', '🧹 Tutte le sezioni sono state pulite!', 'success');
+                }
+
+                // Funzione di test per inserire una richiesta di soccorso (AGGIORNATA)
+                async function inserisciRichiesta() {
+                    // Leggi tutti i campi dal form
+                    const descrizione = document.getElementById('descrizione').value;
+                    const indirizzo = document.getElementById('indirizzo').value;
+                    const nome = document.getElementById('nome').value;
+                    const emailSegnalante = document.getElementById('emailSegnalante').value;
+                    const nomeSegnalante = document.getElementById('nomeSegnalante').value;
+                    const coordinate = document.getElementById('coordinate').value;
+                    const foto = document.getElementById('foto').value;
+
+                    // Valida input obbligatori
+                    if (!descrizione || descrizione.trim().length < 10) {
+                        showResponse('richiestaResponse', '❌ La descrizione deve essere di almeno 10 caratteri', 'error');
+                        return;
+                    }
+
+                    if (!indirizzo || indirizzo.trim().length < 5) {
+                        showResponse('richiestaResponse', '❌ L\'indirizzo è obbligatorio e deve essere valido', 'error');
+                        return;
+                    }
+
+                    if (!nome || nome.trim().length < 2) {
+                        showResponse('richiestaResponse', '❌ Il nome è obbligatorio', 'error');
+                        return;
+                    }
+
+                    if (!emailSegnalante || !emailSegnalante.includes('@')) {
+                        showResponse('richiestaResponse', '❌ L\'email del segnalante è obbligatoria e deve essere valida', 'error');
+                        return;
+                    }
+
+                    if (!nomeSegnalante || nomeSegnalante.trim().length < 2) {
+                        showResponse('richiestaResponse', '❌ Il nome del segnalante è obbligatorio', 'error');
+                        return;
+                    }
+
+                    // Prepara il payload con tutti i campi
+                    const richiestaData = {
+                        descrizione: descrizione.trim(),
+                        indirizzo: indirizzo.trim(),
+                        nome: nome.trim(),
+                        emailSegnalante: emailSegnalante.trim(),
+                        nomeSegnalante: nomeSegnalante.trim(),
+                        coordinate: coordinate.trim() || null, // Opzionale
+                        foto: foto.trim() || null               // Opzionale
+                    };
+
+                    try {
+                        showResponse('richiestaResponse', '🔄 Invio richiesta di soccorso...', 'info');
+
+                        // Chiamata all'endpoint REST
+                        const response = await fetch(`${API_BASE_URL}/richieste`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(richiestaData)
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok && result.success) {
+                            showResponse('richiestaResponse',
+                                    `✅ ${result.message}\n\n` +
+                                    `📋 Codice Richiesta: ${result.richiesta.codice}\n` +
+                                    `📍 Stato: ${result.richiesta.stato}\n` +
+                                    `👤 Nome: ${result.richiesta.nome}\n` +
+                                    `📧 Email: ${result.richiesta.emailSegnalante}\n` +
+                                    `🏠 Indirizzo: ${result.richiesta.indirizzo}\n` +
+                                    `🔗 Codice Validazione: ${result.richiesta.stringaValidazione}\n` +
+                                    `${result.richiesta.coordinate ? `🌍 Coordinate: ${result.richiesta.coordinate}\n` : ''}` +
+                                    `${result.richiesta.foto ? `📷 Foto: ${result.richiesta.foto}\n` : ''}`,
+                                    'success');
+                        } else {
+                            showResponse('richiestaResponse',
+                                    `❌ Errore: ${result.message || 'Errore sconosciuto'}`,
+                                    'error');
+                        }
+
+                    } catch (error) {
+                        showResponse('richiestaResponse',
+                                `❌ Errore di rete: ${error.message}`,
+                                'error');
+                    }
+                }
+
+                // Funzione per compilare dati di test realistici
+                function fillTestData() {
+                    document.getElementById('descrizione').value = "Incendio in appartamento al secondo piano, presenza di feriti. Fumo denso dalle finestre. Necessario intervento immediato di VVF e ambulanza.";
+                    document.getElementById('indirizzo').value = "Via Roma 123, L'Aquila (AQ)";
+                    document.getElementById('nome').value = "Mario Rossi";
+                    document.getElementById('emailSegnalante').value = "mario.rossi@email.com";
+                    document.getElementById('nomeSegnalante').value = "Mario Rossi";
+                    document.getElementById('coordinate').value = "42.3598, 13.3986";
+                    document.getElementById('foto').value = "";
+                }
+
+                // Funzione per pulire il form
+                function clearForm() {
+                    document.getElementById('descrizione').value = "";
+                    document.getElementById('indirizzo').value = "";
+                    document.getElementById('nome').value = "";
+                    document.getElementById('emailSegnalante').value = "";
+                    document.getElementById('nomeSegnalante').value = "";
+                    document.getElementById('coordinate').value = "";
+                    document.getElementById('foto').value = "";
+
+                    showResponse('richiestaResponse', 'Form pulito. Pronto per nuovi dati...', 'info');
+                }
+
+                // Funzione per effettuare la convalida
+                async function doConvalida() {
+                    const id = document.getElementById('convalidaId').value;
+                    const token = document.getElementById('convalidaToken').value;
+
+                    if (!id || !token) {
+                        showResponse('convalidaResponse', 'Inserisci sia ID che token di convalida', 'error');
+                        return;
+                    }
+
+                    if (id <= 0) {
+                        showResponse('convalidaResponse', 'ID richiesta deve essere maggiore di 0', 'error');
+                        return;
+                    }
+
+                    if (token.trim().length < 10) {
+                        showResponse('convalidaResponse', 'Token troppo corto. Verifica di aver inserito il token completo.', 'error');
+                        return;
+                    }
+
+                    showResponse('convalidaResponse', 'Convalida in corso...', 'info');
+
+                    try {
+                        const url = `${API_BASE_URL}/richieste/${id}/convalida?token=${encodeURIComponent(token)}`;
+
+                        const response = await fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok && data.success) {
+                            const richiesta = data.richiesta;
+                            const message = `✅ ${data.message}\n\n` +
+                                    `Dettagli richiesta convalidata:\n` +
+                                    `• ID: ${richiesta.codice}\n` +
+                                    `• Stato: ${richiesta.stato}\n` +
+                                    `• Indirizzo: ${richiesta.indirizzo}\n` +
+                                    `• Segnalante: ${richiesta.nomeSegnalante}\n` +
+                                    `• Email: ${richiesta.emailSegnalante}\n` +
+                                    `• Descrizione: ${richiesta.descrizione.substring(0, 100)}${richiesta.descrizione.length > 100 ? '...' : ''}`;
+
+                            showResponse('convalidaResponse', message, 'success');
+                        } else {
+                            // Gestione errori specifici
+                            let errorMessage = data.message || 'Errore sconosciuto durante la convalida';
+
+                            if (response.status === 400) {
+                                if (data.message && data.message.includes('già')) {
+                                    errorMessage = `⚠️ ${data.message}`;
+                                    showResponse('convalidaResponse', errorMessage, 'warning');
+                                    return;
+                                }
+                            } else if (response.status === 404) {
+                                errorMessage = '❌ Richiesta non trovata. Verifica l\'ID inserito.';
+                            } else if (response.status === 500) {
+                                errorMessage = '❌ Errore interno del server. Riprova più tardi.';
+                            }
+
+                            showResponse('convalidaResponse', errorMessage, 'error');
+                        }
+                    } catch (error) {
+                        showResponse('convalidaResponse', `❌ Errore di rete: ${error.message}`, 'error');
+                    }
+                }
+
+                // Funzione per riempire con dati di esempio
+                function fillConvalidaExample() {
+                    document.getElementById('convalidaId').value = "1";
+                    document.getElementById('convalidaToken').value = "exemplo-token-123456789abcdef";
+
+                    showResponse('convalidaResponse',
+                            '📋 Form riempito con dati di esempio.\n\n' +
+                            '⚠️ IMPORTANTE: Questi sono dati di esempio!\n' +
+                            '• L\'ID e il token devono corrispondere a una richiesta reale\n' +
+                            '• Il token viene inviato via email al segnalante\n' +
+                            '• La richiesta deve essere in stato PENDING_VALIDATION',
+                            'info');
+                }
+
+                // Funzione per pulire il form di convalida
+                function clearConvalidaForm() {
+                    document.getElementById('convalidaId').value = "";
+                    document.getElementById('convalidaToken').value = "";
+                    showResponse('convalidaResponse', 'Form di convalida pulito. Pronto per nuovi dati...', 'info');
+                }
+
+                // Aggiorna anche la funzione clearAllResponses() per includere la nuova sezione
+                function clearAllResponses() {
+                    const responseAreas = ['authResponse', 'richiestaResponse', 'convalidaResponse', 'listaResponse', 'operatoriResponse', 'testResponse'];
+                    responseAreas.forEach(id => {
+                        const element = document.getElementById(id);
+                        if (element) {
+                            element.textContent = 'Sezione pulita...';
+                            element.className = 'response-area';
+                        }
+                    });
+                }
+
+                async function getListaRichieste() {
+                    if (!authToken) {
+                        showResponse('listaResponse', 'Devi prima effettuare il login per vedere le richieste', 'error');
+                        return;
+                    }
+
+                    const stato = document.getElementById('filtroStato').value;
+                    const pagina = parseInt(document.getElementById('pagina').value) || 1;
+
+                    if (pagina < 1) {
+                        showResponse('listaResponse', 'Il numero di pagina deve essere >= 1', 'error');
+                        return;
+                    }
+
+                    showResponse('listaResponse', 'Caricamento lista richieste...', 'info');
+
+                    try {
+                        // Costruisci l'URL con i parametri
+                        let url = '/richieste';
+                        const params = new URLSearchParams();
+
+                        if (stato && stato.trim() !== '') {
+                            params.append('stato', stato);
+                        }
+                        params.append('page', pagina.toString());
+                        params.append('size', '10'); // Dimensione fissa per il test
+
+                        if (params.toString()) {
+                            url += '?' + params.toString();
+                        }
+
+                        const result = await apiCall(url);
+
+                        if (result.ok) {
+                            const response = result.data;
+
+                            let message = `✅ Lista richieste caricata con successo!\n\n`;
+                            message += `📊 Statistiche:\n`;
+                            message += `• Totale richieste: ${response.totalElements}\n`;
+                            message += `• Pagine totali: ${response.totalPages}\n`;
+                            message += `• Pagina corrente: ${response.number + 1}\n`;
+                            message += `• Richieste in questa pagina: ${response.content.length}\n`;
+                            message += `• Prima pagina: ${response.first ? 'Sì' : 'No'}\n`;
+                            message += `• Ultima pagina: ${response.last ? 'Sì' : 'No'}\n\n`;
+
+                            if (response.content.length > 0) {
+                                message += `🔍 Prime ${Math.min(3, response.content.length)} richieste:\n`;
+                                response.content.slice(0, 3).forEach((richiesta, index) => {
+                                    message += `\n${index + 1}. ID: ${richiesta.codice}\n`;
+                                    message += `   • Stato: ${richiesta.stato}\n`;
+                                    message += `   • Segnalante: ${richiesta.nomeSegnalante}\n`;
+                                    message += `   • Indirizzo: ${richiesta.indirizzo}\n`;
+                                    message += `   • Descrizione: ${richiesta.descrizione.substring(0, 80)}${richiesta.descrizione.length > 80 ? '...' : ''}\n`;
+                                });
+
+                                if (response.content.length > 3) {
+                                    message += `\n... e altre ${response.content.length - 3} richieste.`;
+                                }
+                            } else {
+                                message += `📭 Nessuna richiesta trovata con i filtri specificati.`;
+                            }
+
+                            showResponse('listaResponse', message, 'success');
+                        } else {
+                            let errorMessage = `❌ Errore nel caricamento: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
+                            if (result.status === 401) {
+                                errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
+                            } else if (result.status === 403) {
+                                errorMessage = '❌ Accesso negato. Solo gli amministratori possono vedere tutte le richieste.';
+                            }
+                            showResponse('listaResponse', errorMessage, 'error');
+                        }
+                    } catch (error) {
+                        showResponse('listaResponse', `❌ Errore di rete: ${error.message}`, 'error');
+                    }
+                }
+
+                // Funzione per caricare le richieste non positive
+                async function getRichiesteNonPositive() {
+                    if (!authToken) {
+                        showResponse('listaResponse', 'Devi prima effettuare il login', 'error');
+                        return;
+                    }
+
+                    const pagina = parseInt(document.getElementById('pagina').value) || 1;
+
+                    if (pagina < 1) {
+                        showResponse('listaResponse', 'Il numero di pagina deve essere >= 1', 'error');
+                        return;
+                    }
+
+                    showResponse('listaResponse', 'Caricamento richieste non positive...', 'info');
+
+                    try {
+                        const url = `/richieste/non-positive?page=${pagina}&size=10`;
+                        const result = await apiCall(url);
+
+                        if (result.ok) {
+                            const response = result.data;
+
+                            let message = `✅ Richieste non positive caricate!\n\n`;
+                            message += `📊 Statistiche:\n`;
+                            message += `• Totale richieste non positive: ${response.totalElements}\n`;
+                            message += `• Pagine totali: ${response.totalPages}\n`;
+                            message += `• Pagina corrente: ${response.number + 1}\n`;
+                            message += `• Richieste in questa pagina: ${response.content.length}\n\n`;
+
+                            if (response.content.length > 0) {
+                                message += `🔍 Richieste non positive:\n`;
+                                response.content.forEach((richiesta, index) => {
+                                    message += `\n${index + 1}. ID: ${richiesta.codice}\n`;
+                                    message += `   • Stato: ${richiesta.stato}\n`;
+                                    message += `   • Segnalante: ${richiesta.nomeSegnalante}\n`;
+                                    message += `   • Indirizzo: ${richiesta.indirizzo}\n`;
+                                    message += `   • Descrizione: ${richiesta.descrizione.substring(0, 60)}...\n`;
+                                });
+                            } else {
+                                message += `🎉 Ottime notizie! Non ci sono richieste con esito non positivo.`;
+                            }
+
+                            showResponse('listaResponse', message, 'success');
+                        } else {
+                            let errorMessage = `❌ Errore nel caricamento: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
+                            if (result.status === 401) {
+                                errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
+                            } else if (result.status === 403) {
+                                errorMessage = '❌ Accesso negato. Solo gli amministratori possono vedere queste richieste.';
+                            }
+                            showResponse('listaResponse', errorMessage, 'error');
+                        }
+                    } catch (error) {
+                        showResponse('listaResponse', `❌ Errore di rete: ${error.message}`, 'error');
+                    }
+                }
+
+                // Funzione per testare diversi filtri rapidamente
+                function testFiltriVeloci() {
+                    const filtri = [
+                        {stato: '', desc: 'tutte le richieste'},
+                        {stato: 'ATTIVA', desc: 'richieste attive'},
+                        {stato: 'CHIUSA', desc: 'richieste chiuse'},
+                        {stato: 'CONVALIDATA', desc: 'richieste convalidate'}
+                    ];
+
+                    let message = '🚀 Test rapido filtri disponibili:\n\n';
+                    filtri.forEach((filtro, index) => {
+                        message += `${index + 1}. Stato: "${filtro.stato || 'TUTTI'}" - ${filtro.desc}\n`;
+                    });
+                    message += '\nModifica il filtro "Stato" e clicca "Carica Lista" per testare!';
+
+                    showResponse('listaResponse', message, 'info');
+                }
+
+                // AGGIORNA la funzione updateAuthStatus esistente per i pulsanti missioni
+
+                function updateAuthStatus(isLoggedIn) {
+                    const statusEl = document.getElementById('authStatus');
+                    const buttons = [
+                        'verifyBtn',
+                        'logoutBtn',
+                        'listaBtn',
+                        'operatoriBtn', // Operatori liberi
+                        'dettagliOperatoreBtn', // Cerca operatore per ID
+                        'richiesteAttiveBtn', // Vedi richieste attive (NUOVO)
+                        'mostraFormBtn', // Mostra form missione (NUOVO)
+                        'creaMissioneBtn'         // Crea missione (NUOVO)
+                    ];
+
+                    if (isLoggedIn) {
+                        statusEl.textContent = `✅ Autenticato come: ${currentUser.email} (${currentUser.role})`;
+                        statusEl.className = 'auth-status logged-in';
+                        buttons.forEach(btnId => {
+                            const btn = document.getElementById(btnId);
+                            if (btn)
+                                btn.disabled = false;
+                        });
+                    } else {
+                        statusEl.textContent = '❌ Non autenticato';
+                        statusEl.className = 'auth-status logged-out';
+                        buttons.forEach(btnId => {
+                            const btn = document.getElementById(btnId);
+                            if (btn)
+                                btn.disabled = true;
+                        });
+                    }
+                }
+
+                // AGGIORNA anche la funzione clearAllResponses per includere le nuove aree
+                function clearAllResponses() {
+                    const responseAreas = [
+                        'authResponse',
+                        'richiestaResponse',
+                        'convalidaResponse',
+                        'listaResponse',
+                        'operatoriResponse',
+                        'missioneResponse', // Area missioni principale (NUOVO)
+                        'richiesteAttiveResponse', // Area richieste attive (NUOVO)
+                        'testResponse'
+                    ];
+
+                    responseAreas.forEach(id => {
+                        const element = document.getElementById(id);
+                        if (element) {
+                            element.textContent = 'Sezione pulita...';
+                            element.className = 'response-area';
+                        }
+                    });
+
+                    // Nascondi anche le sezioni espandibili
+                    document.getElementById('sezionRichiesteAttive').style.display = 'none';
+                    document.getElementById('sezionFormMissione').style.display = 'none';
+
+                    showResponse('testResponse', '🧹 Tutte le sezioni sono state pulite e chiuse!', 'success');
+                }
+                // Funzione per pulire tutte le risposte (aggiornata)
+                function clearAllResponses() {
+                    const responseAreas = [
+                        'authResponse',
+                        'richiestaResponse',
+                        'convalidaResponse',
+                        'listaResponse',
+                        'operatoriResponse',
+                        'testResponse'
+                    ];
+
+                    responseAreas.forEach(id => {
+                        const element = document.getElementById(id);
+                        if (element) {
+                            element.textContent = 'Sezione pulita...';
+                            element.className = 'response-area';
+                        }
+                    });
+
+                    showResponse('testResponse', '🧹 Tutte le sezioni sono state pulite!', 'success');
+                }
+
+                document.addEventListener('DOMContentLoaded', function () {
+                    updateAuthStatus(false);
+                    showResponse('authResponse', 'Pronto per il test di autenticazione...');
+                    showResponse('richiestaResponse', 'Pronto per il test di inserimento richiesta...');
+                    showResponse('convalidaResponse', 'Pronto per il test di convalida richiesta...');
+                    showResponse('listaResponse', 'Pronto per il test di lista richieste...');
+                    showResponse('operatoriResponse', 'Pronto per il test di lista operatori...');
+                    showResponse('testResponse', 'Pronto per i test di connettività...');
+                });
+
+                // Funzione per mostrare le richieste attive
+                async function mostraRichiesteAttive() {
+                    if (!authToken) {
+                        showResponse('missioneResponse', 'Devi prima effettuare il login per vedere le richieste', 'error');
+                        return;
+                    }
+
+                    // Nascondi form se aperto
+                    document.getElementById('sezionFormMissione').style.display = 'none';
+                    // Mostra sezione richieste attive
+                    document.getElementById('sezionRichiesteAttive').style.display = 'block';
+                    showResponse('richiesteAttiveResponse', 'Caricamento richieste attive...', 'info');
+                    try {
+                        const result = await apiCall('/missioni/richieste-attive');
+                        if (result.ok) {
+                            const richieste = result.data;
+                            let message = `✅ Richieste attive caricate!\n\n`;
+                            message += `📊 Trovate ${richieste.length} richieste disponibili per creare missioni:\n\n`;
+                            if (richieste.length > 0) {
+                                richieste.forEach((richiesta, index) => {
+                                    message += `${index + 1}. 🆔 ID: ${richiesta.codice}\n`;
+                                    message += `   📋 Descrizione: ${richiesta.descrizione.substring(0, 80)}${richiesta.descrizione.length > 80 ? '...' : ''}\n`;
+                                    message += `   📍 Indirizzo: ${richiesta.indirizzo}\n`;
+                                    message += `   👤 Segnalante: ${richiesta.nomeSegnalante}\n`;
+                                    message += `   📧 Email: ${richiesta.emailSegnalante}\n`;
+                                    message += `   🚨 Stato: ${richiesta.stato}\n`;
+                                    if (index < richieste.length - 1) {
+                                        message += `\n${'-'.repeat(40)}\n\n`;
+                                    }
+                                });
+                                message += `\n\n💡 Usa questi ID nel form "Crea Missione" per assegnare una missione a una richiesta.`;
+                            } else {
+                                message += `📭 Non ci sono richieste attive al momento.\nTutte le richieste sono già state gestite o sono in stati diversi.`;
+                            }
+
+                            showResponse('richiesteAttiveResponse', message, 'success');
+                            showResponse('missioneResponse', 'Richieste attive visualizzate. Usa "Crea Missione" per creare una nuova missione.', 'info');
+                        } else {
+                            let errorMessage = `❌ Errore nel caricamento: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
+                            if (result.status === 401) {
+                                errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
+                            } else if (result.status === 403) {
+                                errorMessage = '❌ Accesso negato. Solo gli amministratori possono vedere le richieste.';
+                            }
+                            showResponse('richiesteAttiveResponse', errorMessage, 'error');
+                        }
+                    } catch (error) {
+                        showResponse('richiesteAttiveResponse', `❌ Errore di rete: ${error.message}`, 'error');
+                    }
+                }
+
+                // Funzione per mostrare il form di creazione missione
+                function mostraFormCreazioneMissione() {
+                    if (!authToken) {
+                        showResponse('missioneResponse', 'Devi prima effettuare il login per creare missioni', 'error');
+                        return;
+                    }
+
+                    // Nascondi richieste attive se aperte
+                    document.getElementById('sezionRichiesteAttive').style.display = 'none';
+                    // Mostra form
+                    document.getElementById('sezionFormMissione').style.display = 'block';
+                    // Aggiorna orario di creazione
+                    updateOrarioCreazione();
+                    showResponse('missioneResponse', 'Form di creazione missione aperto. Compila i campi richiesti e clicca "Crea Missione".', 'info');
+                }
+
+                // Funzione per nascondere il form
+                function nascondiFormMissione() {
+                    document.getElementById('sezionFormMissione').style.display = 'none';
+                    showResponse('missioneResponse', 'Form chiuso. Usa i pulsanti sopra per vedere le richieste attive o creare una missione.', 'info');
+                }
+
+                // Funzione per aggiornare l'orario di creazione
+                function updateOrarioCreazione() {
+                    const now = new Date();
+                    const orarioFormattato = now.toLocaleString('it-IT', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    });
+                    document.getElementById('orarioCreazione').textContent = orarioFormattato;
+                }
+
+                // Funzione per creare la missione
+                async function creaMissione() {
+                    if (!authToken) {
+                        showResponse('missioneResponse', 'Devi prima effettuare il login', 'error');
+                        return;
+                    }
+
+                    // Raccogli dati dal form
+                    const richiestaId = parseInt(document.getElementById('richiestaIdMissione').value);
+                    const nome = document.getElementById('nomeMissione').value.trim();
+                    const posizione = document.getElementById('posizioneMissione').value.trim();
+                    const obiettivo = document.getElementById('obiettivoMissione').value.trim();
+                    const operatori = document.getElementById('operatoriMissione').value.trim();
+                    const mezzi = document.getElementById('mezziMissione').value.trim();
+                    const materiali = document.getElementById('materialiMissione').value.trim();
+                    // Validazioni client-side
+                    if (!richiestaId || richiestaId <= 0) {
+                        showResponse('missioneResponse', '❌ Inserisci un ID richiesta valido', 'error');
+                        return;
+                    }
+
+                    if (!nome) {
+                        showResponse('missioneResponse', '❌ Il nome della missione è obbligatorio', 'error');
+                        return;
+                    }
+
+                    if (!posizione) {
+                        showResponse('missioneResponse', '❌ La posizione è obbligatoria', 'error');
+                        return;
+                    }
+
+                    if (!obiettivo) {
+                        showResponse('missioneResponse', '❌ L\'obiettivo è obbligatorio', 'error');
+                        return;
+                    }
+
+                    if (!operatori) {
+                        showResponse('missioneResponse', '❌ Almeno un operatore è obbligatorio', 'error');
+                        return;
+                    }
+
+                    // Prepara i dati della richiesta
+                    const missioneData = {
+                        richiestaId: richiestaId,
+                        nome: nome,
+                        posizione: posizione,
+                        obiettivo: obiettivo,
+                        operatori: operatori,
+                        mezzi: mezzi || null,
+                        materiali: materiali || null
+                    };
+                    showResponse('missioneResponse', 'Creazione missione in corso...', 'info');
+                    try {
+                        const result = await apiCall('/missioni', {
+                            method: 'POST',
+                            body: JSON.stringify(missioneData)
+                        });
+                        if (result.ok) {
+                            const response = result.data;
+                            let message = `✅ ${response.message}\n\n`;
+                            message += `🎯 Dettagli missione creata:\n`;
+                            message += `• Nome: ${response.missione.nome}\n`;
+                            message += `• Posizione: ${response.missione.posizione}\n`;
+                            message += `• Obiettivo: ${response.missione.obiettivo}\n`;
+                            message += `• ID Richiesta: ${response.missione.codiceRichiesta}\n`;
+                            message += `• Data/Ora Inizio: ${new Date(response.missione.dataOraInizio).toLocaleString('it-IT')}\n`;
+                            if (response.emailOperatori && response.emailOperatori.length > 0) {
+                                message += `\n📧 Email notifiche inviate a:\n`;
+                                response.emailOperatori.forEach(email => {
+                                    message += `• ${email}\n`;
+                                });
+                            }
+
+                            showResponse('missioneResponse', message, 'success');
+                            // Pulisci il form dopo il successo
+                            clearMissioneForm();
+                        } else {
+                            let errorMessage = `❌ Errore nella creazione: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
+                            if (result.status === 400) {
+                                errorMessage = `❌ Dati non validi: ${result.data.error || 'Controlla i campi inseriti'}`;
+                            } else if (result.status === 401) {
+                                errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
+                            } else if (result.status === 403) {
+                                errorMessage = '❌ Accesso negato. Solo gli amministratori possono creare missioni.';
+                            }
+
+                            showResponse('missioneResponse', errorMessage, 'error');
+                        }
+                    } catch (error) {
+                        showResponse('missioneResponse', `❌ Errore di rete: ${error.message}`, 'error');
+                    }
+                }
+
+                // Funzione per pulire il form
+                function clearMissioneForm() {
+                    document.getElementById('richiestaIdMissione').value = '';
+                    document.getElementById('nomeMissione').value = '';
+                    document.getElementById('posizioneMissione').value = '';
+                    document.getElementById('obiettivoMissione').value = '';
+                    document.getElementById('operatoriMissione').value = '';
+                    document.getElementById('mezziMissione').value = '';
+                    document.getElementById('materialiMissione').value = '';
+                    // Aggiorna orario
+                    updateOrarioCreazione();
+                    showResponse('missioneResponse', 'Form pulito. Compila i campi per creare una nuova missione.', 'info');
+                }
+            </script>
+        </body>
+    </html>
