@@ -380,78 +380,48 @@
 
             <!-- Sezione 4: Lista Richieste di Soccorso -->
             <div class="section">
-                <h2>📋 4. Lista Richieste di Soccorso (Operazione richiesta)</h2>
-
+                <h2>📋 4. Lista Richieste di Soccorso</h2>
 
                 <div class="two-column">
                     <div>
-                        <div class="form-group">
-                            <label for="filtroStato">Filtra per stato:</label>
-                            <select id="filtroStato" style="width: 100%;
-                                    padding: 10px;
-                                    border: 1px solid #ddd;
-                                    border-radius: 5px;">
-                                <option value="">Tutte</option>
-                                <option value="ATTIVA">Attive</option>
-                                <option value="IN_CORSO">In corso</option>
-                                <option value="CHIUSA">Chiuse</option>
-                                <option value="IGNORATA">Ignorate</option>
-                                <option value="CONVALIDATA">Convalidate</option>
-                                <option value="ANNULLATA">Annullate</option>
-                            </select>
-                        </div>
+                        <label for="filtroStato">Filtra per Stato:</label>
+                        <select id="filtroStato">
+                            <option value="">Tutte le richieste</option>
+                            <option value="Inviata">Inviata</option>
+                            <option value="Convalidata">Convalidata</option>
+                            <option value="Attiva">Attiva</option>
+                            <option value="Annullata">Annullata</option>
+                            <option value="Chiusa">Chiusa</option>
+                        </select>
                     </div>
+
                     <div>
-                        <div class="form-group">
-                            <label for="pagina">Pagina:</label>
-                            <input type="number" id="pagina" value="1" min="1" max="100" 
-                                   style="width: 100%;
-                                   padding: 10px;
-                                   border: 1px solid #ddd;
-                                   border-radius: 5px;">
-                        </div>
+                        <label for="pagina">Pagina:</label>
+                        <input type="number" id="pagina" min="1" value="1" style="width: 80px;">
                     </div>
                 </div>
 
                 <div class="button-row">
-                    <button onclick="getListaRichieste()" id="listaBtn" disabled style="background-color: #007bff;">📋 Carica Lista</button>
-                    <button onclick="getRichiesteNonPositive()" id="nonPositiveBtn" disabled style="background-color: #dc3545;">🚫 Richieste Non Positive</button>
-                    <button onclick="testFiltriVeloci()" style="background-color: #17a2b8;">🚀 Test Filtri</button>
-                </div>
-
-                <div class="form-group">
-                    <label>
-                        <em>💡 Suggerimenti per il test:</em>
-                    </label>
-                    <ul style="margin: 10px 0;
-                        padding-left: 20px;
-                        font-size: 14px;
-                        color: #666;">
-                        <li><strong>Lista completa:</strong> Lascia "Stato" vuoto e clicca "Carica Lista"</li>
-                        <li><strong>Filtro per stato:</strong> Seleziona uno stato specifico (es. "Attive")</li>
-                        <li><strong>Paginazione:</strong> Cambia il numero di pagina e ricarica</li>
-                        <li><strong>Richieste problematiche:</strong> Usa "Richieste Non Positive" per vedere quelle con livello < 5</li>
-                    </ul>
+                    <button id="listaBtn" onclick="getListaRichieste()" disabled>Carica Lista</button>
+                    <button id="richiesteNonPositiveBtn" onclick="getRichiesteNonPositive()" disabled>Richieste Non Positive</button>
+                    <button onclick="clearListaForm()">Pulisci Filtri</button>
                 </div>
 
                 <div class="response-area" id="listaResponse">
-                    Lista delle richieste apparirà qui...
+                    Pronto per il test di lista richieste...
                 </div>
             </div>
 
 
 
-            <!-- Sezione 6: Lista Operatori attalmente liberi -->
-            <div class="section">
-                <h2>👨‍🚒 6. Lista Operatori Attualmente Liberi (Operazione richiesta)</h2>
 
+            <!-- Sezione 5: Lista Operatori Attualmente Liberi (AGGIORNATA) -->
+            <div class="section">
+                <h2>👨‍🚒 5. Lista Operatori Attualmente Liberi</h2>
 
                 <div class="button-row">
                     <button onclick="getOperatoriLiberiConDettagli()" id="operatoriBtn" disabled style="background-color: #28a745;">
                         👨‍🚒 Operatori Liberi
-                    </button>
-                    <button onclick="getDettagliOperatoreSpecifico()" id="dettagliOperatoreBtn" disabled style="background-color: #fd7e14;">
-                        🔍 Cerca Operatore per ID
                     </button>
                 </div>
 
@@ -463,8 +433,9 @@
                         padding-left: 20px;
                         font-size: 14px;
                         color: #666;">
-                        <li><strong>Operatori Liberi:</strong> Mostra operatori non impegnati in missioni attive con dettagli completi</li>
-                        <li><strong>Cerca Operatore per ID:</strong> Informazioni dettagliate di un operatore specifico (utile per debug)</li>
+                        <li><strong>Operatori Liberi:</strong> Mostra operatori non impegnati in missioni attive</li>
+                        <li><strong>Dettagli inclusi:</strong> Nome, email, codice fiscale, patenti possedute, abilità speciali</li>
+                        <li><strong>Utilità:</strong> Ideale per assegnare operatori a nuove missioni</li>
                     </ul>
                 </div>
 
@@ -472,7 +443,6 @@
                     Lista degli operatori liberi apparirà qui...
                 </div>
             </div>
-
 
             <!-- Sezione 7: Creazione Missione -->
             <div class="section">
@@ -768,15 +738,6 @@
                         currentUser = null;
                         updateAuthStatus(false);
                     }
-                }
-
-
-                async function getListaRichieste() {
-                    showResponse('listaResponse', '🚧 Endpoint non ancora implementato - TODO', 'info');
-                }
-
-                async function getOperatoriLiberi() {
-                    showResponse('operatoriResponse', '🚧 Endpoint non ancora implementato - TODO', 'info');
                 }
 
                 // Funzioni di test
@@ -1084,6 +1045,7 @@
                     });
                 }
 
+// Funzione per la lista richieste (più carina rispetto a prima)
                 async function getListaRichieste() {
                     if (!authToken) {
                         showResponse('listaResponse', 'Devi prima effettuare il login per vedere le richieste', 'error');
@@ -1109,7 +1071,7 @@
                             params.append('stato', stato);
                         }
                         params.append('page', pagina.toString());
-                        params.append('size', '10'); // Dimensione fissa per il test
+                        params.append('size', '5'); // Riduciamo a 5 per testare meglio la paginazione
 
                         if (params.toString()) {
                             url += '?' + params.toString();
@@ -1124,14 +1086,26 @@
                             message += `📊 Statistiche:\n`;
                             message += `• Totale richieste: ${response.totalElements}\n`;
                             message += `• Pagine totali: ${response.totalPages}\n`;
-                            message += `• Pagina corrente: ${response.number + 1}\n`;
+                            message += `• Pagina corrente: ${response.number + 1}/${response.totalPages}\n`;
                             message += `• Richieste in questa pagina: ${response.content.length}\n`;
                             message += `• Prima pagina: ${response.first ? 'Sì' : 'No'}\n`;
                             message += `• Ultima pagina: ${response.last ? 'Sì' : 'No'}\n\n`;
 
+                            // Suggerimenti per la navigazione
+                            if (response.totalPages > 1) {
+                                message += `🧭 Navigazione:\n`;
+                                if (!response.first) {
+                                    message += `• Pagina precedente: ${response.number}\n`;
+                                }
+                                if (!response.last) {
+                                    message += `• Pagina successiva: ${response.number + 2}\n`;
+                                }
+                                message += `• Ultima pagina: ${response.totalPages}\n\n`;
+                            }
+
                             if (response.content.length > 0) {
-                                message += `🔍 Prime ${Math.min(3, response.content.length)} richieste:\n`;
-                                response.content.slice(0, 3).forEach((richiesta, index) => {
+                                message += `🔍 Richieste in questa pagina:\n`;
+                                response.content.forEach((richiesta, index) => {
                                     message += `\n${index + 1}. ID: ${richiesta.codice}\n`;
                                     message += `   • Stato: ${richiesta.stato}\n`;
                                     message += `   • Segnalante: ${richiesta.nomeSegnalante}\n`;
@@ -1139,11 +1113,14 @@
                                     message += `   • Descrizione: ${richiesta.descrizione.substring(0, 80)}${richiesta.descrizione.length > 80 ? '...' : ''}\n`;
                                 });
 
-                                if (response.content.length > 3) {
-                                    message += `\n... e altre ${response.content.length - 3} richieste.`;
+                                if (response.totalElements > response.content.length) {
+                                    message += `\n... e altre ${response.totalElements - response.content.length} richieste nelle altre pagine.`;
                                 }
                             } else {
                                 message += `📭 Nessuna richiesta trovata con i filtri specificati.`;
+                                if (stato) {
+                                    message += `\n\nℹ️ Prova a cambiare il filtro stato o rimuovere i filtri per vedere tutte le richieste.`;
+                                }
                             }
 
                             showResponse('listaResponse', message, 'success');
@@ -1161,10 +1138,10 @@
                     }
                 }
 
-                // Funzione per caricare le richieste non positive
+// Funzione migliorata per caricare richieste non positive (score <5)
                 async function getRichiesteNonPositive() {
                     if (!authToken) {
-                        showResponse('listaResponse', 'Devi prima effettuare il login', 'error');
+                        showResponse('listaResponse', 'Devi prima effettuare il login per vedere le richieste', 'error');
                         return;
                     }
 
@@ -1188,11 +1165,13 @@
                             message += `📊 Statistiche:\n`;
                             message += `• Totale richieste non positive: ${response.totalElements}\n`;
                             message += `• Pagine totali: ${response.totalPages}\n`;
-                            message += `• Pagina corrente: ${response.number + 1}\n`;
-                            message += `• Richieste in questa pagina: ${response.content.length}\n\n`;
+                            message += `• Pagina corrente: ${response.number + 1}/${response.totalPages}\n`;
+                            message += `• Richieste in questa pagina: ${response.content.length}\n`;
+                            message += `• Prima pagina: ${response.first ? 'Sì' : 'No'}\n`;
+                            message += `• Ultima pagina: ${response.last ? 'Sì' : 'No'}\n\n`;
 
                             if (response.content.length > 0) {
-                                message += `🔍 Richieste non positive:\n`;
+                                message += `🔍 Richieste con livello di successo < 5:\n`;
                                 response.content.forEach((richiesta, index) => {
                                     message += `\n${index + 1}. ID: ${richiesta.codice}\n`;
                                     message += `   • Stato: ${richiesta.stato}\n`;
@@ -1200,8 +1179,13 @@
                                     message += `   • Indirizzo: ${richiesta.indirizzo}\n`;
                                     message += `   • Descrizione: ${richiesta.descrizione.substring(0, 60)}...\n`;
                                 });
+
+                                message += `\n💡 Queste sono richieste chiuse con valutazione di successo inferiore a 5/5.`;
                             } else {
                                 message += `🎉 Ottime notizie! Non ci sono richieste con esito non positivo.`;
+                                if (response.totalElements === 0) {
+                                    message += `\n\nℹ️ Questo significa che tutte le missioni completate hanno avuto successo >= 5/5.`;
+                                }
                             }
 
                             showResponse('listaResponse', message, 'success');
@@ -1237,19 +1221,19 @@
                     showResponse('listaResponse', message, 'info');
                 }
 
-                // AGGIORNA la funzione updateAuthStatus esistente per i pulsanti missioni
-
+// Quando si fa il login vengono resi cliccabili alcuni pulsanti prima inutilizzabili
                 function updateAuthStatus(isLoggedIn) {
                     const statusEl = document.getElementById('authStatus');
                     const buttons = [
                         'verifyBtn',
                         'logoutBtn',
                         'listaBtn',
-                        'operatoriBtn', // Operatori liberi
-                        'dettagliOperatoreBtn', // Cerca operatore per ID
-                        'richiesteAttiveBtn', // Vedi richieste attive (NUOVO)
-                        'mostraFormBtn', // Mostra form missione (NUOVO)
-                        'creaMissioneBtn'         // Crea missione (NUOVO)
+                        'richiesteNonPositiveBtn', // NUOVO pulsante
+                        'operatoriBtn',
+                        'dettagliOperatoreBtn',
+                        'richiesteAttiveBtn',
+                        'mostraFormBtn',
+                        'creaMissioneBtn'
                     ];
 
                     if (isLoggedIn) {
@@ -1271,7 +1255,7 @@
                     }
                 }
 
-                // AGGIORNA anche la funzione clearAllResponses per includere le nuove aree
+
                 function clearAllResponses() {
                     const responseAreas = [
                         'authResponse',
@@ -1524,6 +1508,86 @@
                     updateOrarioCreazione();
                     showResponse('missioneResponse', 'Form pulito. Compila i campi per creare una nuova missione.', 'info');
                 }
+
+                // Funzione per pulire i filtri della lista missioni
+                function clearListaForm() {
+                    document.getElementById('filtroStato').value = '';
+                    document.getElementById('pagina').value = '1';
+                    showResponse('listaResponse', 'Filtri resettati. Pronto per una nuova ricerca...', 'info');
+                }
+
+// Funzione per ottenere operatori liberi con dettagli completi
+                async function getOperatoriLiberiConDettagli() {
+                    if (!authToken) {
+                        showResponse('operatoriResponse', 'Devi prima effettuare il login per vedere gli operatori', 'error');
+                        return;
+                    }
+
+                    showResponse('operatoriResponse', 'Caricamento operatori liberi...', 'info');
+
+                    try {
+                        const result = await apiCall('/operatori/liberi');
+
+                        if (result.ok) {
+                            const operatori = result.data;
+
+                            let message = `✅ Operatori liberi caricati!\n\n`;
+                            message += `👥 Trovati ${operatori.length} operatori attualmente disponibili:\n\n`;
+
+                            if (operatori.length > 0) {
+                                operatori.forEach((operatore, index) => {
+                                    message += `${index + 1}. 🆔 ID: ${operatore.id}\n`;
+                                    message += `   👤 Nome: ${operatore.nome} ${operatore.cognome}\n`;
+                                    message += `   📧 Email: ${operatore.email || 'N/A'}\n`;
+                                    message += `   🆔 Codice Fiscale: ${operatore.codiceFiscale || 'N/A'}\n`;
+
+                                    // Aggiungi informazioni su patenti se disponibili
+                                    if (operatore.patenti && operatore.patenti.length > 0) {
+                                        const patentiFormatted = operatore.patenti.map(p => p.replace('_', ' ')).join(', ');
+                                        message += `   🚗 Patenti: ${patentiFormatted}\n`;
+                                    } else {
+                                        message += `   🚗 Patenti: Nessuna registrata\n`;
+                                    }
+
+                                    // Aggiungi informazioni su abilità se disponibili
+                                    if (operatore.abilita && operatore.abilita.length > 0) {
+                                        const abilitaFormatted = operatore.abilita.map(a => a.replace(/_/g, ' ').replace(/-/g, ' ')).join(', ');
+                                        message += `   🛠️ Abilità: ${abilitaFormatted}\n`;
+                                    } else {
+                                        message += `   🛠️ Abilità: Nessuna registrata\n`;
+                                    }
+
+                                    message += `   🟢 Stato: Libero (disponibile per nuove missioni)\n`;
+
+                                    if (index < operatori.length - 1) {
+                                        message += `\n${'-'.repeat(50)}\n\n`;
+                                    }
+                                });
+
+                                message += `\n\n💡 Questi operatori sono immediatamente disponibili per essere assegnati a nuove missioni.`;
+                                message += `\n🔍 Le patenti e abilità mostrate sono quelle registrate nel sistema per ogni operatore.`;
+                            } else {
+                                message += `📭 Nessun operatore libero al momento.\n`;
+                                message += `Tutti gli operatori sono attualmente impegnati in missioni attive.`;
+                            }
+
+                            showResponse('operatoriResponse', message, 'success');
+                        } else {
+                            let errorMessage = `❌ Errore nel caricamento: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
+                            if (result.status === 401) {
+                                errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
+                            } else if (result.status === 403) {
+                                errorMessage = '❌ Accesso negato. Solo gli amministratori possono vedere gli operatori.';
+                            }
+                            showResponse('operatoriResponse', errorMessage, 'error');
+                        }
+                    } catch (error) {
+                        showResponse('operatoriResponse', `❌ Errore di rete: ${error.message}`, 'error');
+                    }
+                }
+
+
+
             </script>
         </body>
     </html>
