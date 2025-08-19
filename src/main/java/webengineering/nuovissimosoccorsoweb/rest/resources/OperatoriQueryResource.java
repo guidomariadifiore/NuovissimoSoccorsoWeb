@@ -7,6 +7,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import webengineering.nuovissimosoccorsoweb.SoccorsoDataLayer;
 import webengineering.nuovissimosoccorsoweb.model.Operatore;
+import webengineering.nuovissimosoccorsoweb.model.TipoPatente;
+import webengineering.nuovissimosoccorsoweb.model.Abilita;
 import webengineering.nuovissimosoccorsoweb.rest.dto.OperatoreDTO;
 import webengineering.nuovissimosoccorsoweb.rest.dto.ErrorResponse;
 import webengineering.nuovissimosoccorsoweb.service.OperatoriQueryService;
@@ -19,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import webengineering.nuovissimosoccorsoweb.rest.security.Secured;
 
 /**
  * Resource REST per le operazioni di query sugli operatori.
@@ -69,13 +70,13 @@ public class OperatoriQueryResource {
                         .build();
             }
             
-            // Converte i modelli interni in DTO per la risposta
+            // Converte i modelli interni in DTO per la risposta CON patenti e abilità
             List<OperatoreDTO> operatoriDTO = new ArrayList<>();
             for (Operatore operatore : result.getOperatori()) {
-                operatoriDTO.add(mapToOperatoreDTO(operatore, true)); // disponibile = true
+                operatoriDTO.add(mapToOperatoreDTOWithDetails(operatore, true, dataLayer)); // METODO AGGIORNATO
             }
             
-            logger.info("Restituiti " + operatoriDTO.size() + " operatori liberi");
+            logger.info("Restituiti " + operatoriDTO.size() + " operatori liberi con dettagli completi");
             
             return Response.ok(operatoriDTO).build();
             
@@ -124,7 +125,7 @@ public class OperatoriQueryResource {
                 
                 List<OperatoreDTO> operatoriDTO = new ArrayList<>();
                 for (OperatoriQueryService.OperatoreInfo info : operatoriConStato) {
-                    OperatoreDTO dto = mapToOperatoreDTO(info.getOperatore(), info.isDisponibile());
+                    OperatoreDTO dto = mapToOperatoreDTOWithDetails(info.getOperatore(), info.isDisponibile(), dataLayer);
                     dto.setMissioniInCorso(info.getMissioniInCorso());
                     dto.setMissioniCompletate(info.getMissioniCompletate());
                     operatoriDTO.add(dto);
@@ -146,7 +147,7 @@ public class OperatoriQueryResource {
                 
                 List<OperatoreDTO> operatoriDTO = new ArrayList<>();
                 for (Operatore operatore : result.getOperatori()) {
-                    operatoriDTO.add(mapToOperatoreDTO(operatore, true));
+                    operatoriDTO.add(mapToOperatoreDTOWithDetails(operatore, true, dataLayer));
                 }
                 
                 logger.info("Restituiti " + operatoriDTO.size() + " operatori liberi (lista semplice)");
@@ -214,10 +215,11 @@ public class OperatoriQueryResource {
                         .build();
             }
             
-            // Converte in DTO dettagliato
-            OperatoreDTO operatoreDTO = mapToOperatoreDTO(
+            // Converte in DTO dettagliato CON patenti e abilità
+            OperatoreDTO operatoreDTO = mapToOperatoreDTOWithDetails(
                 operatoreInfo.getOperatore(), 
-                operatoreInfo.isDisponibile()
+                operatoreInfo.isDisponibile(),
+                dataLayer
             );
             operatoreDTO.setMissioniInCorso(operatoreInfo.getMissioniInCorso());
             operatoreDTO.setMissioniCompletate(operatoreInfo.getMissioniCompletate());
@@ -251,65 +253,6 @@ public class OperatoriQueryResource {
         }
     }
     
-    /**
-     * Statistiche operatori.
-     * GET /api/operatori/statistiche
-     * 
-     * @return Contatori operatori per stato
-     */
-    @GET
-    @Path("statistiche")
-    @Secured
-    public Response getStatisticheOperatori() {
-        SoccorsoDataLayer dataLayer = null;
-        
-        try {
-            logger.info("=== STATISTICHE OPERATORI ===");
-            
-            // Crea DataLayer
-            dataLayer = createDataLayer();
-            
-            // USA IL SERVICE CONDIVISO
-            OperatoriQueryService.StatisticheOperatori stats = 
-                OperatoriQueryService.getStatisticheOperatori(dataLayer);
-            
-            // Crea risposta JSON semplice
-            java.util.Map<String, Object> response = new java.util.HashMap<>();
-            response.put("totaleOperatori", stats.getTotaleOperatori());
-            response.put("operatoriLiberi", stats.getOperatoriLiberi());
-            response.put("operatoriOccupati", stats.getOperatoriOccupati());
-            response.put("percentualeDisponibili", 
-                stats.getTotaleOperatori() > 0 ? 
-                    (double) stats.getOperatoriLiberi() / stats.getTotaleOperatori() * 100 : 0);
-            
-            logger.info("Statistiche: " + stats.getTotaleOperatori() + " totali, " + 
-                       stats.getOperatoriLiberi() + " liberi, " + stats.getOperatoriOccupati() + " occupati");
-            
-            return Response.ok(response).build();
-            
-        } catch (DataException e) {
-            logger.log(Level.SEVERE, "Errore database nel recupero statistiche operatori", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ErrorResponse("Errore nel database", "DATABASE_ERROR"))
-                    .build();
-                    
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Errore generico nel recupero statistiche operatori", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ErrorResponse("Errore di sistema", "INTERNAL_ERROR"))
-                    .build();
-                    
-        } finally {
-            if (dataLayer != null) {
-                try {
-                    dataLayer.destroy();
-                } catch (Exception e) {
-                    logger.log(Level.WARNING, "Errore chiusura DataLayer", e);
-                }
-            }
-        }
-    }
-    
     // ========== METODI DI UTILITÀ ==========
     
     /**
@@ -324,8 +267,54 @@ public class OperatoriQueryResource {
     }
     
     /**
-     * Converte il modello interno in DTO per la risposta.
+     * METODO AGGIORNATO: Converte il modello interno in DTO per la risposta 
+     * INCLUDENDO patenti e abilità caricate dal database.
      */
+    private OperatoreDTO mapToOperatoreDTOWithDetails(Operatore operatore, boolean disponibile, SoccorsoDataLayer dataLayer) {
+        OperatoreDTO dto = new OperatoreDTO();
+        dto.setId(operatore.getId());
+        dto.setNome(operatore.getNome());
+        dto.setCognome(operatore.getCognome());
+        dto.setEmail(operatore.getEmail());
+        dto.setCodiceFiscale(operatore.getCodiceFiscale());
+        dto.setDisponibile(disponibile);
+        
+        // NUOVO: Carica patenti dell'operatore
+        try {
+            List<TipoPatente> patentiObj = dataLayer.getOperatoreHaPatenteDAO().getPatentiByOperatore(operatore.getId());
+            List<String> patentiString = new ArrayList<>();
+            for (TipoPatente patente : patentiObj) {
+                patentiString.add(patente.toDBString()); // Converte enum in stringa leggibile
+            }
+            dto.setPatenti(patentiString);
+            logger.fine("Caricate " + patentiString.size() + " patenti per operatore " + operatore.getId());
+        } catch (DataException e) {
+            logger.log(Level.WARNING, "Errore caricamento patenti per operatore " + operatore.getId(), e);
+            dto.setPatenti(new ArrayList<>()); // Lista vuota in caso di errore
+        }
+        
+        // NUOVO: Carica abilità dell'operatore
+        try {
+            List<Abilita> abilitaObj = dataLayer.getAbilitaDAO().getAbilitaByOperatore(operatore.getId());
+            List<String> abilitaString = new ArrayList<>();
+            for (Abilita abilita : abilitaObj) {
+                abilitaString.add(abilita.getTipo().toDBString()); // Converte enum in stringa leggibile
+            }
+            dto.setAbilita(abilitaString);
+            logger.fine("Caricate " + abilitaString.size() + " abilità per operatore " + operatore.getId());
+        } catch (DataException e) {
+            logger.log(Level.WARNING, "Errore caricamento abilità per operatore " + operatore.getId(), e);
+            dto.setAbilita(new ArrayList<>()); // Lista vuota in caso di errore
+        }
+        
+        return dto;
+    }
+    
+    /**
+     * METODO LEGACY: Manteniamo per compatibilità, ma deprecato.
+     * @deprecated Usa mapToOperatoreDTOWithDetails invece
+     */
+    @Deprecated
     private OperatoreDTO mapToOperatoreDTO(Operatore operatore, boolean disponibile) {
         OperatoreDTO dto = new OperatoreDTO();
         dto.setId(operatore.getId());
@@ -334,7 +323,7 @@ public class OperatoriQueryResource {
         dto.setEmail(operatore.getEmail());
         dto.setCodiceFiscale(operatore.getCodiceFiscale());
         dto.setDisponibile(disponibile);
-        // Non esponiamo password e altri dati sensibili
+        // Non include patenti e abilità - metodo deprecato
         return dto;
     }
 }

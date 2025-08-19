@@ -1,8 +1,12 @@
 package webengineering.nuovissimosoccorsoweb.rest.dto;
 
+import java.util.List;
+
 /**
  * DTO per la rappresentazione di un operatore nelle API REST.
  * Non include informazioni sensibili come password.
+ * 
+ * VERSIONE ESTESA: Include patenti e abilità dell'operatore.
  */
 public class OperatoreDTO {
     private int id;
@@ -11,6 +15,10 @@ public class OperatoreDTO {
     private String email;
     private String codiceFiscale;
     private boolean disponibile;
+    
+    // NUOVI CAMPI: Patenti e abilità
+    private List<String> patenti;
+    private List<String> abilita;
     
     // Informazioni aggiuntive opzionali
     private Integer missioniInCorso;
@@ -27,7 +35,7 @@ public class OperatoreDTO {
         this.disponibile = disponibile;
     }
     
-    // Getters e Setters
+    // Getters e Setters esistenti
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     
@@ -52,6 +60,13 @@ public class OperatoreDTO {
     public Integer getMissioniCompletate() { return missioniCompletate; }
     public void setMissioniCompletate(Integer missioniCompletate) { this.missioniCompletate = missioniCompletate; }
     
+    // NUOVI Getters e Setters per patenti e abilità
+    public List<String> getPatenti() { return patenti; }
+    public void setPatenti(List<String> patenti) { this.patenti = patenti; }
+    
+    public List<String> getAbilita() { return abilita; }
+    public void setAbilita(List<String> abilita) { this.abilita = abilita; }
+    
     /**
      * Metodo di convenienza per ottenere nome completo.
      */
@@ -66,6 +81,20 @@ public class OperatoreDTO {
         return disponibile ? "Disponibile" : "Impegnato";
     }
     
+    /**
+     * Verifica se l'operatore ha almeno una patente.
+     */
+    public boolean hasPatenti() {
+        return patenti != null && !patenti.isEmpty();
+    }
+    
+    /**
+     * Verifica se l'operatore ha almeno un'abilità.
+     */
+    public boolean hasAbilita() {
+        return abilita != null && !abilita.isEmpty();
+    }
+    
     @Override
     public String toString() {
         return "OperatoreDTO{" +
@@ -73,7 +102,10 @@ public class OperatoreDTO {
                 ", nome='" + nome + '\'' +
                 ", cognome='" + cognome + '\'' +
                 ", email='" + email + '\'' +
+                ", codiceFiscale='" + codiceFiscale + '\'' +
                 ", disponibile=" + disponibile +
+                ", patenti=" + patenti +
+                ", abilita=" + abilita +
                 ", missioniInCorso=" + missioniInCorso +
                 ", missioniCompletate=" + missioniCompletate +
                 '}';
