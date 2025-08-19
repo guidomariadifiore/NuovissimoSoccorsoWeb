@@ -8,7 +8,7 @@
             maxIdle="30"
             maxWaitMillis="10000"
             username="root"
-            password="BeaPas2011!"
+            password="root"
             driverClassName="com.mysql.cj.jdbc.Driver"
             url="jdbc:mysql://localhost/soccorso?connectionTimeZone=LOCAL&amp;forceConnectionTimeZoneToSession=false"/>
 </Context>

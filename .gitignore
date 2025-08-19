@@ -4,3 +4,6 @@ target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.l
 target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
 target/nuovissimo-soccorso-web-1.0-SNAPSHOT/META-INF/context.xml
 src/main/webapp/META-INF/context.xml
+src/main/webapp/META-INF/context.xml
+/src/main/webapp/META-INF
+/target/nuovissimo-soccorso-web-1.0-SNAPSHOT/META-INF
