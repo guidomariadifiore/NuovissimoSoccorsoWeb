@@ -79,6 +79,7 @@ webengineering\nuovissimosoccorsoweb\rest\resources\AuthResource$VerifyResponse.
 webengineering\nuovissimosoccorsoweb\controller\OperatoreDashboardController.class
 webengineering\nuovissimosoccorsoweb\dao\impl\InfoMissioneDAO_MySQL.class
 webengineering\nuovissimosoccorsoweb\model\impl\PartecipazioneSquadraImpl.class
+webengineering\nuovissimosoccorsoweb\rest\resources\MissioniResource$OperatoreConRuolo.class
 webengineering\framework\security\SecurityHelpers.class
 webengineering\nuovissimosoccorsoweb\model\Materiale.class
 webengineering\nuovissimosoccorsoweb\dao\impl\RichiestaSoccorsoDAO_MySQL.class

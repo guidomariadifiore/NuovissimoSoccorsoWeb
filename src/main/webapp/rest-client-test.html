@@ -444,167 +444,111 @@
                 </div>
             </div>
 
-            <!-- Sezione 7: Creazione Missione -->
-            <div class="section">
-                <h2>🎯 7. Creazione di una Missione (Operazione richiesta)</h2>
-                <p>
-                    <strong>Nota:</strong> Solo gli amministratori possono creare missioni.
-                </p>
+           <!-- Sezione 7: Creazione Missione (AGGIORNATA) -->
+    <div class="section">
+        <h2>🎯 7. Creazione Missione</h2>
 
-                <!-- Pulsanti principali -->
-                <div class="button-row">
-                    <button onclick="mostraRichiesteAttive()" id="richiesteAttiveBtn" disabled style="background-color: #17a2b8;">
-                        📋 Vedi Richieste Attive
-                    </button>
-                    <button onclick="mostraFormCreazioneMissione()" id="mostraFormBtn" disabled style="background-color: #28a745;">
-                        🎯 Crea Missione
-                    </button>
+        <div class="button-row">
+            <button onclick="mostraFormMissione()" style="background-color: #28a745;">
+                🎯 Crea Nuova Missione
+            </button>
+        </div>
+
+        <!-- Form per creare missione (inizialmente nascosto) -->
+        <div id="sezionFormMissione" class="form-section hidden">
+            <h3 style="color: #007bff; margin-bottom: 20px;">📝 Compila Dati Missione</h3>
+
+            <!-- Informazioni richiesta -->
+            <div class="form-group">
+                <label for="richiestaIdMissione">ID Richiesta di Soccorso <span class="required">*</span>:</label>
+                <input type="number" id="richiestaIdMissione" min="1" placeholder="ID della richiesta convalidata">
+                <small style="color: #666;">Solo richieste in stato "Convalidata" possono essere utilizzate per creare missioni</small>
+            </div>
+
+            <!-- Dati missione -->
+            <div class="two-column">
+                <div class="form-group">
+                    <label for="nomeMissione">Nome Missione <span class="required">*</span>:</label>
+                    <input type="text" id="nomeMissione" maxlength="45" placeholder="Nome identificativo della missione">
                 </div>
-
-                <!-- Sezione Richieste Attive (inizialmente nascosta) -->
-                <div id="sezionRichiesteAttive" style="display: none;
-                     margin-top: 20px;">
-                    <h3>📋 Richieste Attive Disponibili</h3>
-                    <p style="color: #666;
-                       font-size: 14px;">
-                        Queste sono le richieste in stato "ATTIVA" per cui puoi creare una missione:
-                    </p>
-                    <div class="response-area" id="richiesteAttiveResponse">
-                        Lista richieste attive...
-                    </div>
-                </div>
-
-                <!-- Sezione Form Creazione Missione (inizialmente nascosta) -->
-                <div id="sezionFormMissione" style="display: none;
-                     margin-top: 20px;">
-                    <h3>🎯 Crea Nuova Missione</h3>
-
-                    <!-- Info orario -->
-                    <div style="background-color: #e9ecef;
-                         padding: 15px;
-                         border-radius: 5px;
-                         margin-bottom: 20px;">
-                        <strong>🕒 Orario di creazione:</strong> 
-                        <span id="orarioCreazione" style="color: #495057;">-</span>
-                        <br>
-                        <small style="color: #666;">L'orario verrà registrato automaticamente quando crei la missione</small>
-                    </div>
-
-                    <!-- Form campi missione -->
-                    <div class="form-group">
-                        <label for="richiestaIdMissione">ID Richiesta di Soccorso: <span style="color: red;">*</span></label>
-                        <input type="number" id="richiestaIdMissione" min="1" placeholder="Es: 123" 
-                               style="width: 100%;
-                               padding: 10px;
-                               border: 1px solid #ddd;
-                               border-radius: 5px;">
-                        <small style="color: #666;">ID della richiesta per cui creare la missione (deve essere in stato ATTIVA)</small>
-                    </div>
-
-                    <div class="two-column">
-                        <div>
-                            <div class="form-group">
-                                <label for="nomeMissione">Nome Missione: <span style="color: red;">*</span></label>
-                                <input type="text" id="nomeMissione" placeholder="Es: Intervento Incendio Via Roma" 
-                                       style="width: 100%;
-                                       padding: 10px;
-                                       border: 1px solid #ddd;
-                                       border-radius: 5px;">
-                            </div>
-                        </div>
-                        <div>
-                            <div class="form-group">
-                                <label for="posizioneMissione">Posizione: <span style="color: red;">*</span></label>
-                                <input type="text" id="posizioneMissione" placeholder="Es: Via Roma 123, L'Aquila" 
-                                       style="width: 100%;
-                                       padding: 10px;
-                                       border: 1px solid #ddd;
-                                       border-radius: 5px;">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="obiettivoMissione">Obiettivo: <span style="color: red;">*</span></label>
-                        <textarea id="obiettivoMissione" rows="3" placeholder="Descrivi l'obiettivo della missione..." 
-                                  style="width: 100%;
-                                  padding: 10px;
-                                  border: 1px solid #ddd;
-                                  border-radius: 5px;"></textarea>
-                    </div>
-
-                    <div class="two-column">
-                        <div>
-                            <div class="form-group">
-                                <label for="operatoriMissione">Operatori (IDs): <span style="color: red;">*</span></label>
-                                <input type="text" id="operatoriMissione" placeholder="Es: 1,2,3" 
-                                       style="width: 100%;
-                                       padding: 10px;
-                                       border: 1px solid #ddd;
-                                       border-radius: 5px;">
-                                <small style="color: #666;">Lista degli ID operatori separati da virgola</small>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="form-group">
-                                <label for="mezziMissione">Mezzi (IDs) - Opzionale:</label>
-                                <input type="text" id="mezziMissione" placeholder="Es: 1,2" 
-                                       style="width: 100%;
-                                       padding: 10px;
-                                       border: 1px solid #ddd;
-                                       border-radius: 5px;">
-                                <small style="color: #666;">Lista degli ID mezzi separati da virgola</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="materialiMissione">Materiali (IDs) - Opzionale:</label>
-                        <input type="text" id="materialiMissione" placeholder="Es: 1,2,3" 
-                               style="width: 100%;
-                               padding: 10px;
-                               border: 1px solid #ddd;
-                               border-radius: 5px;">
-                        <small style="color: #666;">Lista degli ID materiali separati da virgola</small>
-                    </div>
-
-                    <!-- Pulsanti azione form -->
-                    <div class="button-row">
-                        <button onclick="creaMissione()" id="creaMissioneBtn" disabled style="background-color: #dc3545;">
-                            🚀 Crea Missione
-                        </button>
-                        <button onclick="clearMissioneForm()" style="background-color: #6c757d;">
-                            🧹 Pulisci Form
-                        </button>
-                        <button onclick="nascondiFormMissione()" style="background-color: #6c757d;">
-                            ❌ Chiudi Form
-                        </button>
-                    </div>
-
-                    <!-- Info validazione -->
-                    <div style="background-color: #d1ecf1;
-                         padding: 15px;
-                         border-radius: 5px;
-                         margin-top: 15px;">
-                        <h5 style="margin: 0 0 10px 0;
-                            color: #0c5460;">💡 Requisiti per la creazione:</h5>
-                        <ul style="margin: 0;
-                            padding-left: 20px;
-                            font-size: 14px;
-                            color: #0c5460;">
-                            <li><strong>ID Richiesta:</strong> Deve essere una richiesta esistente in stato "ATTIVA"</li>
-                            <li><strong>Operatori:</strong> Almeno un operatore è obbligatorio (devono essere disponibili)</li>
-                            <li><strong>Mezzi/Materiali:</strong> Opzionali, se specificati devono essere disponibili</li>
-                            <li><strong>Campi obbligatori:</strong> Contrassegnati con <span style="color: red;">*</span></li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Area di risposta generale -->
-                <div class="response-area" id="missioneResponse">
-                    Usa i pulsanti sopra per vedere le richieste attive o creare una missione...
+                <div class="form-group">
+                    <label for="posizioneMissione">Posizione <span class="required">*</span>:</label>
+                    <input type="text" id="posizioneMissione" maxlength="100" placeholder="Luogo dell'intervento">
                 </div>
             </div>
+
+            <div class="form-group">
+                <label for="obiettivoMissione">Obiettivo <span class="required">*</span>:</label>
+                <textarea id="obiettivoMissione" rows="3" placeholder="Descrizione dell'obiettivo della missione"></textarea>
+            </div>
+
+            <!-- Sezione Operatori AGGIORNATA -->
+            <div class="operator-section">
+                <h5>👥 Assegnazione Operatori</h5>
+                
+                <div class="form-group">
+                    <label for="caposquadraMissione">Caposquadra <span class="required">*</span>:</label>
+                    <input type="text" id="caposquadraMissione" placeholder="ID del caposquadra (es: 1,2)">
+                    <small style="color: #666;">Inserire almeno un ID di operatore che farà da caposquadra</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="operatoriStandardMissione">Operatori Standard:</label>
+                    <input type="text" id="operatoriStandardMissione" placeholder="ID operatori separati da virgola (es: 3,4,5)">
+                    <small style="color: #666;">Operatori che supporteranno il caposquadra (opzionale)</small>
+                </div>
+            </div>
+
+            <!-- Sezione Mezzi AGGIORNATA -->
+            <div class="form-group">
+                <label for="mezziMissione">Mezzi (Targhe):</label>
+                <input type="text" id="mezziMissione" placeholder="Targhe separate da virgola (es: AB123CD,EF456GH)">
+                <small style="color: #666;">Inserire le targhe dei mezzi, non gli ID</small>
+            </div>
+
+            <div class="form-group">
+                <label for="materialiMissione">Materiali (ID):</label>
+                <input type="text" id="materialiMissione" placeholder="ID materiali separati da virgola (es: 1,2,3)">
+                <small style="color: #666;">ID dei materiali necessari per la missione</small>
+            </div>
+
+            <!-- Info orario -->
+            <div style="background-color: #f8f9fa; padding: 10px; border-radius: 5px; margin: 15px 0;">
+                <strong>🕐 Orario di creazione:</strong>
+                <span id="orarioCreazione">--</span>
+            </div>
+
+            <!-- Pulsanti azione -->
+            <div class="button-row">
+                <button onclick="creaMissione()" style="background-color: #28a745;">
+                    🚀 Crea Missione
+                </button>
+                <button onclick="clearMissioneForm()" style="background-color: #6c757d;">
+                    🧹 Pulisci Form
+                </button>
+                <button onclick="nascondiFormMissione()" style="background-color: #6c757d;">
+                    ❌ Chiudi Form
+                </button>
+            </div>
+
+            <!-- Info validazione AGGIORNATA -->
+            <div class="info-box">
+                <h5>💡 Requisiti per la creazione:</h5>
+                <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #0c5460;">
+                    <li><strong>ID Richiesta:</strong> Deve essere una richiesta esistente in stato "CONVALIDATA"</li>
+                    <li><strong>Caposquadra:</strong> Almeno un operatore deve essere assegnato come caposquadra</li>
+                    <li><strong>Operatori:</strong> Devono essere disponibili (non impegnati in altre missioni)</li>
+                    <li><strong>Mezzi:</strong> Inserire le targhe, non gli ID</li>
+                    <li><strong>Stato richiesta:</strong> Dopo la creazione, la richiesta passerà da "Convalidata" ad "Attiva"</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Area di risposta generale -->
+        <div class="response-area" id="missioneResponse">
+            Usa il pulsante sopra per creare una nuova missione...
+        </div>
+    </div>
             <!-- Sezione Test Vari -->
             <div class="section">
                 <h2>🧪 Test Vari</h2>
@@ -817,7 +761,8 @@
                         'convalidaResponse',
                         'listaResponse',
                         'operatoriResponse',
-                        'testResponse'
+                        'testResponse',
+                        'missioneResponse'
                     ];
 
                     responseAreas.forEach(id => {
@@ -1314,56 +1259,7 @@
                     showResponse('testResponse', 'Pronto per i test di connettività...');
                 });
 
-                // Funzione per mostrare le richieste attive
-                async function mostraRichiesteAttive() {
-                    if (!authToken) {
-                        showResponse('missioneResponse', 'Devi prima effettuare il login per vedere le richieste', 'error');
-                        return;
-                    }
-
-                    // Nascondi form se aperto
-                    document.getElementById('sezionFormMissione').style.display = 'none';
-                    // Mostra sezione richieste attive
-                    document.getElementById('sezionRichiesteAttive').style.display = 'block';
-                    showResponse('richiesteAttiveResponse', 'Caricamento richieste attive...', 'info');
-                    try {
-                        const result = await apiCall('/missioni/richieste-attive');
-                        if (result.ok) {
-                            const richieste = result.data;
-                            let message = `✅ Richieste attive caricate!\n\n`;
-                            message += `📊 Trovate ${richieste.length} richieste disponibili per creare missioni:\n\n`;
-                            if (richieste.length > 0) {
-                                richieste.forEach((richiesta, index) => {
-                                    message += `${index + 1}. 🆔 ID: ${richiesta.codice}\n`;
-                                    message += `   📋 Descrizione: ${richiesta.descrizione.substring(0, 80)}${richiesta.descrizione.length > 80 ? '...' : ''}\n`;
-                                    message += `   📍 Indirizzo: ${richiesta.indirizzo}\n`;
-                                    message += `   👤 Segnalante: ${richiesta.nomeSegnalante}\n`;
-                                    message += `   📧 Email: ${richiesta.emailSegnalante}\n`;
-                                    message += `   🚨 Stato: ${richiesta.stato}\n`;
-                                    if (index < richieste.length - 1) {
-                                        message += `\n${'-'.repeat(40)}\n\n`;
-                                    }
-                                });
-                                message += `\n\n💡 Usa questi ID nel form "Crea Missione" per assegnare una missione a una richiesta.`;
-                            } else {
-                                message += `📭 Non ci sono richieste attive al momento.\nTutte le richieste sono già state gestite o sono in stati diversi.`;
-                            }
-
-                            showResponse('richiesteAttiveResponse', message, 'success');
-                            showResponse('missioneResponse', 'Richieste attive visualizzate. Usa "Crea Missione" per creare una nuova missione.', 'info');
-                        } else {
-                            let errorMessage = `❌ Errore nel caricamento: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
-                            if (result.status === 401) {
-                                errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
-                            } else if (result.status === 403) {
-                                errorMessage = '❌ Accesso negato. Solo gli amministratori possono vedere le richieste.';
-                            }
-                            showResponse('richiesteAttiveResponse', errorMessage, 'error');
-                        }
-                    } catch (error) {
-                        showResponse('richiesteAttiveResponse', `❌ Errore di rete: ${error.message}`, 'error');
-                    }
-                }
+                
 
                 // Funzione per mostrare il form di creazione missione
                 function mostraFormCreazioneMissione() {
@@ -1404,110 +1300,125 @@
 
                 // Funzione per creare la missione
                 async function creaMissione() {
-                    if (!authToken) {
-                        showResponse('missioneResponse', 'Devi prima effettuare il login', 'error');
-                        return;
-                    }
+            if (!authToken) {
+                showResponse('missioneResponse', 'Devi prima effettuare il login', 'error');
+                return;
+            }
 
-                    // Raccogli dati dal form
-                    const richiestaId = parseInt(document.getElementById('richiestaIdMissione').value);
-                    const nome = document.getElementById('nomeMissione').value.trim();
-                    const posizione = document.getElementById('posizioneMissione').value.trim();
-                    const obiettivo = document.getElementById('obiettivoMissione').value.trim();
-                    const operatori = document.getElementById('operatoriMissione').value.trim();
-                    const mezzi = document.getElementById('mezziMissione').value.trim();
-                    const materiali = document.getElementById('materialiMissione').value.trim();
-                    // Validazioni client-side
-                    if (!richiestaId || richiestaId <= 0) {
-                        showResponse('missioneResponse', '❌ Inserisci un ID richiesta valido', 'error');
-                        return;
-                    }
+            // Raccogli dati dal form
+            const richiestaId = parseInt(document.getElementById('richiestaIdMissione').value);
+            const nome = document.getElementById('nomeMissione').value.trim();
+            const posizione = document.getElementById('posizioneMissione').value.trim();
+            const obiettivo = document.getElementById('obiettivoMissione').value.trim();
+            const caposquadra = document.getElementById('caposquadraMissione').value.trim();
+            const operatoriStandard = document.getElementById('operatoriStandardMissione').value.trim();
+            const mezzi = document.getElementById('mezziMissione').value.trim();
+            const materiali = document.getElementById('materialiMissione').value.trim();
 
-                    if (!nome) {
-                        showResponse('missioneResponse', '❌ Il nome della missione è obbligatorio', 'error');
-                        return;
-                    }
+            // Validazioni client-side
+            if (!richiestaId || richiestaId <= 0) {
+                showResponse('missioneResponse', '❌ Inserisci un ID richiesta valido', 'error');
+                return;
+            }
 
-                    if (!posizione) {
-                        showResponse('missioneResponse', '❌ La posizione è obbligatoria', 'error');
-                        return;
-                    }
+            if (!nome) {
+                showResponse('missioneResponse', '❌ Il nome della missione è obbligatorio', 'error');
+                return;
+            }
 
-                    if (!obiettivo) {
-                        showResponse('missioneResponse', '❌ L\'obiettivo è obbligatorio', 'error');
-                        return;
-                    }
+            if (!posizione) {
+                showResponse('missioneResponse', '❌ La posizione è obbligatoria', 'error');
+                return;
+            }
 
-                    if (!operatori) {
-                        showResponse('missioneResponse', '❌ Almeno un operatore è obbligatorio', 'error');
-                        return;
-                    }
+            if (!obiettivo) {
+                showResponse('missioneResponse', '❌ L\'obiettivo è obbligatorio', 'error');
+                return;
+            }
 
-                    // Prepara i dati della richiesta
-                    const missioneData = {
-                        richiestaId: richiestaId,
-                        nome: nome,
-                        posizione: posizione,
-                        obiettivo: obiettivo,
-                        operatori: operatori,
-                        mezzi: mezzi || null,
-                        materiali: materiali || null
-                    };
-                    showResponse('missioneResponse', 'Creazione missione in corso...', 'info');
-                    try {
-                        const result = await apiCall('/missioni', {
-                            method: 'POST',
-                            body: JSON.stringify(missioneData)
+            if (!caposquadra) {
+                showResponse('missioneResponse', '❌ Almeno un caposquadra è obbligatorio', 'error');
+                return;
+            }
+
+            // Combina caposquadra e operatori standard per creare la lista completa degli operatori
+            let tuttiOperatori = caposquadra;
+            if (operatoriStandard) {
+                tuttiOperatori += ',' + operatoriStandard;
+            }
+
+            // Prepara i dati della richiesta (usando il formato esistente)
+            const missioneData = {
+                richiestaId: richiestaId,
+                nome: nome,
+                posizione: posizione,
+                obiettivo: obiettivo,
+                operatori: tuttiOperatori,
+                mezzi: mezzi || null,
+                materiali: materiali || null,
+                // Aggiungiamo informazioni sui ruoli per il backend
+                caposquadra: caposquadra,
+                operatoriStandard: operatoriStandard || null
+            };
+
+            showResponse('missioneResponse', 'Creazione missione in corso...', 'info');
+
+            try {
+                const result = await apiCall('/missioni', {
+                    method: 'POST',
+                    body: JSON.stringify(missioneData)
+                });
+
+                if (result.ok) {
+                    const response = result.data;
+                    let message = `✅ ${response.message}\n\n`;
+                    message += `🎯 Dettagli missione creata:\n`;
+                    message += `• Nome: ${response.missione.nome}\n`;
+                    message += `• Posizione: ${response.missione.posizione}\n`;
+                    message += `• Obiettivo: ${response.missione.obiettivo}\n`;
+                    message += `• ID Richiesta: ${response.missione.codiceRichiesta}\n`;
+                    message += `• Data/Ora Inizio: ${new Date(response.missione.dataOraInizio).toLocaleString('it-IT')}\n`;
+                    
+                    if (response.emailOperatori && response.emailOperatori.length > 0) {
+                        message += `\n📧 Email notifiche inviate a:\n`;
+                        response.emailOperatori.forEach(email => {
+                            message += `• ${email}\n`;
                         });
-                        if (result.ok) {
-                            const response = result.data;
-                            let message = `✅ ${response.message}\n\n`;
-                            message += `🎯 Dettagli missione creata:\n`;
-                            message += `• Nome: ${response.missione.nome}\n`;
-                            message += `• Posizione: ${response.missione.posizione}\n`;
-                            message += `• Obiettivo: ${response.missione.obiettivo}\n`;
-                            message += `• ID Richiesta: ${response.missione.codiceRichiesta}\n`;
-                            message += `• Data/Ora Inizio: ${new Date(response.missione.dataOraInizio).toLocaleString('it-IT')}\n`;
-                            if (response.emailOperatori && response.emailOperatori.length > 0) {
-                                message += `\n📧 Email notifiche inviate a:\n`;
-                                response.emailOperatori.forEach(email => {
-                                    message += `• ${email}\n`;
-                                });
-                            }
-
-                            showResponse('missioneResponse', message, 'success');
-                            // Pulisci il form dopo il successo
-                            clearMissioneForm();
-                        } else {
-                            let errorMessage = `❌ Errore nella creazione: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
-                            if (result.status === 400) {
-                                errorMessage = `❌ Dati non validi: ${result.data.error || 'Controlla i campi inseriti'}`;
-                            } else if (result.status === 401) {
-                                errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
-                            } else if (result.status === 403) {
-                                errorMessage = '❌ Accesso negato. Solo gli amministratori possono creare missioni.';
-                            }
-
-                            showResponse('missioneResponse', errorMessage, 'error');
-                        }
-                    } catch (error) {
-                        showResponse('missioneResponse', `❌ Errore di rete: ${error.message}`, 'error');
                     }
+
+                    showResponse('missioneResponse', message, 'success');
+                    clearMissioneForm();
+                } else {
+                    let errorMessage = `❌ Errore nella creazione: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
+                    
+                    if (result.status === 400) {
+                        errorMessage = `❌ Dati non validi: ${result.data.error || 'Controlla i campi inseriti'}`;
+                    } else if (result.status === 401) {
+                        errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
+                    } else if (result.status === 403) {
+                        errorMessage = '❌ Accesso negato. Solo gli amministratori possono creare missioni.';
+                    }
+
+                    showResponse('missioneResponse', errorMessage, 'error');
                 }
+            } catch (error) {
+                showResponse('missioneResponse', `❌ Errore di rete: ${error.message}`, 'error');
+            }
+        }
 
                 // Funzione per pulire il form
                 function clearMissioneForm() {
-                    document.getElementById('richiestaIdMissione').value = '';
-                    document.getElementById('nomeMissione').value = '';
-                    document.getElementById('posizioneMissione').value = '';
-                    document.getElementById('obiettivoMissione').value = '';
-                    document.getElementById('operatoriMissione').value = '';
-                    document.getElementById('mezziMissione').value = '';
-                    document.getElementById('materialiMissione').value = '';
-                    // Aggiorna orario
-                    updateOrarioCreazione();
-                    showResponse('missioneResponse', 'Form pulito. Compila i campi per creare una nuova missione.', 'info');
-                }
+            document.getElementById('richiestaIdMissione').value = '';
+            document.getElementById('nomeMissione').value = '';
+            document.getElementById('posizioneMissione').value = '';
+            document.getElementById('obiettivoMissione').value = '';
+            document.getElementById('caposquadraMissione').value = '';
+            document.getElementById('operatoriStandardMissione').value = '';
+            document.getElementById('mezziMissione').value = '';
+            document.getElementById('materialiMissione').value = '';
+            updateOrarioCreazione();
+            showResponse('missioneResponse', 'Form pulito. Compila i campi per creare una nuova missione.', 'info');
+        }
 
                 // Funzione per pulire i filtri della lista missioni
                 function clearListaForm() {
