@@ -265,7 +265,19 @@ public class MissioniResource {
         if (!"Convalidata".equals(richiesta.getStato())) {
             throw new IllegalArgumentException("La richiesta deve essere in stato 'Convalidata', stato attuale: " + richiesta.getStato());
         }
-        
+        try {
+        Missione missioneEsistente = dataLayer.getMissioneDAO().getMissioneByCodice(richiestaId);
+        if (missioneEsistente != null) {
+            throw new IllegalArgumentException("Esiste già una missione per la richiesta " + richiestaId + 
+                ". Non è possibile creare multiple missioni per la stessa richiesta di soccorso.");
+        }
+    
+        } catch (DataException e) {
+        // Se getMissioneByCodice restituisce null o dà errore, significa che non esiste
+        // Possiamo continuare
+        logger.info("Nessuna missione esistente trovata per richiesta " + richiestaId + " - OK per creare nuova missione");
+    
+        }
         // Avvia transazione
         Connection conn = dataLayer.getConnection();
         boolean autoCommit = conn.getAutoCommit();

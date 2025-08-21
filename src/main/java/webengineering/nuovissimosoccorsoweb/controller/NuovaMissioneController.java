@@ -103,12 +103,12 @@ public class NuovaMissioneController extends SoccorsoBaseController {
             }
             
             // Verifica che sia stata attivata
-            if (!"Attiva".equals(richiesta.getStato())) {
-                logger.warning("Tentativo di creare missione per richiesta non attiva: " + richiestaId);
-                response.sendRedirect(request.getContextPath() + "/admin/richiesta/" + richiestaId + 
-                                    "?error=not_active");
-                return;
-            }
+            if (!"Convalidata".equals(richiesta.getStato())) {
+    logger.warning("Tentativo di creare missione per richiesta non convalidata: " + richiestaId);
+    response.sendRedirect(request.getContextPath() + "/admin/richiesta/" + richiestaId + 
+                        "?error=not_convalidata");
+    return;
+}
             
             // Carica risorse disponibili
             List<Operatore> operatoriDisponibili = dataLayer.getOperatoreDAO().getOperatoriDisponibili();
@@ -256,12 +256,12 @@ public class NuovaMissioneController extends SoccorsoBaseController {
                 return;
             }
             
-            if (!"Attiva".equals(richiesta.getStato())) {
-                logger.warning("Tentativo di creare missione per richiesta non attiva: " + richiestaId);
-                response.sendRedirect(request.getContextPath() + "/admin/richiesta/" + richiestaId + 
-                                    "?error=not_active");
-                return;
-            }
+           if (!"Convalidata".equals(richiesta.getStato())) {
+    logger.warning("Tentativo di creare missione per richiesta non convalidata: " + richiestaId);
+    response.sendRedirect(request.getContextPath() + "/admin/richiesta/" + richiestaId + 
+                        "?error=not_convalidata");
+    return;
+}
             
             // Estrai e valida i parametri del form
             String nome = request.getParameter("nome");
@@ -551,21 +551,22 @@ public class NuovaMissioneController extends SoccorsoBaseController {
     }
     
     private String getErrorMessage(String errorCode) {
-        switch (errorCode) {
-            case "access_denied":
-                return "Accesso negato. Solo gli amministratori possono creare missioni.";
-            case "invalid_id":
-                return "ID richiesta non valido.";
-            case "not_found":
-                return "Richiesta non trovata.";
-            case "not_active":
-                return "La richiesta deve essere in stato 'Attiva' per creare una missione.";
-            case "database_error":
-                return "Errore nel database. Riprova più tardi.";
-            case "system_error":
-                return "Errore di sistema. Riprova più tardi.";
-            default:
-                return "Si è verificato un errore: " + errorCode;
-        }
+    switch (errorCode) {
+        case "access_denied":
+            return "Accesso negato. Solo gli amministratori possono creare missioni.";
+        case "invalid_id":
+            return "ID richiesta non valido.";
+        case "not_found":
+            return "Richiesta non trovata.";
+        case "not_active":  // ← Questa riga va MODIFICATA
+            return "La richiesta deve essere in stato 'Convalidata' per creare una missione.";
+        case "database_error":
+            return "Errore nel database. Riprova più tardi.";
+        case "system_error":
+            return "Errore di sistema. Riprova più tardi.";
+        default:
+            return "Si è verificato un errore: " + errorCode;
     }
 }
+}
+    

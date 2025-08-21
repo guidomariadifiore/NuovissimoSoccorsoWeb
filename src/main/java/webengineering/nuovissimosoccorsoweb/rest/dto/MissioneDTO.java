@@ -1,9 +1,11 @@
 package webengineering.nuovissimosoccorsoweb.rest.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 
 /**
  * DTO per rappresentare una missione nelle risposte API.
+ * CORRETTO: Aggiunta annotation per LocalDateTime
  */
 public class MissioneDTO {
     private int codiceRichiesta;
@@ -11,7 +13,11 @@ public class MissioneDTO {
     private String posizione;
     private String obiettivo;
     private String nota;
+    
+    // CORREZIONE: Aggiunta annotation per serializzazione JSON
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime dataOraInizio;
+    
     private int idAmministratore;
     
     // Costruttori
