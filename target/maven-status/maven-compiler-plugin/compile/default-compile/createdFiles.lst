@@ -101,6 +101,7 @@ webengineering\nuovissimosoccorsoweb\model\OperatoreHaPatente.class
 webengineering\nuovissimosoccorsoweb\controller\AdminNuovoMezzoController$ValidationResult.class
 webengineering\nuovissimosoccorsoweb\rest\security\JWTAuthenticationFilter.class
 webengineering\nuovissimosoccorsoweb\dao\OperatoreHaPatenteDAO.class
+webengineering\nuovissimosoccorsoweb\rest\dto\AnnullaRichiestaResponse.class
 webengineering\nuovissimosoccorsoweb\service\OperatoriQueryService$OperatoriResult.class
 webengineering\framework\result\StreamResult.class
 webengineering\nuovissimosoccorsoweb\model\impl\AmministratoreImpl.class
@@ -127,6 +128,7 @@ webengineering\nuovissimosoccorsoweb\controller\AdminOperatoriController.class
 webengineering\nuovissimosoccorsoweb\dao\MissioneDAO.class
 webengineering\nuovissimosoccorsoweb\dao\impl\OperatoreDAO_MySQL.class
 webengineering\nuovissimosoccorsoweb\dao\MezzoDAO.class
+AnnullaRichiestaResponse.class
 webengineering\framework\result\TemplateManagerException.class
 webengineering\nuovissimosoccorsoweb\model\impl\proxy\OperatoreProxy.class
 webengineering\nuovissimosoccorsoweb\service\MissioniService.class
@@ -139,6 +141,7 @@ webengineering\nuovissimosoccorsoweb\model\impl\proxy\AggiornaMezzoProxy.class
 webengineering\framework\data\DataException.class
 webengineering\nuovissimosoccorsoweb\model\impl\MissioneImpl.class
 webengineering\nuovissimosoccorsoweb\model\MissioneUtilizzaMezzo.class
+AnnullaRichiestaResponse\java.class
 webengineering\nuovissimosoccorsoweb\rest\security\CORSFilter.class
 webengineering\nuovissimosoccorsoweb\model\RuoloSquadra.class
 webengineering\nuovissimosoccorsoweb\model\impl\proxy\PartecipazioneSquadraProxy.class

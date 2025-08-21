@@ -594,6 +594,38 @@
             Effettua il login come amministratore per creare missioni...
         </div>
     </div>
+    <!-- Sezione 9: Annullamento Richiesta di Soccorso (NUOVO) -->
+            <div class="section">
+                <h2>❌ 9. Annullamento Richiesta di Soccorso (Solo Admin)</h2>
+
+                <div class="form-group">
+                    <label for="annullaRichiestaId">ID Richiesta da Annullare:</label>
+                    <input type="number" id="annullaRichiestaId" min="1" placeholder="Inserisci l'ID della richiesta da annullare">
+                    <small style="color: #666;">Solo richieste non chiuse possono essere annullate</small>
+                </div>
+
+                <div class="info-box">
+                    <h5>⚠️ Condizioni per l'annullamento:</h5>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #0c5460;">
+                        <li><strong>Solo amministratori</strong> possono annullare richieste</li>
+                        <li><strong>Non si possono annullare</strong> richieste già chiuse</li>
+                        <li><strong>Non si possono annullare</strong> richieste con missioni attive</li>
+                        <li><strong>Stati annullabili:</strong> Inviata, Convalidata, Attiva</li>
+                    </ul>
+                </div>
+
+                <div class="button-row">
+                    <button onclick="annullaRichiesta()" id="annullaBtn" disabled style="background-color: #dc3545;">
+                        ❌ Annulla Richiesta
+                    </button>
+                    <button onclick="clearAnnullaForm()">🧹 Pulisci Form</button>
+                    <button onclick="fillAnnullaExample()">📋 Esempio</button>
+                </div>
+
+                <div class="response-area" id="annullaResponse">
+                    Effettua il login come amministratore per annullare richieste...
+                </div>
+            </div>
             <!-- Sezione Test Vari -->
             <div class="section">
                 <h2>🧪 Test Vari</h2>
@@ -795,7 +827,7 @@
                     }
                     
                     const statusElement = document.getElementById('authStatus');
-                    const buttons = ['verifyBtn', 'logoutBtn', 'listaBtn', 'richiesteNonPositiveBtn', 'operatoriBtn'];
+                    const buttons = ['verifyBtn', 'logoutBtn', 'listaBtn', 'richiesteNonPositiveBtn', 'operatoriBtn', 'annullaBtn']; // AGGIUNTO annullaBtn
 
                     if (isLoggedIn) {
                         statusElement.textContent = `✅ Autenticato come: ${currentUser ? currentUser.email : 'Utente'} (${currentUser ? currentUser.role : 'N/A'})`;
@@ -1386,6 +1418,7 @@
                         'listaResponse',
                         'operatoriResponse',
                         'missioneResponse',
+                        'annullaResponse', // AGGIUNTO
                         'testResponse'
                     ];
 
@@ -1399,7 +1432,6 @@
 
                     showResponse('testResponse', '🧹 Tutte le sezioni sono state pulite!', 'success');
                 }
-
                 // === INIZIALIZZAZIONE ===
                 document.addEventListener('DOMContentLoaded', function () {
                     updateAuthStatus(false);
@@ -1411,6 +1443,101 @@
                     showResponse('missioneResponse', 'Effettua il login come amministratore per creare missioni...');
                     showResponse('testResponse', 'Pronto per i test di connettività...');
                 });
+                // === FUNZIONI ANNULLAMENTO RICHIESTA ===
+                
+                async function annullaRichiesta() {
+                    if (!authToken) {
+                        showResponse('annullaResponse', 'Devi prima effettuare il login come amministratore', 'error');
+                        return;
+                    }
+
+                    const richiestaId = parseInt(document.getElementById('annullaRichiestaId').value);
+
+                    // Validazione input
+                    if (!richiestaId || richiestaId <= 0) {
+                        showResponse('annullaResponse', '❌ Inserisci un ID richiesta valido', 'error');
+                        return;
+                    }
+
+                    // Conferma dall'utente
+                    const conferma = confirm(`⚠️ ATTENZIONE!\n\nSei sicuro di voler ANNULLARE la richiesta ${richiestaId}?\n\nQuesta azione:\n• Cambierà lo stato in "Annullata"\n• NON può essere annullata\n• Renderà la richiesta non più gestibile\n\nConfermi l'annullamento?`);
+                    
+                    if (!conferma) {
+                        showResponse('annullaResponse', '🚫 Annullamento richiesta cancellato dall\'utente', 'info');
+                        return;
+                    }
+
+                    showResponse('annullaResponse', 'Annullamento richiesta in corso...', 'info');
+
+                    try {
+                        const result = await apiCall(`/richieste/${richiestaId}/annulla`, {
+                            method: 'PUT'
+                        });
+
+                        if (result.ok) {
+                            const response = result.data;
+                            
+                            let message = `✅ ${response.message}\n\n`;
+                            message += `📋 Dettagli operazione:\n`;
+                            message += `• ID Richiesta: ${response.richiesta.codice}\n`;
+                            message += `• Stato precedente: ${response.statoOriginale}\n`;
+                            message += `• Stato attuale: ${response.richiesta.stato}\n`;
+                            message += `• Segnalante: ${response.richiesta.nomeSegnalante}\n`;
+                            message += `• Email: ${response.richiesta.emailSegnalante}\n`;
+                            message += `• Indirizzo: ${response.richiesta.indirizzo}\n`;
+                            message += `• Annullata da Admin ID: ${response.adminId}\n`;
+                            message += `• Descrizione: ${response.richiesta.descrizione.substring(0, 100)}${response.richiesta.descrizione.length > 100 ? '...' : ''}\n`;
+                            
+                            showResponse('annullaResponse', message, 'success');
+                            
+                            // Pulisci il form dopo il successo
+                            clearAnnullaForm();
+                            
+                        } else {
+                            let errorMessage = `❌ Errore nell'annullamento: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
+                            
+                            // Gestione errori specifici
+                            if (result.status === 400) {
+                                if (result.data.error === 'ALREADY_CANCELLED') {
+                                    errorMessage = '⚠️ La richiesta è già stata annullata in precedenza';
+                                } else if (result.data.error === 'CANNOT_CANCEL_CLOSED') {
+                                    errorMessage = '❌ Non è possibile annullare una richiesta già chiusa';
+                                } else if (result.data.error === 'HAS_ACTIVE_MISSIONS') {
+                                    errorMessage = '❌ La richiesta ha missioni attive. Chiudi prima le missioni associate.';
+                                } else {
+                                    errorMessage = `❌ Richiesta non valida: ${result.data.message || 'Controlla l\'ID inserito'}`;
+                                }
+                            } else if (result.status === 401) {
+                                errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
+                            } else if (result.status === 403) {
+                                errorMessage = '❌ Accesso negato. Solo gli amministratori possono annullare richieste.';
+                            } else if (result.status === 404) {
+                                errorMessage = '❌ Richiesta non trovata. Verifica l\'ID inserito.';
+                            }
+
+                            showResponse('annullaResponse', errorMessage, 'error');
+                        }
+                    } catch (error) {
+                        showResponse('annullaResponse', `❌ Errore di rete: ${error.message}`, 'error');
+                    }
+                }
+
+                function clearAnnullaForm() {
+                    document.getElementById('annullaRichiestaId').value = '';
+                    showResponse('annullaResponse', 'Form pulito. Inserisci l\'ID della richiesta da annullare.', 'info');
+                }
+
+                function fillAnnullaExample() {
+                    document.getElementById('annullaRichiestaId').value = '1';
+                    showResponse('annullaResponse', 
+                        '📋 Form riempito con dati di esempio.\n\n' +
+                        '⚠️ IMPORTANTE: Questo è solo un esempio!\n' +
+                        '• L\'ID deve corrispondere a una richiesta reale\n' +
+                        '• La richiesta deve essere in uno stato annullabile\n' +
+                        '• L\'annullamento è irreversibile\n' +
+                        '• Solo gli amministratori possono eseguire questa operazione',
+                        'info');
+                }
             </script>
         </body>
     </html>
