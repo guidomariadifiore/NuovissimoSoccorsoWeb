@@ -35,7 +35,55 @@
                 border-bottom: 2px solid #667eea;
                 padding-bottom: 10px;
             }
+.form-section {
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 8px;
+                margin: 20px 0;
+                border-left: 4px solid #007bff;
+            }
 
+            .operator-section {
+                background: #e8f4f8;
+                padding: 15px;
+                border-radius: 8px;
+                margin: 15px 0;
+                border: 1px solid #17a2b8;
+            }
+
+            .operator-section h5 {
+                color: #17a2b8;
+                margin: 0 0 10px 0;
+            }
+
+            .info-box {
+                background: #d1ecf1;
+                padding: 15px;
+                border-radius: 5px;
+                margin: 15px 0;
+                border-left: 4px solid #17a2b8;
+            }
+
+            .info-box h5 {
+                color: #0c5460;
+                margin: 0 0 10px 0;
+            }
+
+            .required {
+                color: red;
+            }
+
+            .hidden {
+                display: none;
+            }
+
+            .status-indicator {
+                display: inline-block;
+                padding: 4px 8px;
+                border-radius: 3px;
+                font-size: 12px;
+                font-weight: bold;
+            }
             .form-group {
                 margin-bottom: 15px;
             }
@@ -445,16 +493,11 @@
             </div>
 
            <!-- Sezione 7: Creazione Missione (AGGIORNATA) -->
+    <!-- Sezione 7: Creazione Missione (AGGIORNATA - sempre visibile per admin) -->
     <div class="section">
         <h2>🎯 7. Creazione Missione</h2>
 
-        <div class="button-row">
-            <button onclick="mostraFormMissione()" style="background-color: #28a745;">
-                🎯 Crea Nuova Missione
-            </button>
-        </div>
-
-        <!-- Form per creare missione (inizialmente nascosto) -->
+        <!-- Form per creare missione (visibile solo per admin autenticati) -->
         <div id="sezionFormMissione" class="form-section hidden">
             <h3 style="color: #007bff; margin-bottom: 20px;">📝 Compila Dati Missione</h3>
 
@@ -482,7 +525,7 @@
                 <textarea id="obiettivoMissione" rows="3" placeholder="Descrizione dell'obiettivo della missione"></textarea>
             </div>
 
-            <!-- Sezione Operatori AGGIORNATA -->
+            <!-- Sezione Operatori -->
             <div class="operator-section">
                 <h5>👥 Assegnazione Operatori</h5>
                 
@@ -499,7 +542,7 @@
                 </div>
             </div>
 
-            <!-- Sezione Mezzi AGGIORNATA -->
+            <!-- Sezione Mezzi -->
             <div class="form-group">
                 <label for="mezziMissione">Mezzi (Targhe):</label>
                 <input type="text" id="mezziMissione" placeholder="Targhe separate da virgola (es: AB123CD,EF456GH)">
@@ -518,20 +561,17 @@
                 <span id="orarioCreazione">--</span>
             </div>
 
-            <!-- Pulsanti azione -->
+            <!-- Pulsanti azione (RIMOSSO il pulsante pulisci) -->
             <div class="button-row">
                 <button onclick="creaMissione()" style="background-color: #28a745;">
                     🚀 Crea Missione
-                </button>
-                <button onclick="clearMissioneForm()" style="background-color: #6c757d;">
-                    🧹 Pulisci Form
                 </button>
                 <button onclick="nascondiFormMissione()" style="background-color: #6c757d;">
                     ❌ Chiudi Form
                 </button>
             </div>
 
-            <!-- Info validazione AGGIORNATA -->
+            <!-- Info validazione -->
             <div class="info-box">
                 <h5>💡 Requisiti per la creazione:</h5>
                 <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #0c5460;">
@@ -544,9 +584,14 @@
             </div>
         </div>
 
+        <!-- Messaggio per non-admin -->
+        <div id="messaggioNonAdmin" class="response-area" style="display: none; background-color: #fff3cd; border-color: #ffeaa7; color: #856404;">
+            ⚠️ Solo gli amministratori possono creare missioni. Effettua il login come amministratore per accedere a questa funzionalità.
+        </div>
+
         <!-- Area di risposta generale -->
         <div class="response-area" id="missioneResponse">
-            Usa il pulsante sopra per creare una nuova missione...
+            Effettua il login come amministratore per creare missioni...
         </div>
     </div>
             <!-- Sezione Test Vari -->
@@ -568,6 +613,8 @@
                 let authToken = null;
                 let currentUser = null;
 
+                // === FUNZIONI HELPER ===
+                
                 // Utility function per le chiamate API
                 async function apiCall(endpoint, options = {}) {
                     const url = `${API_BASE_URL}${endpoint}`;
@@ -610,10 +657,17 @@
                             data: {error: 'NETWORK_ERROR', message: error.message},
                             headers: null
                         };
-                }
+                    }
                 }
 
-                // Funzioni di autenticazione
+                function showResponse(elementId, message, type = 'info') {
+                    const element = document.getElementById(elementId);
+                    element.textContent = message;
+                    element.className = `response-area ${type}`;
+                }
+
+                // === FUNZIONI DI AUTENTICAZIONE ===
+                
                 async function doLogin() {
                     const email = document.getElementById('email').value;
                     const password = document.getElementById('password').value;
@@ -623,43 +677,93 @@
                         return;
                     }
 
-                    showResponse('authResponse', 'Autenticazione in corso...', 'info');
+                    showResponse('authResponse', 'Login in corso...', 'info');
 
-                    const result = await apiCall('/auth/login', {
-                        method: 'POST',
-                        body: JSON.stringify({email, password})
-                    });
+                    try {
+                        const result = await apiCall('/auth/login', {
+                            method: 'POST',
+                            body: JSON.stringify({ email, password })
+                        });
 
-                    if (result.ok && result.data.success) {
-                        authToken = result.data.token;
-                        currentUser = result.data.user;
-                        updateAuthStatus(true);
-                        showResponse('authResponse',
-                                `✅ Login riuscito!\nUtente: ${currentUser.email}\nRuolo: ${currentUser.role}\nToken: ${authToken.substring(0, 50)}...`,
-                                'success');
-                    } else {
-                        updateAuthStatus(false);
-                        showResponse('authResponse',
-                                `❌ Login fallito: ${result.data.message || 'Errore sconosciuto'}`,
-                                'error');
+                        // DEBUG: Stampa tutta la risposta per vedere cosa arriva
+                        console.log('=== DEBUG LOGIN RESPONSE ===');
+                        console.log('result.ok:', result.ok);
+                        console.log('result.status:', result.status);
+                        console.log('result.data:', result.data);
+                        console.log('============================');
+
+                        if (result.ok) {
+                            authToken = result.data.token;
+                            
+                            // DEBUG: Controlla come viene estratto il ruolo
+                            console.log('Token estratto:', authToken);
+                            console.log('result.data.role:', result.data.role);
+                            console.log('result.data.user:', result.data.user);
+                            
+                            // Prova diversi modi di estrarre il ruolo
+                            let userRole = null;
+                            let isAdmin = false;
+                            
+                            if (result.data.role) {
+                                userRole = result.data.role;
+                            } else if (result.data.user && result.data.user.role) {
+                                userRole = result.data.user.role;
+                            }
+                            
+                            console.log('userRole estratto:', userRole);
+                            
+                            // Controlla se è admin con diverse varianti
+                            if (userRole) {
+                                isAdmin = userRole.toLowerCase() === 'admin' || 
+                                         userRole.toLowerCase() === 'amministratore' ||
+                                         userRole.toUpperCase() === 'ADMIN';
+                            }
+                            
+                            console.log('isAdmin calcolato:', isAdmin);
+                            
+                            // Salva i dati utente
+                            currentUser = {
+                                email: email,
+                                role: userRole,
+                                isAdmin: isAdmin
+                            };
+                            
+                            updateAuthStatus(true, isAdmin);
+                            
+                            let message = `✅ Login effettuato con successo!\n\n`;
+                            message += `Email: ${email}\n`;
+                            message += `Ruolo estratto: ${userRole || 'NON TROVATO'}\n`;
+                            message += `È admin: ${isAdmin ? 'SÌ' : 'NO'}\n`;
+                            message += `Token: ${authToken.substring(0, 30)}...\n`;
+                            
+                            showResponse('authResponse', message, 'success');
+                            
+                            // Se è admin, mostra automaticamente il form missione
+                            if (isAdmin) {
+                                mostraFormMissioneAutomatic();
+                            } else {
+                                showResponse('missioneResponse', '⚠️ Utente non amministratore. Solo gli admin possono creare missioni.', 'warning');
+                            }
+                        } else {
+                            showResponse('authResponse', `❌ Login fallito: ${result.data.error || result.data.message}`, 'error');
+                        }
+                    } catch (error) {
+                        console.error('Errore durante login:', error);
+                        showResponse('authResponse', `❌ Errore di rete: ${error.message}`, 'error');
                     }
                 }
 
-                async function doLogout() {
-                    if (!authToken) {
-                        showResponse('authResponse', 'Non sei autenticato', 'error');
-                        return;
-                    }
-
-                    const result = await apiCall('/auth/logout', {
-                        method: 'DELETE'
-                    });
-
+                function doLogout() {
                     authToken = null;
                     currentUser = null;
                     updateAuthStatus(false);
-
-                    showResponse('authResponse', '✅ Logout effettuato', 'success');
+                    
+                    // Nascondi il form missione
+                    document.getElementById('sezionFormMissione').style.display = 'none';
+                    document.getElementById('messaggioNonAdmin').style.display = 'none';
+                    showResponse('missioneResponse', 'Effettua il login come amministratore per creare missioni...', 'info');
+                    
+                    showResponse('authResponse', '👋 Logout effettuato', 'info');
                 }
 
                 async function verifyToken() {
@@ -684,101 +788,194 @@
                     }
                 }
 
-                // Funzioni di test
-                async function testHealth() {
-                    showResponse('testResponse', 'Testing basic connectivity...', 'info');
-
-                    const result = await fetch(`${API_BASE_URL}/auth/login`, {
-                        method: 'OPTIONS'
-                    });
-
-                    if (result.ok) {
-                        showResponse('testResponse', '✅ API raggiungibile, CORS configurato correttamente', 'success');
-                    } else {
-                        showResponse('testResponse', `❌ Problema di connettività: ${result.status}`, 'error');
+                function updateAuthStatus(isLoggedIn, isAdmin) {
+                    // Se isAdmin non è specificato, lo impostiamo a false
+                    if (isAdmin === undefined) {
+                        isAdmin = false;
                     }
-                }
-
-                async function testCORS() {
-                    try {
-                        const response = await fetch(`${API_BASE_URL}/auth/login`, {
-                            method: 'OPTIONS',
-                            headers: {
-                                'Origin': window.location.origin,
-                                'Access-Control-Request-Method': 'POST',
-                                'Access-Control-Request-Headers': 'Content-Type'
-                            }
-                        });
-
-                        showResponse('testResponse',
-                                `✅ Test CORS completato\nStatus: ${response.status}\nHeaders CORS: ${response.headers.get('Access-Control-Allow-Origin')}`,
-                                'success');
-                    } catch (error) {
-                        showResponse('testResponse', `❌ Errore CORS: ${error.message}`, 'error');
-                    }
-                }
-
-                // Utility functions
-                function updateAuthStatus(isLoggedIn) {
-                    const statusEl = document.getElementById('authStatus');
-                    const buttons = [
-                        'verifyBtn',
-                        'logoutBtn',
-                        'listaBtn',
-                        'operatoriBtn', // Pulsante principale operatori liberi
-                        'dettagliOperatoreBtn'    // Cerca operatore per ID
-                    ];
+                    
+                    const statusElement = document.getElementById('authStatus');
+                    const buttons = ['verifyBtn', 'logoutBtn', 'listaBtn', 'richiesteNonPositiveBtn', 'operatoriBtn'];
 
                     if (isLoggedIn) {
-                        statusEl.textContent = `✅ Autenticato come: ${currentUser.email} (${currentUser.role})`;
-                        statusEl.className = 'auth-status logged-in';
-                        buttons.forEach(btnId => {
-                            const btn = document.getElementById(btnId);
-                            if (btn)
-                                btn.disabled = false;
+                        statusElement.textContent = `✅ Autenticato come: ${currentUser ? currentUser.email : 'Utente'} (${currentUser ? currentUser.role : 'N/A'})`;
+                        statusElement.className = 'auth-status logged-in';
+                        buttons.forEach(id => {
+                            const btn = document.getElementById(id);
+                            if (btn) btn.disabled = false;
                         });
+                        
+                        // Gestisci visibilità form missione basata sul ruolo
+                        if (isAdmin) {
+                            document.getElementById('messaggioNonAdmin').style.display = 'none';
+                        } else {
+                            document.getElementById('sezionFormMissione').style.display = 'none';
+                            document.getElementById('messaggioNonAdmin').style.display = 'block';
+                            showResponse('missioneResponse', '', '');
+                        }
                     } else {
-                        statusEl.textContent = '❌ Non autenticato';
-                        statusEl.className = 'auth-status logged-out';
-                        buttons.forEach(btnId => {
-                            const btn = document.getElementById(btnId);
-                            if (btn)
-                                btn.disabled = true;
+                        statusElement.textContent = '❌ Non autenticato';
+                        statusElement.className = 'auth-status logged-out';
+                        buttons.forEach(id => {
+                            const btn = document.getElementById(id);
+                            if (btn) btn.disabled = true;
                         });
+                        
+                        // Nascondi tutto quando non autenticato
+                        document.getElementById('sezionFormMissione').style.display = 'none';
+                        document.getElementById('messaggioNonAdmin').style.display = 'none';
                     }
                 }
 
-                function showResponse(elementId, message, type = 'info') {
-                    const element = document.getElementById(elementId);
-                    element.textContent = message;
-                    element.className = `response-area ${type}`;
+                // === FUNZIONI MISSIONE ===
+                
+                function mostraFormMissioneAutomatic() {
+                    document.getElementById('sezionFormMissione').style.display = 'block';
+                    document.getElementById('messaggioNonAdmin').style.display = 'none';
+                    updateOrarioCreazione();
+                    showResponse('missioneResponse', '✅ Accesso autorizzato! Compila i campi per creare una nuova missione.', 'success');
                 }
 
-                function clearAllResponses() {
-                    const responseAreas = [
-                        'authResponse',
-                        'richiestaResponse',
-                        'convalidaResponse',
-                        'listaResponse',
-                        'operatoriResponse',
-                        'testResponse',
-                        'missioneResponse'
-                    ];
+                function nascondiFormMissione() {
+                    document.getElementById('sezionFormMissione').style.display = 'none';
+                    showResponse('missioneResponse', 'Form chiuso.', 'info');
+                }
 
-                    responseAreas.forEach(id => {
-                        const element = document.getElementById(id);
-                        if (element) {
-                            element.textContent = 'Sezione pulita...';
-                            element.className = 'response-area';
-                        }
+                function updateOrarioCreazione() {
+                    const now = new Date();
+                    const orarioFormattato = now.toLocaleString('it-IT', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
                     });
-
-                    showResponse('testResponse', '🧹 Tutte le sezioni sono state pulite!', 'success');
+                    document.getElementById('orarioCreazione').textContent = orarioFormattato;
                 }
 
-                // Funzione di test per inserire una richiesta di soccorso (AGGIORNATA)
+                async function creaMissione() {
+                    if (!authToken) {
+                        showResponse('missioneResponse', 'Devi prima effettuare il login', 'error');
+                        return;
+                    }
+
+                    // Raccogli dati dal form
+                    const richiestaId = parseInt(document.getElementById('richiestaIdMissione').value);
+                    const nome = document.getElementById('nomeMissione').value.trim();
+                    const posizione = document.getElementById('posizioneMissione').value.trim();
+                    const obiettivo = document.getElementById('obiettivoMissione').value.trim();
+                    const caposquadra = document.getElementById('caposquadraMissione').value.trim();
+                    const operatoriStandard = document.getElementById('operatoriStandardMissione').value.trim();
+                    const mezzi = document.getElementById('mezziMissione').value.trim();
+                    const materiali = document.getElementById('materialiMissione').value.trim();
+
+                    // Validazioni client-side
+                    if (!richiestaId || richiestaId <= 0) {
+                        showResponse('missioneResponse', '❌ Inserisci un ID richiesta valido', 'error');
+                        return;
+                    }
+
+                    if (!nome) {
+                        showResponse('missioneResponse', '❌ Il nome della missione è obbligatorio', 'error');
+                        return;
+                    }
+
+                    if (!posizione) {
+                        showResponse('missioneResponse', '❌ La posizione è obbligatoria', 'error');
+                        return;
+                    }
+
+                    if (!obiettivo) {
+                        showResponse('missioneResponse', '❌ L\'obiettivo è obbligatorio', 'error');
+                        return;
+                    }
+
+                    if (!caposquadra) {
+                        showResponse('missioneResponse', '❌ Almeno un caposquadra è obbligatorio', 'error');
+                        return;
+                    }
+
+                    // Combina caposquadra e operatori standard
+                    let tuttiOperatori = caposquadra;
+                    if (operatoriStandard) {
+                        tuttiOperatori += ',' + operatoriStandard;
+                    }
+
+                    // Prepara i dati della richiesta
+                    const missioneData = {
+                        richiestaId: richiestaId,
+                        nome: nome,
+                        posizione: posizione,
+                        obiettivo: obiettivo,
+                        operatori: tuttiOperatori,
+                        mezzi: mezzi || null,
+                        materiali: materiali || null,
+                        caposquadra: caposquadra,
+                        operatoriStandard: operatoriStandard || null
+                    };
+
+                    showResponse('missioneResponse', 'Creazione missione in corso...', 'info');
+
+                    try {
+                        const result = await apiCall('/missioni', {
+                            method: 'POST',
+                            body: JSON.stringify(missioneData)
+                        });
+
+                        if (result.ok) {
+                            const response = result.data;
+                            let message = `✅ ${response.message}\n\n`;
+                            message += `🎯 Dettagli missione creata:\n`;
+                            message += `• Nome: ${response.missione.nome}\n`;
+                            message += `• Posizione: ${response.missione.posizione}\n`;
+                            message += `• Obiettivo: ${response.missione.obiettivo}\n`;
+                            message += `• ID Richiesta: ${response.missione.codiceRichiesta}\n`;
+                            message += `• Data/Ora Inizio: ${new Date(response.missione.dataOraInizio).toLocaleString('it-IT')}\n`;
+                            
+                            if (response.emailOperatori && response.emailOperatori.length > 0) {
+                                message += `\n📧 Email notifiche inviate a:\n`;
+                                response.emailOperatori.forEach(email => {
+                                    message += `• ${email}\n`;
+                                });
+                            }
+
+                            showResponse('missioneResponse', message, 'success');
+                            clearMissioneFormSilent();
+                        } else {
+                            let errorMessage = `❌ Errore nella creazione: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
+                            
+                            if (result.status === 400) {
+                                errorMessage = `❌ Dati non validi: ${result.data.error || 'Controlla i campi inseriti'}`;
+                            } else if (result.status === 401) {
+                                errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
+                            } else if (result.status === 403) {
+                                errorMessage = '❌ Accesso negato. Solo gli amministratori possono creare missioni.';
+                            }
+
+                            showResponse('missioneResponse', errorMessage, 'error');
+                        }
+                    } catch (error) {
+                        showResponse('missioneResponse', `❌ Errore di rete: ${error.message}`, 'error');
+                    }
+                }
+
+                function clearMissioneFormSilent() {
+                    document.getElementById('richiestaIdMissione').value = '';
+                    document.getElementById('nomeMissione').value = '';
+                    document.getElementById('posizioneMissione').value = '';
+                    document.getElementById('obiettivoMissione').value = '';
+                    document.getElementById('caposquadraMissione').value = '';
+                    document.getElementById('operatoriStandardMissione').value = '';
+                    document.getElementById('mezziMissione').value = '';
+                    document.getElementById('materialiMissione').value = '';
+                    updateOrarioCreazione();
+                }
+
+                // === FUNZIONI RICHIESTE ===
+                
                 async function inserisciRichiesta() {
-                    // Leggi tutti i campi dal form
                     const descrizione = document.getElementById('descrizione').value;
                     const indirizzo = document.getElementById('indirizzo').value;
                     const nome = document.getElementById('nome').value;
@@ -787,7 +984,6 @@
                     const coordinate = document.getElementById('coordinate').value;
                     const foto = document.getElementById('foto').value;
 
-                    // Valida input obbligatori
                     if (!descrizione || descrizione.trim().length < 10) {
                         showResponse('richiestaResponse', '❌ La descrizione deve essere di almeno 10 caratteri', 'error');
                         return;
@@ -813,21 +1009,19 @@
                         return;
                     }
 
-                    // Prepara il payload con tutti i campi
                     const richiestaData = {
                         descrizione: descrizione.trim(),
                         indirizzo: indirizzo.trim(),
                         nome: nome.trim(),
                         emailSegnalante: emailSegnalante.trim(),
                         nomeSegnalante: nomeSegnalante.trim(),
-                        coordinate: coordinate.trim() || null, // Opzionale
-                        foto: foto.trim() || null               // Opzionale
+                        coordinate: coordinate.trim() || null,
+                        foto: foto.trim() || null
                     };
 
                     try {
                         showResponse('richiestaResponse', '🔄 Invio richiesta di soccorso...', 'info');
 
-                        // Chiamata all'endpoint REST
                         const response = await fetch(`${API_BASE_URL}/richieste`, {
                             method: 'POST',
                             headers: {
@@ -863,7 +1057,6 @@
                     }
                 }
 
-                // Funzione per compilare dati di test realistici
                 function fillTestData() {
                     document.getElementById('descrizione').value = "Incendio in appartamento al secondo piano, presenza di feriti. Fumo denso dalle finestre. Necessario intervento immediato di VVF e ambulanza.";
                     document.getElementById('indirizzo').value = "Via Roma 123, L'Aquila (AQ)";
@@ -874,7 +1067,6 @@
                     document.getElementById('foto').value = "";
                 }
 
-                // Funzione per pulire il form
                 function clearForm() {
                     document.getElementById('descrizione').value = "";
                     document.getElementById('indirizzo').value = "";
@@ -883,11 +1075,11 @@
                     document.getElementById('nomeSegnalante').value = "";
                     document.getElementById('coordinate').value = "";
                     document.getElementById('foto').value = "";
-
                     showResponse('richiestaResponse', 'Form pulito. Pronto per nuovi dati...', 'info');
                 }
 
-                // Funzione per effettuare la convalida
+                // === FUNZIONI CONVALIDA ===
+                
                 async function doConvalida() {
                     const id = document.getElementById('convalidaId').value;
                     const token = document.getElementById('convalidaToken').value;
@@ -935,7 +1127,6 @@
 
                             showResponse('convalidaResponse', message, 'success');
                         } else {
-                            // Gestione errori specifici
                             let errorMessage = data.message || 'Errore sconosciuto durante la convalida';
 
                             if (response.status === 400) {
@@ -957,11 +1148,9 @@
                     }
                 }
 
-                // Funzione per riempire con dati di esempio
                 function fillConvalidaExample() {
                     document.getElementById('convalidaId').value = "1";
                     document.getElementById('convalidaToken').value = "exemplo-token-123456789abcdef";
-
                     showResponse('convalidaResponse',
                             '📋 Form riempito con dati di esempio.\n\n' +
                             '⚠️ IMPORTANTE: Questi sono dati di esempio!\n' +
@@ -971,26 +1160,14 @@
                             'info');
                 }
 
-                // Funzione per pulire il form di convalida
                 function clearConvalidaForm() {
                     document.getElementById('convalidaId').value = "";
                     document.getElementById('convalidaToken').value = "";
                     showResponse('convalidaResponse', 'Form di convalida pulito. Pronto per nuovi dati...', 'info');
                 }
 
-                // Aggiorna anche la funzione clearAllResponses() per includere la nuova sezione
-                function clearAllResponses() {
-                    const responseAreas = ['authResponse', 'richiestaResponse', 'convalidaResponse', 'listaResponse', 'operatoriResponse', 'testResponse'];
-                    responseAreas.forEach(id => {
-                        const element = document.getElementById(id);
-                        if (element) {
-                            element.textContent = 'Sezione pulita...';
-                            element.className = 'response-area';
-                        }
-                    });
-                }
-
-// Funzione per la lista richieste (più carina rispetto a prima)
+                // === ALTRE FUNZIONI ===
+                
                 async function getListaRichieste() {
                     if (!authToken) {
                         showResponse('listaResponse', 'Devi prima effettuare il login per vedere le richieste', 'error');
@@ -1008,7 +1185,6 @@
                     showResponse('listaResponse', 'Caricamento lista richieste...', 'info');
 
                     try {
-                        // Costruisci l'URL con i parametri
                         let url = '/richieste';
                         const params = new URLSearchParams();
 
@@ -1016,7 +1192,7 @@
                             params.append('stato', stato);
                         }
                         params.append('page', pagina.toString());
-                        params.append('size', '5'); // Riduciamo a 5 per testare meglio la paginazione
+                        params.append('size', '5');
 
                         if (params.toString()) {
                             url += '?' + params.toString();
@@ -1033,39 +1209,17 @@
                             message += `• Pagine totali: ${response.totalPages}\n`;
                             message += `• Pagina corrente: ${response.number + 1}/${response.totalPages}\n`;
                             message += `• Richieste in questa pagina: ${response.content.length}\n`;
-                            message += `• Prima pagina: ${response.first ? 'Sì' : 'No'}\n`;
-                            message += `• Ultima pagina: ${response.last ? 'Sì' : 'No'}\n\n`;
-
-                            // Suggerimenti per la navigazione
-                            if (response.totalPages > 1) {
-                                message += `🧭 Navigazione:\n`;
-                                if (!response.first) {
-                                    message += `• Pagina precedente: ${response.number}\n`;
-                                }
-                                if (!response.last) {
-                                    message += `• Pagina successiva: ${response.number + 2}\n`;
-                                }
-                                message += `• Ultima pagina: ${response.totalPages}\n\n`;
-                            }
 
                             if (response.content.length > 0) {
-                                message += `🔍 Richieste in questa pagina:\n`;
+                                message += `\n🔍 Richieste in questa pagina:\n`;
                                 response.content.forEach((richiesta, index) => {
                                     message += `\n${index + 1}. ID: ${richiesta.codice}\n`;
                                     message += `   • Stato: ${richiesta.stato}\n`;
                                     message += `   • Segnalante: ${richiesta.nomeSegnalante}\n`;
                                     message += `   • Indirizzo: ${richiesta.indirizzo}\n`;
-                                    message += `   • Descrizione: ${richiesta.descrizione.substring(0, 80)}${richiesta.descrizione.length > 80 ? '...' : ''}\n`;
                                 });
-
-                                if (response.totalElements > response.content.length) {
-                                    message += `\n... e altre ${response.totalElements - response.content.length} richieste nelle altre pagine.`;
-                                }
                             } else {
-                                message += `📭 Nessuna richiesta trovata con i filtri specificati.`;
-                                if (stato) {
-                                    message += `\n\nℹ️ Prova a cambiare il filtro stato o rimuovere i filtri per vedere tutte le richieste.`;
-                                }
+                                message += `\n📭 Nessuna richiesta trovata con i filtri specificati.`;
                             }
 
                             showResponse('listaResponse', message, 'success');
@@ -1083,7 +1237,6 @@
                     }
                 }
 
-// Funzione migliorata per caricare richieste non positive (score <5)
                 async function getRichiesteNonPositive() {
                     if (!authToken) {
                         showResponse('listaResponse', 'Devi prima effettuare il login per vedere le richieste', 'error');
@@ -1091,11 +1244,6 @@
                     }
 
                     const pagina = parseInt(document.getElementById('pagina').value) || 1;
-
-                    if (pagina < 1) {
-                        showResponse('listaResponse', 'Il numero di pagina deve essere >= 1', 'error');
-                        return;
-                    }
 
                     showResponse('listaResponse', 'Caricamento richieste non positive...', 'info');
 
@@ -1105,329 +1253,34 @@
 
                         if (result.ok) {
                             const response = result.data;
-
                             let message = `✅ Richieste non positive caricate!\n\n`;
-                            message += `📊 Statistiche:\n`;
-                            message += `• Totale richieste non positive: ${response.totalElements}\n`;
-                            message += `• Pagine totali: ${response.totalPages}\n`;
-                            message += `• Pagina corrente: ${response.number + 1}/${response.totalPages}\n`;
-                            message += `• Richieste in questa pagina: ${response.content.length}\n`;
-                            message += `• Prima pagina: ${response.first ? 'Sì' : 'No'}\n`;
-                            message += `• Ultima pagina: ${response.last ? 'Sì' : 'No'}\n\n`;
+                            message += `📊 Totale richieste non positive: ${response.totalElements}\n`;
 
                             if (response.content.length > 0) {
-                                message += `🔍 Richieste con livello di successo < 5:\n`;
+                                message += `\n🔍 Richieste con livello di successo < 5:\n`;
                                 response.content.forEach((richiesta, index) => {
                                     message += `\n${index + 1}. ID: ${richiesta.codice}\n`;
-                                    message += `   • Stato: ${richiesta.stato}\n`;
                                     message += `   • Segnalante: ${richiesta.nomeSegnalante}\n`;
-                                    message += `   • Indirizzo: ${richiesta.indirizzo}\n`;
-                                    message += `   • Descrizione: ${richiesta.descrizione.substring(0, 60)}...\n`;
                                 });
-
-                                message += `\n💡 Queste sono richieste chiuse con valutazione di successo inferiore a 5/5.`;
                             } else {
-                                message += `🎉 Ottime notizie! Non ci sono richieste con esito non positivo.`;
-                                if (response.totalElements === 0) {
-                                    message += `\n\nℹ️ Questo significa che tutte le missioni completate hanno avuto successo >= 5/5.`;
-                                }
+                                message += `\n🎉 Ottime notizie! Non ci sono richieste con esito non positivo.`;
                             }
 
                             showResponse('listaResponse', message, 'success');
                         } else {
-                            let errorMessage = `❌ Errore nel caricamento: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
-                            if (result.status === 401) {
-                                errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
-                            } else if (result.status === 403) {
-                                errorMessage = '❌ Accesso negato. Solo gli amministratori possono vedere queste richieste.';
-                            }
-                            showResponse('listaResponse', errorMessage, 'error');
+                            showResponse('listaResponse', `❌ Errore: ${result.data.error || 'Errore sconosciuto'}`, 'error');
                         }
                     } catch (error) {
                         showResponse('listaResponse', `❌ Errore di rete: ${error.message}`, 'error');
                     }
                 }
 
-                // Funzione per testare diversi filtri rapidamente
-                function testFiltriVeloci() {
-                    const filtri = [
-                        {stato: '', desc: 'tutte le richieste'},
-                        {stato: 'ATTIVA', desc: 'richieste attive'},
-                        {stato: 'CHIUSA', desc: 'richieste chiuse'},
-                        {stato: 'CONVALIDATA', desc: 'richieste convalidate'}
-                    ];
-
-                    let message = '🚀 Test rapido filtri disponibili:\n\n';
-                    filtri.forEach((filtro, index) => {
-                        message += `${index + 1}. Stato: "${filtro.stato || 'TUTTI'}" - ${filtro.desc}\n`;
-                    });
-                    message += '\nModifica il filtro "Stato" e clicca "Carica Lista" per testare!';
-
-                    showResponse('listaResponse', message, 'info');
-                }
-
-// Quando si fa il login vengono resi cliccabili alcuni pulsanti prima inutilizzabili
-                function updateAuthStatus(isLoggedIn) {
-                    const statusEl = document.getElementById('authStatus');
-                    const buttons = [
-                        'verifyBtn',
-                        'logoutBtn',
-                        'listaBtn',
-                        'richiesteNonPositiveBtn', // NUOVO pulsante
-                        'operatoriBtn',
-                        'dettagliOperatoreBtn',
-                        'richiesteAttiveBtn',
-                        'mostraFormBtn',
-                        'creaMissioneBtn'
-                    ];
-
-                    if (isLoggedIn) {
-                        statusEl.textContent = `✅ Autenticato come: ${currentUser.email} (${currentUser.role})`;
-                        statusEl.className = 'auth-status logged-in';
-                        buttons.forEach(btnId => {
-                            const btn = document.getElementById(btnId);
-                            if (btn)
-                                btn.disabled = false;
-                        });
-                    } else {
-                        statusEl.textContent = '❌ Non autenticato';
-                        statusEl.className = 'auth-status logged-out';
-                        buttons.forEach(btnId => {
-                            const btn = document.getElementById(btnId);
-                            if (btn)
-                                btn.disabled = true;
-                        });
-                    }
-                }
-
-
-                function clearAllResponses() {
-                    const responseAreas = [
-                        'authResponse',
-                        'richiestaResponse',
-                        'convalidaResponse',
-                        'listaResponse',
-                        'operatoriResponse',
-                        'missioneResponse', // Area missioni principale (NUOVO)
-                        'richiesteAttiveResponse', // Area richieste attive (NUOVO)
-                        'testResponse'
-                    ];
-
-                    responseAreas.forEach(id => {
-                        const element = document.getElementById(id);
-                        if (element) {
-                            element.textContent = 'Sezione pulita...';
-                            element.className = 'response-area';
-                        }
-                    });
-
-                    // Nascondi anche le sezioni espandibili
-                    document.getElementById('sezionRichiesteAttive').style.display = 'none';
-                    document.getElementById('sezionFormMissione').style.display = 'none';
-
-                    showResponse('testResponse', '🧹 Tutte le sezioni sono state pulite e chiuse!', 'success');
-                }
-                // Funzione per pulire tutte le risposte (aggiornata)
-                function clearAllResponses() {
-                    const responseAreas = [
-                        'authResponse',
-                        'richiestaResponse',
-                        'convalidaResponse',
-                        'listaResponse',
-                        'operatoriResponse',
-                        'testResponse'
-                    ];
-
-                    responseAreas.forEach(id => {
-                        const element = document.getElementById(id);
-                        if (element) {
-                            element.textContent = 'Sezione pulita...';
-                            element.className = 'response-area';
-                        }
-                    });
-
-                    showResponse('testResponse', '🧹 Tutte le sezioni sono state pulite!', 'success');
-                }
-
-                document.addEventListener('DOMContentLoaded', function () {
-                    updateAuthStatus(false);
-                    showResponse('authResponse', 'Pronto per il test di autenticazione...');
-                    showResponse('richiestaResponse', 'Pronto per il test di inserimento richiesta...');
-                    showResponse('convalidaResponse', 'Pronto per il test di convalida richiesta...');
-                    showResponse('listaResponse', 'Pronto per il test di lista richieste...');
-                    showResponse('operatoriResponse', 'Pronto per il test di lista operatori...');
-                    showResponse('testResponse', 'Pronto per i test di connettività...');
-                });
-
-                
-
-                // Funzione per mostrare il form di creazione missione
-                function mostraFormCreazioneMissione() {
-                    if (!authToken) {
-                        showResponse('missioneResponse', 'Devi prima effettuare il login per creare missioni', 'error');
-                        return;
-                    }
-
-                    // Nascondi richieste attive se aperte
-                    document.getElementById('sezionRichiesteAttive').style.display = 'none';
-                    // Mostra form
-                    document.getElementById('sezionFormMissione').style.display = 'block';
-                    // Aggiorna orario di creazione
-                    updateOrarioCreazione();
-                    showResponse('missioneResponse', 'Form di creazione missione aperto. Compila i campi richiesti e clicca "Crea Missione".', 'info');
-                }
-
-                // Funzione per nascondere il form
-                function nascondiFormMissione() {
-                    document.getElementById('sezionFormMissione').style.display = 'none';
-                    showResponse('missioneResponse', 'Form chiuso. Usa i pulsanti sopra per vedere le richieste attive o creare una missione.', 'info');
-                }
-
-                // Funzione per aggiornare l'orario di creazione
-                function updateOrarioCreazione() {
-                    const now = new Date();
-                    const orarioFormattato = now.toLocaleString('it-IT', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit'
-                    });
-                    document.getElementById('orarioCreazione').textContent = orarioFormattato;
-                }
-
-                // Funzione per creare la missione
-                async function creaMissione() {
-            if (!authToken) {
-                showResponse('missioneResponse', 'Devi prima effettuare il login', 'error');
-                return;
-            }
-
-            // Raccogli dati dal form
-            const richiestaId = parseInt(document.getElementById('richiestaIdMissione').value);
-            const nome = document.getElementById('nomeMissione').value.trim();
-            const posizione = document.getElementById('posizioneMissione').value.trim();
-            const obiettivo = document.getElementById('obiettivoMissione').value.trim();
-            const caposquadra = document.getElementById('caposquadraMissione').value.trim();
-            const operatoriStandard = document.getElementById('operatoriStandardMissione').value.trim();
-            const mezzi = document.getElementById('mezziMissione').value.trim();
-            const materiali = document.getElementById('materialiMissione').value.trim();
-
-            // Validazioni client-side
-            if (!richiestaId || richiestaId <= 0) {
-                showResponse('missioneResponse', '❌ Inserisci un ID richiesta valido', 'error');
-                return;
-            }
-
-            if (!nome) {
-                showResponse('missioneResponse', '❌ Il nome della missione è obbligatorio', 'error');
-                return;
-            }
-
-            if (!posizione) {
-                showResponse('missioneResponse', '❌ La posizione è obbligatoria', 'error');
-                return;
-            }
-
-            if (!obiettivo) {
-                showResponse('missioneResponse', '❌ L\'obiettivo è obbligatorio', 'error');
-                return;
-            }
-
-            if (!caposquadra) {
-                showResponse('missioneResponse', '❌ Almeno un caposquadra è obbligatorio', 'error');
-                return;
-            }
-
-            // Combina caposquadra e operatori standard per creare la lista completa degli operatori
-            let tuttiOperatori = caposquadra;
-            if (operatoriStandard) {
-                tuttiOperatori += ',' + operatoriStandard;
-            }
-
-            // Prepara i dati della richiesta (usando il formato esistente)
-            const missioneData = {
-                richiestaId: richiestaId,
-                nome: nome,
-                posizione: posizione,
-                obiettivo: obiettivo,
-                operatori: tuttiOperatori,
-                mezzi: mezzi || null,
-                materiali: materiali || null,
-                // Aggiungiamo informazioni sui ruoli per il backend
-                caposquadra: caposquadra,
-                operatoriStandard: operatoriStandard || null
-            };
-
-            showResponse('missioneResponse', 'Creazione missione in corso...', 'info');
-
-            try {
-                const result = await apiCall('/missioni', {
-                    method: 'POST',
-                    body: JSON.stringify(missioneData)
-                });
-
-                if (result.ok) {
-                    const response = result.data;
-                    let message = `✅ ${response.message}\n\n`;
-                    message += `🎯 Dettagli missione creata:\n`;
-                    message += `• Nome: ${response.missione.nome}\n`;
-                    message += `• Posizione: ${response.missione.posizione}\n`;
-                    message += `• Obiettivo: ${response.missione.obiettivo}\n`;
-                    message += `• ID Richiesta: ${response.missione.codiceRichiesta}\n`;
-                    message += `• Data/Ora Inizio: ${new Date(response.missione.dataOraInizio).toLocaleString('it-IT')}\n`;
-                    
-                    if (response.emailOperatori && response.emailOperatori.length > 0) {
-                        message += `\n📧 Email notifiche inviate a:\n`;
-                        response.emailOperatori.forEach(email => {
-                            message += `• ${email}\n`;
-                        });
-                    }
-
-                    showResponse('missioneResponse', message, 'success');
-                    clearMissioneForm();
-                } else {
-                    let errorMessage = `❌ Errore nella creazione: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
-                    
-                    if (result.status === 400) {
-                        errorMessage = `❌ Dati non validi: ${result.data.error || 'Controlla i campi inseriti'}`;
-                    } else if (result.status === 401) {
-                        errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
-                    } else if (result.status === 403) {
-                        errorMessage = '❌ Accesso negato. Solo gli amministratori possono creare missioni.';
-                    }
-
-                    showResponse('missioneResponse', errorMessage, 'error');
-                }
-            } catch (error) {
-                showResponse('missioneResponse', `❌ Errore di rete: ${error.message}`, 'error');
-            }
-        }
-
-                // Funzione per pulire il form
-                function clearMissioneForm() {
-            document.getElementById('richiestaIdMissione').value = '';
-            document.getElementById('nomeMissione').value = '';
-            document.getElementById('posizioneMissione').value = '';
-            document.getElementById('obiettivoMissione').value = '';
-            document.getElementById('caposquadraMissione').value = '';
-            document.getElementById('operatoriStandardMissione').value = '';
-            document.getElementById('mezziMissione').value = '';
-            document.getElementById('materialiMissione').value = '';
-            updateOrarioCreazione();
-            showResponse('missioneResponse', 'Form pulito. Compila i campi per creare una nuova missione.', 'info');
-        }
-
-                // Funzione per pulire i filtri della lista missioni
                 function clearListaForm() {
                     document.getElementById('filtroStato').value = '';
                     document.getElementById('pagina').value = '1';
                     showResponse('listaResponse', 'Filtri resettati. Pronto per una nuova ricerca...', 'info');
                 }
 
-// Funzione per ottenere operatori liberi con dettagli completi
                 async function getOperatoriLiberiConDettagli() {
                     if (!authToken) {
                         showResponse('operatoriResponse', 'Devi prima effettuare il login per vedere gli operatori', 'error');
@@ -1441,7 +1294,6 @@
 
                         if (result.ok) {
                             const operatori = result.data;
-
                             let message = `✅ Operatori liberi caricati!\n\n`;
                             message += `👥 Trovati ${operatori.length} operatori attualmente disponibili:\n\n`;
 
@@ -1452,7 +1304,6 @@
                                     message += `   📧 Email: ${operatore.email || 'N/A'}\n`;
                                     message += `   🆔 Codice Fiscale: ${operatore.codiceFiscale || 'N/A'}\n`;
 
-                                    // Aggiungi informazioni su patenti se disponibili
                                     if (operatore.patenti && operatore.patenti.length > 0) {
                                         const patentiFormatted = operatore.patenti.map(p => p.replace('_', ' ')).join(', ');
                                         message += `   🚗 Patenti: ${patentiFormatted}\n`;
@@ -1460,7 +1311,6 @@
                                         message += `   🚗 Patenti: Nessuna registrata\n`;
                                     }
 
-                                    // Aggiungi informazioni su abilità se disponibili
                                     if (operatore.abilita && operatore.abilita.length > 0) {
                                         const abilitaFormatted = operatore.abilita.map(a => a.replace(/_/g, ' ').replace(/-/g, ' ')).join(', ');
                                         message += `   🛠️ Abilità: ${abilitaFormatted}\n`;
@@ -1468,18 +1318,14 @@
                                         message += `   🛠️ Abilità: Nessuna registrata\n`;
                                     }
 
-                                    message += `   🟢 Stato: Libero (disponibile per nuove missioni)\n`;
+                                    message += `   🟢 Stato: Libero\n`;
 
                                     if (index < operatori.length - 1) {
-                                        message += `\n${'-'.repeat(50)}\n\n`;
+                                        message += `\n${'-'.repeat(30)}\n\n`;
                                     }
                                 });
-
-                                message += `\n\n💡 Questi operatori sono immediatamente disponibili per essere assegnati a nuove missioni.`;
-                                message += `\n🔍 Le patenti e abilità mostrate sono quelle registrate nel sistema per ogni operatore.`;
                             } else {
-                                message += `📭 Nessun operatore libero al momento.\n`;
-                                message += `Tutti gli operatori sono attualmente impegnati in missioni attive.`;
+                                message += `📭 Nessun operatore libero al momento.`;
                             }
 
                             showResponse('operatoriResponse', message, 'success');
@@ -1497,8 +1343,74 @@
                     }
                 }
 
+                // === FUNZIONI TEST ===
+                
+                async function testHealth() {
+                    showResponse('testResponse', 'Testing basic connectivity...', 'info');
 
+                    const result = await fetch(`${API_BASE_URL}/auth/login`, {
+                        method: 'OPTIONS'
+                    });
 
+                    if (result.ok) {
+                        showResponse('testResponse', '✅ API raggiungibile, CORS configurato correttamente', 'success');
+                    } else {
+                        showResponse('testResponse', `❌ Problema di connettività: ${result.status}`, 'error');
+                    }
+                }
+
+                async function testCORS() {
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                            method: 'OPTIONS',
+                            headers: {
+                                'Origin': window.location.origin,
+                                'Access-Control-Request-Method': 'POST',
+                                'Access-Control-Request-Headers': 'Content-Type'
+                            }
+                        });
+
+                        showResponse('testResponse',
+                                `✅ Test CORS completato\nStatus: ${response.status}\nHeaders CORS: ${response.headers.get('Access-Control-Allow-Origin')}`,
+                                'success');
+                    } catch (error) {
+                        showResponse('testResponse', `❌ Errore CORS: ${error.message}`, 'error');
+                    }
+                }
+
+                function clearAllResponses() {
+                    const responseAreas = [
+                        'authResponse',
+                        'richiestaResponse',
+                        'convalidaResponse',
+                        'listaResponse',
+                        'operatoriResponse',
+                        'missioneResponse',
+                        'testResponse'
+                    ];
+
+                    responseAreas.forEach(id => {
+                        const element = document.getElementById(id);
+                        if (element) {
+                            element.textContent = 'Sezione pulita...';
+                            element.className = 'response-area';
+                        }
+                    });
+
+                    showResponse('testResponse', '🧹 Tutte le sezioni sono state pulite!', 'success');
+                }
+
+                // === INIZIALIZZAZIONE ===
+                document.addEventListener('DOMContentLoaded', function () {
+                    updateAuthStatus(false);
+                    showResponse('authResponse', 'Pronto per il test di autenticazione...');
+                    showResponse('richiestaResponse', 'Pronto per il test di inserimento richiesta...');
+                    showResponse('convalidaResponse', 'Pronto per il test di convalida richiesta...');
+                    showResponse('listaResponse', 'Pronto per il test di lista richieste...');
+                    showResponse('operatoriResponse', 'Pronto per il test di lista operatori...');
+                    showResponse('missioneResponse', 'Effettua il login come amministratore per creare missioni...');
+                    showResponse('testResponse', 'Pronto per i test di connettività...');
+                });
             </script>
         </body>
     </html>
