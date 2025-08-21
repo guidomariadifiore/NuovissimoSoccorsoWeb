@@ -562,14 +562,21 @@
             </div>
 
             <!-- Pulsanti azione (RIMOSSO il pulsante pulisci) -->
-            <div class="button-row">
-                <button onclick="creaMissione()" style="background-color: #28a745;">
-                    🚀 Crea Missione
-                </button>
-                <button onclick="nascondiFormMissione()" style="background-color: #6c757d;">
-                    ❌ Chiudi Form
-                </button>
-            </div>
+           <!-- Pulsanti azione -->
+
+           <div class="button-row">
+    
+               <button onclick="creaMissione()" style="background-color: #28a745;">
+        🚀 Crea Missione
+    
+               </button>
+    <button onclick="pulisciFormMissione()" style="background-color: #17a2b8;">
+        🧹 Pulisci Form
+    </button>
+    <button onclick="nascondiFormMissione()" style="background-color: #6c757d;">
+        ❌ Chiudi Form
+    </button>
+</div>
 
             <!-- Info validazione -->
             <div class="info-box">
@@ -992,7 +999,10 @@
                         showResponse('missioneResponse', `❌ Errore di rete: ${error.message}`, 'error');
                     }
                 }
-
+function pulisciFormMissione() {
+    clearMissioneFormSilent();
+    showResponse('missioneResponse', '🧹 Form pulito! Compila i campi per creare una nuova missione.', 'info');
+}
                 function clearMissioneFormSilent() {
                     document.getElementById('richiestaIdMissione').value = '';
                     document.getElementById('nomeMissione').value = '';
