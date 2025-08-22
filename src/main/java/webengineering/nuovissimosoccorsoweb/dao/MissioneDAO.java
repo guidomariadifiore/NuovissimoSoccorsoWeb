@@ -52,4 +52,16 @@ public interface MissioneDAO {
     int countMissioniInCorsoByOperatore(int idOperatore) throws DataException;
     
     int countMissioniCompletateByOperatore(int idOperatore) throws DataException;
+    
+    // ========== NUOVI METODI PER DETTAGLI MISSIONE ==========
+    
+    List<webengineering.nuovissimosoccorsoweb.model.Operatore> getOperatoriAssegnati(int codiceMissione) throws DataException;
+    
+    String getRuoloOperatoreInMissione(int codiceOperatore, int codiceMissione) throws DataException;
+    
+    List<String> getTargheMezziAssegnati(int codiceMissione) throws DataException;
+    
+    List<Integer> getIdMaterialiAssegnati(int codiceMissione) throws DataException;
+    
+    boolean esisteMissione(int codice) throws DataException;
 }

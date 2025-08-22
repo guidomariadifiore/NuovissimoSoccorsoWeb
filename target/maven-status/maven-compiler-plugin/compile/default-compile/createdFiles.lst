@@ -14,6 +14,7 @@ webengineering\nuovissimosoccorsoweb\rest\dto\MissioneDTO.class
 webengineering\nuovissimosoccorsoweb\controller\RegistrazioneNuovoUtente.class
 webengineering\nuovissimosoccorsoweb\dao\AggiornaMezzoDAO.class
 webengineering\nuovissimosoccorsoweb\controller\SoccorsoBaseController.class
+webengineering\nuovissimosoccorsoweb\rest\dto\OperatoreAssegnatoDTO.class
 webengineering\framework\data\DataItemImpl.class
 webengineering\nuovissimosoccorsoweb\model\impl\AggiornaMezzoImpl.class
 webengineering\nuovissimosoccorsoweb\SoccorsoDataLayer.class
@@ -37,6 +38,7 @@ webengineering\nuovissimosoccorsoweb\service\AuthenticationService.class
 webengineering\nuovissimosoccorsoweb\rest\exception\JacksonExceptionMapper.class
 webengineering\nuovissimosoccorsoweb\controller\SessionDebug.class
 webengineering\nuovissimosoccorsoweb\dao\AggiornaMaterialeDAO.class
+webengineering\nuovissimosoccorsoweb\rest\dto\MaterialeAssegnatoDTO.class
 webengineering\nuovissimosoccorsoweb\model\impl\proxy\RichiestaSoccorsoProxy.class
 webengineering\nuovissimosoccorsoweb\controller\AdminDashboardController$DashboardData.class
 webengineering\nuovissimosoccorsoweb\controller\AdminMaterialiController.class
@@ -64,6 +66,7 @@ webengineering\nuovissimosoccorsoweb\rest\dto\RichiestaDTO.class
 webengineering\nuovissimosoccorsoweb\controller\RichiesteListController.class
 webengineering\nuovissimosoccorsoweb\dao\impl\PatenteDAO_MySQL.class
 webengineering\nuovissimosoccorsoweb\controller\AdminNuovoMaterialeController$ValidationResult.class
+webengineering\nuovissimosoccorsoweb\rest\dto\ValutazioneMissioneDTO.class
 webengineering\framework\data\DataCache.class
 webengineering\nuovissimosoccorsoweb\dao\OperatoreHaAbilitaDAO.class
 webengineering\nuovissimosoccorsoweb\rest\service\AuthService$UserInfo.class
@@ -128,7 +131,6 @@ webengineering\nuovissimosoccorsoweb\controller\AdminOperatoriController.class
 webengineering\nuovissimosoccorsoweb\dao\MissioneDAO.class
 webengineering\nuovissimosoccorsoweb\dao\impl\OperatoreDAO_MySQL.class
 webengineering\nuovissimosoccorsoweb\dao\MezzoDAO.class
-AnnullaRichiestaResponse.class
 webengineering\framework\result\TemplateManagerException.class
 webengineering\nuovissimosoccorsoweb\model\impl\proxy\OperatoreProxy.class
 webengineering\nuovissimosoccorsoweb\service\MissioniService.class
@@ -141,7 +143,6 @@ webengineering\nuovissimosoccorsoweb\model\impl\proxy\AggiornaMezzoProxy.class
 webengineering\framework\data\DataException.class
 webengineering\nuovissimosoccorsoweb\model\impl\MissioneImpl.class
 webengineering\nuovissimosoccorsoweb\model\MissioneUtilizzaMezzo.class
-AnnullaRichiestaResponse\java.class
 webengineering\nuovissimosoccorsoweb\rest\security\CORSFilter.class
 webengineering\nuovissimosoccorsoweb\model\RuoloSquadra.class
 webengineering\nuovissimosoccorsoweb\model\impl\proxy\PartecipazioneSquadraProxy.class
@@ -150,6 +151,7 @@ webengineering\nuovissimosoccorsoweb\controller\AdminMezziController.class
 webengineering\nuovissimosoccorsoweb\controller\OperatoreStoricoController$MissioneConDettagli.class
 webengineering\nuovissimosoccorsoweb\model\impl\proxy\MissioneUtilizzaMezzoProxy.class
 webengineering\nuovissimosoccorsoweb\controller\Login$UserInfo.class
+webengineering\nuovissimosoccorsoweb\rest\dto\DettagliMissioneDTO.class
 webengineering\nuovissimosoccorsoweb\rest\resources\RichiesteResource.class
 webengineering\nuovissimosoccorsoweb\model\AggiornaMateriale.class
 webengineering\framework\data\DataItem.class
@@ -166,6 +168,7 @@ webengineering\nuovissimosoccorsoweb\dao\impl\OperatoreHaPatenteDAO_MySQL.class
 webengineering\nuovissimosoccorsoweb\dao\InfoMissioneDAO.class
 webengineering\nuovissimosoccorsoweb\dao\AbilitaDAO.class
 webengineering\nuovissimosoccorsoweb\util\RateLimiter$RateLimiterStats.class
+webengineering\nuovissimosoccorsoweb\rest\dto\MezzoAssegnatoDTO.class
 webengineering\framework\controller\AbstractBaseController.class
 webengineering\nuovissimosoccorsoweb\dao\impl\AmministratoreDAO_MySQL.class
 webengineering\nuovissimosoccorsoweb\rest\dto\RichiestaResponse.class

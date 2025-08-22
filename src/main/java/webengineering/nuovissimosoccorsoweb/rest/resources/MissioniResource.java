@@ -27,6 +27,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import webengineering.nuovissimosoccorsoweb.model.InfoMissione;
+import webengineering.nuovissimosoccorsoweb.model.Materiale;
+import webengineering.nuovissimosoccorsoweb.model.Mezzo;
+import webengineering.nuovissimosoccorsoweb.model.PartecipazioneSquadra;
+import webengineering.nuovissimosoccorsoweb.rest.dto.DettagliMissioneDTO;
+import webengineering.nuovissimosoccorsoweb.rest.dto.MaterialeAssegnatoDTO;
+import webengineering.nuovissimosoccorsoweb.rest.dto.MezzoAssegnatoDTO;
+import webengineering.nuovissimosoccorsoweb.rest.dto.OperatoreAssegnatoDTO;
+import webengineering.nuovissimosoccorsoweb.rest.dto.ValutazioneMissioneDTO;
 
 /**
  * Resource REST per la gestione delle missioni.
@@ -405,6 +414,192 @@ public class MissioniResource {
             }
         }
     }
+    /**
+ * Recupera i dettagli di una missione specifica.
+ * GET /api/missioni/{id}
+ * 
+ * Richiede autenticazione: solo ADMIN può visualizzare i dettagli delle missioni
+ * 
+ * @param id ID della missione
+ * @return Dettagli completi della missione
+ */
+@GET
+@Path("{id}")
+@Secured
+public Response getDettagliMissione(@PathParam("id") int id) {
+    SoccorsoDataLayer dataLayer = null;
+    
+    try {
+        logger.info("=== DETTAGLI MISSIONE " + id + " ===");
+        
+        // Verifica ruolo admin (dal token JWT)
+        String userRole = (String) requestContext.getProperty("userRole");
+        if (!"ADMIN".equals(userRole)) {
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity(new ErrorResponse("Accesso negato. Solo gli admin possono visualizzare i dettagli delle missioni.", "ACCESS_DENIED"))
+                    .build();
+        }
+        
+        // Ottieni il DataLayer
+        dataLayer = createDataLayer();
+        
+        // Cerca la missione per ID
+        Missione missione = dataLayer.getMissioneDAO().getMissioneByCodice(id);
+        
+        if (missione == null) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(new ErrorResponse("Missione non trovata", "MISSION_NOT_FOUND"))
+                    .build();
+        }
+        
+        // Crea DTO con dettagli completi
+        DettagliMissioneDTO dettagli = creaDettagliMissioneCompleti(dataLayer, missione);
+        
+        logger.info("Dettagli missione " + id + " recuperati con successo");
+        
+        return Response.ok(dettagli).build();
+        
+    } catch (DataException ex) {
+        logger.log(Level.SEVERE, "Errore database dettagli missione " + id, ex);
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(new ErrorResponse("Errore nel database", "DATABASE_ERROR"))
+                .build();
+                
+    } catch (Exception ex) {
+        logger.log(Level.SEVERE, "Errore generico dettagli missione " + id, ex);
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(new ErrorResponse("Errore interno del server", "INTERNAL_ERROR"))
+                .build();
+                
+    } finally {
+        if (dataLayer != null) {
+            dataLayer.destroy();
+        }
+    }
+}
+
+/**
+ * Crea un DTO con tutti i dettagli di una missione.
+ * Include operatori, mezzi, materiali e richiesta associata.
+ */
+private DettagliMissioneDTO creaDettagliMissioneCompleti(SoccorsoDataLayer dataLayer, Missione missione) throws DataException {
+    DettagliMissioneDTO dettagli = new DettagliMissioneDTO();
+    
+    // Dati base della missione
+    dettagli.setId(missione.getCodiceRichiesta());
+    dettagli.setNome(missione.getNome());
+    dettagli.setPosizione(missione.getPosizione());
+    dettagli.setObiettivo(missione.getObiettivo());
+    dettagli.setNote(missione.getNota());
+    dettagli.setDataOraInizio(missione.getDataOraInizio());
+    // Data fine - ottienila dalle InfoMissione
+try {
+    InfoMissione infoMissione = dataLayer.getInfoMissioneDAO().getInfoByCodiceMissione(missione.getCodiceRichiesta());
+    if (infoMissione != null) {
+        dettagli.setDataOraFine(infoMissione.getDataOraFine());
+    } else {
+        dettagli.setDataOraFine(null); // Missione ancora attiva
+    }
+} catch (Exception e) {
+    logger.log(Level.WARNING, "Errore recupero info missione " + missione.getCodiceRichiesta(), e);
+    dettagli.setDataOraFine(null);
+}
+    dettagli.setIdAmministratore(missione.getIdAmministratore());
+    dettagli.setRichiestaId(missione.getCodiceRichiesta());
+    
+    // Richiesta di soccorso associata
+    try {
+        RichiestaSoccorso richiesta = dataLayer.getRichiestaSoccorsoDAO().getRichiestaByCodice(missione.getCodiceRichiesta());
+        if (richiesta != null) {
+            RichiestaDTO richiestaDTO = new RichiestaDTO();
+            richiestaDTO.setCodice(richiesta.getCodice());
+            richiestaDTO.setDescrizione(richiesta.getDescrizione());
+            richiestaDTO.setIndirizzo(richiesta.getIndirizzo());
+            richiestaDTO.setStato(richiesta.getStato());
+            richiestaDTO.setNomeSegnalante(richiesta.getNomeSegnalante());
+            richiestaDTO.setEmailSegnalante(richiesta.getEmailSegnalante());
+            
+    dettagli.setRichiesta(richiestaDTO);
+        }
+    } catch (Exception e) {
+        logger.log(Level.WARNING, "Errore recupero richiesta per missione " + missione.getCodiceRichiesta(), e);
+    }
+    
+    // Operatori tramite PartecipazioneSquadra
+try {
+    List<OperatoreAssegnatoDTO> operatori = new ArrayList<>();  
+    List<PartecipazioneSquadra> squadra = dataLayer.getMissioneDAO().getSquadraByMissione(missione.getCodiceRichiesta());
+    
+    for (PartecipazioneSquadra partecipazione : squadra) {
+        try {
+            Operatore operatore = dataLayer.getOperatoreDAO().getOperatoreById(partecipazione.getIdOperatore());
+            if (operatore != null) {
+                OperatoreAssegnatoDTO opDTO = new OperatoreAssegnatoDTO();
+                opDTO.setId(operatore.getId());
+                opDTO.setNome(operatore.getNome());
+                opDTO.setCognome(operatore.getCognome());
+                opDTO.setEmail(operatore.getEmail());
+                opDTO.setRuolo(partecipazione.getRuolo().toString());
+                operatori.add(opDTO);
+            }
+        } catch (Exception opEx) {
+            logger.log(Level.WARNING, "Errore caricamento operatore " + partecipazione.getIdOperatore(), opEx);
+        }
+    }
+    dettagli.setOperatori(operatori);  
+} catch (Exception e) {
+    logger.log(Level.WARNING, "Errore recupero operatori per missione " + missione.getCodiceRichiesta(), e);
+    dettagli.setOperatori(new ArrayList<>());
+}
+    List<MezzoAssegnatoDTO> mezzi = new ArrayList<>();
+try {
+    List<Mezzo> mezziAssegnati = dataLayer.getMissioneDAO().getMezziByMissione(missione.getCodiceRichiesta());
+    
+    for (Mezzo mezzo : mezziAssegnati) {
+        MezzoAssegnatoDTO mezzoDTO = new MezzoAssegnatoDTO();
+        mezzoDTO.setTarga(mezzo.getTarga());
+        mezzoDTO.setTipo("N/A"); 
+        mezzoDTO.setModello(mezzo.getDescrizione() != null ? mezzo.getDescrizione() : "N/A");
+        mezzi.add(mezzoDTO);  
+    }
+    dettagli.setMezzi(mezzi); 
+} catch (Exception e) {
+    logger.log(Level.WARNING, "Errore recupero mezzi per missione " + missione.getCodiceRichiesta(), e);
+    dettagli.setMezzi(new ArrayList<>());
+}
+   
+try {
+    List<MaterialeAssegnatoDTO> materiali = new ArrayList<>();  
+    List<Materiale> materialiAssegnati = dataLayer.getMissioneDAO().getMaterialiByMissione(missione.getCodiceRichiesta());
+    
+    for (Materiale materiale : materialiAssegnati) {
+        MaterialeAssegnatoDTO matDTO = new MaterialeAssegnatoDTO();
+        matDTO.setId(materiale.getId());
+        matDTO.setNome(materiale.getNome());
+        matDTO.setQuantita(1); // Default
+        materiali.add(matDTO);
+    }
+    dettagli.setMateriali(materiali); 
+} catch (Exception e) {
+    logger.log(Level.WARNING, "Errore recupero materiali per missione " + missione.getCodiceRichiesta(), e);
+    dettagli.setMateriali(new ArrayList<>());
+}
+    
+    // Informazioni di valutazione (se la missione è stata conclusa)
+    try {
+        InfoMissione infoMissione = dataLayer.getInfoMissioneDAO().getInfoByCodiceMissione(missione.getCodiceRichiesta());
+        if (infoMissione != null) {
+            ValutazioneMissioneDTO valutazione = new ValutazioneMissioneDTO();
+            valutazione.setSuccesso(infoMissione.getSuccesso());
+            valutazione.setCommento(infoMissione.getCommento());
+            valutazione.setDataOraFine(infoMissione.getDataOraFine());
+            dettagli.setValutazione(valutazione);
+        }
+    } catch (Exception e) {
+        logger.log(Level.WARNING, "Errore recupero valutazione per missione " + missione.getCodiceRichiesta(), e);
+    }
+    return dettagli;
+}
     
     // === METODI HELPER ===
     

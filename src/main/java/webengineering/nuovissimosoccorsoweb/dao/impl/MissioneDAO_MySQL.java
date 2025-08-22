@@ -11,13 +11,18 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import webengineering.framework.data.DAO;
+import webengineering.nuovissimosoccorsoweb.SoccorsoDataLayer;
 import webengineering.nuovissimosoccorsoweb.model.Materiale;
 import webengineering.nuovissimosoccorsoweb.model.Mezzo;
+import webengineering.nuovissimosoccorsoweb.model.Operatore;
 import webengineering.nuovissimosoccorsoweb.model.PartecipazioneSquadra;
 import webengineering.nuovissimosoccorsoweb.model.impl.proxy.MaterialeProxy;
 import webengineering.nuovissimosoccorsoweb.model.impl.proxy.MezzoProxy;
 import webengineering.nuovissimosoccorsoweb.model.impl.proxy.PartecipazioneSquadraProxy;
+
 
 public class MissioneDAO_MySQL extends DAO implements MissioneDAO {
 
@@ -153,6 +158,27 @@ public class MissioneDAO_MySQL extends DAO implements MissioneDAO {
         m.setVersion(rs.getInt("version"));
         return m;
     }
+
+/**
+ * Crea un oggetto Operatore dal ResultSet.
+ * Basato sui nomi dei campi usati nell'OperatoreDAO_MySQL esistente.
+ */
+private webengineering.nuovissimosoccorsoweb.model.Operatore makeOperatore(ResultSet rs) throws SQLException {
+    webengineering.nuovissimosoccorsoweb.model.impl.proxy.OperatoreProxy op = 
+        new webengineering.nuovissimosoccorsoweb.model.impl.proxy.OperatoreProxy();
+    
+    // Usa gli stessi nomi di campo dell'OperatoreDAO_MySQL esistente
+    op.setId(rs.getInt("id"));
+    op.setNome(rs.getString("nome"));
+    op.setCognome(rs.getString("cognome"));
+    op.setEmail(rs.getString("email"));
+    op.setPassword(rs.getString("password"));
+    op.setCodiceFiscale(rs.getString("cf"));
+    op.setIdAmministratore(rs.getInt("id_creatore")); 
+    op.setVersion(rs.getInt("version"));
+    
+    return op;
+}
 
 @Override
 public List<PartecipazioneSquadra> getSquadraByMissione(int codiceMissione) throws DataException {
@@ -359,5 +385,135 @@ public void rimuoviMaterialeDaMissione(int idMateriale, int codiceMissione) thro
             throw new DataException("Errore nel conteggio delle missioni completate per operatore", e);
         }
         return 0;
+    }
+
+/**
+ * Recupera il ruolo specifico di un operatore in una missione.
+ */
+@Override
+public String getRuoloOperatoreInMissione(int codiceOperatore, int codiceMissione) throws DataException {
+    try (PreparedStatement ps = dataLayer.getConnection().prepareStatement(
+        "SELECT ruolo FROM squadra " +
+        "WHERE id_op = ? AND codice_missione_assegnata = ?")) {
+        
+        ps.setInt(1, codiceOperatore);
+        ps.setInt(2, codiceMissione);
+        
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getString("ruolo");
+            }
+        }
+        
+    } catch (SQLException e) {
+        throw new DataException("Errore nel recupero ruolo operatore " + codiceOperatore + 
+                               " per missione " + codiceMissione, e);
+    }
+    
+    return null;
+}
+
+/**
+ * Recupera le targhe di tutti i mezzi assegnati a una missione.
+ */
+@Override
+public List<String> getTargheMezziAssegnati(int codiceMissione) throws DataException {
+    List<String> targhe = new ArrayList<>();
+    
+    try (PreparedStatement ps = dataLayer.getConnection().prepareStatement(
+        "SELECT targa_mezzo FROM utilizza_mezzo " +
+        "WHERE codice_missione = ? " +
+        "ORDER BY targa_mezzo")) {
+        
+        ps.setInt(1, codiceMissione);
+        
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                targhe.add(rs.getString("targa_mezzo"));
+            }
+        }
+        
+    } catch (SQLException e) {
+        throw new DataException("Errore nel recupero mezzi per missione " + codiceMissione, e);
+    }
+    
+    return targhe;
+}
+
+/**
+ * Recupera gli ID di tutti i materiali assegnati a una missione.
+ */
+@Override
+public List<Integer> getIdMaterialiAssegnati(int codiceMissione) throws DataException {
+    List<Integer> materialiIds = new ArrayList<>();
+    
+    try (PreparedStatement ps = dataLayer.getConnection().prepareStatement(
+        "SELECT id_materiale FROM utilizza_materiale " +
+        "WHERE codice_missione = ? " +
+        "ORDER BY id_materiale")) {
+        
+        ps.setInt(1, codiceMissione);
+        
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                materialiIds.add(rs.getInt("id_materiale"));
+            }
+        }
+        
+    } catch (SQLException e) {
+        throw new DataException("Errore nel recupero materiali per missione " + codiceMissione, e);
+    }
+    
+    return materialiIds;
+}
+
+/**
+ * Verifica se esiste una missione con il codice specificato.
+ */
+@Override
+public boolean esisteMissione(int codice) throws DataException {
+    try (PreparedStatement ps = dataLayer.getConnection().prepareStatement(
+        "SELECT 1 FROM missione WHERE codice_richiesta = ? LIMIT 1")) {
+        
+        ps.setInt(1, codice);
+        
+        try (ResultSet rs = ps.executeQuery()) {
+            return rs.next();
+        }
+        
+    } catch (SQLException e) {
+        throw new DataException("Errore nella verifica esistenza missione " + codice, e);
+    }
+}
+
+@Override
+public List<Operatore> getOperatoriAssegnati(int codiceMissione) throws DataException {
+    List<Operatore> operatori = new ArrayList<>();
+    
+    try (PreparedStatement ps = dataLayer.getConnection().prepareStatement(
+        "SELECT o.id FROM operatore o " +
+        "INNER JOIN squadra s ON o.id = s.id_op " +
+        "WHERE s.codice_missione_assegnata = ? " +
+        "ORDER BY s.ruolo DESC, o.cognome, o.nome")) {
+        
+        ps.setInt(1, codiceMissione);
+        
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                int operatoreId = rs.getInt("id");
+                // Cast del dataLayer a SoccorsoDataLayer
+                SoccorsoDataLayer soccorsoDataLayer = (SoccorsoDataLayer) dataLayer;
+                Operatore op = soccorsoDataLayer.getOperatoreDAO().getOperatoreById(operatoreId);
+                if (op != null) {
+                    operatori.add(op);
+                }
+            }
+        }
+        
+    } catch (SQLException e) {
+        throw new DataException("Errore nel recupero operatori per missione " + codiceMissione, e);
+    }
+    
+    return operatori;
     }
 }
