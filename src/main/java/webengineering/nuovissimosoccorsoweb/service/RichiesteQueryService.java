@@ -12,17 +12,18 @@ import java.util.logging.Level;
 /**
  * Servizio per le operazioni di query/lettura delle richieste di soccorso.
  * Complementare al RichiestaService esistente (che gestisce l'inserimento).
- * 
+ *
  * Centralizza la logica business per evitare duplicazione tra MVC e REST.
  */
 public class RichiesteQueryService {
-    
+
     private static final Logger logger = Logger.getLogger(RichiesteQueryService.class.getName());
-    
+
     /**
      * Risultato paginato per le richieste.
      */
     public static class PaginatedResult<T> {
+
         private final List<T> content;
         private final int totalElements;
         private final int totalPages;
@@ -30,7 +31,7 @@ public class RichiesteQueryService {
         private final int pageSize;
         private final boolean first;
         private final boolean last;
-        
+
         public PaginatedResult(List<T> content, int totalElements, int currentPage, int pageSize) {
             this.content = content;
             this.totalElements = totalElements;
@@ -40,20 +41,40 @@ public class RichiesteQueryService {
             this.first = currentPage == 1;
             this.last = currentPage >= totalPages || totalPages == 0;
         }
-        
+
         // Getters
-        public List<T> getContent() { return content; }
-        public int getTotalElements() { return totalElements; }
-        public int getTotalPages() { return totalPages; }
-        public int getCurrentPage() { return currentPage; }
-        public int getPageSize() { return pageSize; }
-        public boolean isFirst() { return first; }
-        public boolean isLast() { return last; }
+        public List<T> getContent() {
+            return content;
+        }
+
+        public int getTotalElements() {
+            return totalElements;
+        }
+
+        public int getTotalPages() {
+            return totalPages;
+        }
+
+        public int getCurrentPage() {
+            return currentPage;
+        }
+
+        public int getPageSize() {
+            return pageSize;
+        }
+
+        public boolean isFirst() {
+            return first;
+        }
+
+        public boolean isLast() {
+            return last;
+        }
     }
-    
+
     /**
      * Recupera richieste filtrate per stato con paginazione.
-     * 
+     *
      * @param stato Stato delle richieste (null per tutte)
      * @param page Numero pagina (1-based)
      * @param size Elementi per pagina
@@ -62,13 +83,13 @@ public class RichiesteQueryService {
      */
     public static PaginatedResult<RichiestaSoccorso> getRichiesteFiltrate(
             String stato, int page, int size, SoccorsoDataLayer dataLayer) throws DataException {
-        
+
         try {
             logger.info("Recupero richieste filtrate - Stato: " + stato + ", Pagina: " + page + ", Size: " + size);
-            
+
             // Mappa stati REST a stati database se necessario
             String statoDb = (stato != null && !stato.trim().isEmpty()) ? mapStatoRestToDb(stato) : null;
-            
+
             // 1. Recupera richieste filtrate (usa i metodi DAO esistenti)
             List<RichiestaSoccorso> tutteRichieste;
             if (statoDb != null) {
@@ -76,24 +97,36 @@ public class RichiesteQueryService {
             } else {
                 tutteRichieste = dataLayer.getRichiestaSoccorsoDAO().getAllRichieste();
             }
-            
-            // 2. Applica paginazione in memoria (per ora)
-            int totalElements = tutteRichieste.size();
+
+            // ✅ NUOVA LOGICA: Filtra automaticamente le richieste "Inviata"
+            List<RichiestaSoccorso> richiesteFiltrate = new ArrayList<>();
+            for (RichiestaSoccorso richiesta : tutteRichieste) {
+                // Escludi le richieste con stato "Inviata"
+                if (!"Inviata".equals(richiesta.getStato())) {
+                    richiesteFiltrate.add(richiesta);
+                }
+            }
+
+            logger.info("Richieste prima del filtro 'Inviata': " + tutteRichieste.size()
+                    + ", dopo il filtro: " + richiesteFiltrate.size());
+
+            // 2. Applica paginazione in memoria
+            int totalElements = richiesteFiltrate.size();
             int startIndex = (page - 1) * size;
             int endIndex = Math.min(startIndex + size, totalElements);
-            
+
             List<RichiestaSoccorso> richiestePagina;
             if (startIndex >= totalElements || startIndex < 0) {
                 richiestePagina = new ArrayList<>();
             } else {
-                richiestePagina = tutteRichieste.subList(startIndex, endIndex);
+                richiestePagina = richiesteFiltrate.subList(startIndex, endIndex);
             }
-            
-            logger.info("Trovate " + totalElements + " richieste totali, " + 
-                       richiestePagina.size() + " nella pagina " + page);
-            
+
+            logger.info("Trovate " + totalElements + " richieste totali (senza 'Inviata'), "
+                    + richiestePagina.size() + " nella pagina " + page);
+
             return new PaginatedResult<>(richiestePagina, totalElements, page, size);
-            
+
         } catch (DataException e) {
             logger.log(Level.SEVERE, "Errore database nel recupero richieste filtrate", e);
             throw e;
@@ -102,10 +135,10 @@ public class RichiesteQueryService {
             throw new DataException("Errore nel recupero delle richieste", e);
         }
     }
-    
+
     /**
-     * Recupera richieste con livello di successo < 5 (per la specifica).
-     * 
+     * Recupera richieste con livello di successo < 5
+     *
      * @param page Numero pagina (1-based)
      * @param size Elementi per pagina
      * @param dataLayer DataLayer per accesso database
@@ -113,36 +146,36 @@ public class RichiesteQueryService {
      */
     public static PaginatedResult<RichiestaSoccorso> getRichiesteNonPositive(
             int page, int size, SoccorsoDataLayer dataLayer) throws DataException {
-        
+
         try {
             logger.info("Recupero richieste non positive - Pagina: " + page + ", Size: " + size);
-            
+
             // 1. Recupera richieste chiuse (usa metodo DAO esistente)
-            List<RichiestaSoccorso> richiesteChiuse = 
-                dataLayer.getRichiestaSoccorsoDAO().getRichiesteByStato("Chiusa");
-            
+            List<RichiestaSoccorso> richiesteChiuse
+                    = dataLayer.getRichiestaSoccorsoDAO().getRichiesteByStato("Chiusa");
+
             // 2. Per ora restituisci tutte le richieste chiuse
             // TODO: Implementare il filtro per livello di successo < 5 quando avrai il JOIN con info_missione
             // Puoi estendere il DAO con un metodo specifico o fare un JOIN manuale
             List<RichiestaSoccorso> richiesteNonPositive = richiesteChiuse;
-            
+
             // 3. Applica paginazione
             int totalElements = richiesteNonPositive.size();
             int startIndex = (page - 1) * size;
             int endIndex = Math.min(startIndex + size, totalElements);
-            
+
             List<RichiestaSoccorso> richiestePagina;
             if (startIndex >= totalElements || startIndex < 0) {
                 richiestePagina = new ArrayList<>();
             } else {
                 richiestePagina = richiesteNonPositive.subList(startIndex, endIndex);
             }
-            
-            logger.info("Trovate " + totalElements + " richieste non positive, " + 
-                       richiestePagina.size() + " nella pagina " + page);
-            
+
+            logger.info("Trovate " + totalElements + " richieste non positive, "
+                    + richiestePagina.size() + " nella pagina " + page);
+
             return new PaginatedResult<>(richiestePagina, totalElements, page, size);
-            
+
         } catch (DataException e) {
             logger.log(Level.SEVERE, "Errore database nel recupero richieste non positive", e);
             throw e;
@@ -151,11 +184,11 @@ public class RichiesteQueryService {
             throw new DataException("Errore nel recupero delle richieste non positive", e);
         }
     }
-    
+
     /**
-     * Recupera una singola richiesta per codice.
-     * Metodo di utilità per evitare duplicazione.
-     * 
+     * Recupera una singola richiesta per codice. Metodo di utilità per evitare
+     * duplicazione.
+     *
      * @param codice Codice della richiesta
      * @param dataLayer DataLayer per accesso database
      * @return Richiesta trovata o null
@@ -169,7 +202,7 @@ public class RichiesteQueryService {
             throw e;
         }
     }
-    
+
     /**
      * Valida i parametri di paginazione.
      */
@@ -184,27 +217,29 @@ public class RichiesteQueryService {
             throw new IllegalArgumentException("La dimensione della pagina non può essere > 100");
         }
     }
-    
+
     /**
-     * Mappa gli stati REST agli stati del database.
-     * Centralizza la logica di mappatura per evitare duplicazione.
+     * Mappa gli stati REST agli stati del database. Centralizza la logica di
+     * mappatura per evitare duplicazione.
      */
     public static String mapStatoRestToDb(String statoRest) {
-        if (statoRest == null) return null;
-        
+        if (statoRest == null) {
+            return null;
+        }
+
         switch (statoRest.toUpperCase()) {
             case "ATTIVA":
             case "ATTIVE":
                 return "Attiva";
             case "IN_CORSO":
             case "INCORSO":
-                return "In corso";  
+                return "In corso";
             case "CHIUSA":
             case "CHIUSE":
                 return "Chiusa";
             case "IGNORATA":
             case "IGNORATE":
-                return "Ignorata";  
+                return "Ignorata";
             case "CONVALIDATA":
             case "CONVALIDATE":
                 return "Convalidata";
@@ -216,14 +251,16 @@ public class RichiesteQueryService {
                 return statoRest;
         }
     }
-    
+
     /**
-     * Ottiene una descrizione user-friendly dello stato.
-     * Utile per logging e messaggi.
+     * Ottiene una descrizione user-friendly dello stato. Utile per logging e
+     * messaggi.
      */
     public static String getStatoDescription(String stato) {
-        if (stato == null) return "Tutti gli stati";
-        
+        if (stato == null) {
+            return "Tutti gli stati";
+        }
+
         switch (stato.toUpperCase()) {
             case "ATTIVA":
                 return "Richieste attive";

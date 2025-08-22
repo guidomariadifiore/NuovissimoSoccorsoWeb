@@ -38,33 +38,30 @@ import webengineering.nuovissimosoccorsoweb.rest.dto.OperatoreAssegnatoDTO;
 import webengineering.nuovissimosoccorsoweb.rest.dto.ValutazioneMissioneDTO;
 
 /**
- * Resource REST per la gestione delle missioni.
- * AGGIORNATO per gestire i nuovi requisiti:
- * - Operatori divisi in caposquadra e standard
- * - Mezzi inseriti per targa
- * - Controllo stato "Convalidata"
- * - Cambio stato richiesta da "Convalidata" ad "Attiva"
+ * Resource REST per la gestione delle missioni. AGGIORNATO per gestire i nuovi
+ * requisiti: - Operatori divisi in caposquadra e standard - Mezzi inseriti per
+ * targa - Controllo stato "Convalidata" - Cambio stato richiesta da
+ * "Convalidata" ad "Attiva"
  */
 @Path("missioni")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class MissioniResource {
-    
+
     private static final Logger logger = Logger.getLogger(MissioniResource.class.getName());
-    
+
     @Context
     private HttpServletRequest httpRequest;
-    
+
     @Context
     private ContainerRequestContext requestContext;
-    
+
     /**
-     * Crea una nuova missione.
-     * POST /api/missioni
-     * 
-     * Richiede autenticazione: solo ADMIN può creare missioni
-     * AGGIORNATO per i nuovi requisiti
-     * 
+     * Crea una nuova missione. POST /api/missioni
+     *
+     * Richiede autenticazione: solo ADMIN può creare missioni AGGIORNATO per i
+     * nuovi requisiti
+     *
      * @param missioneRequest Dati della missione da creare
      * @return Risultato della creazione
      */
@@ -72,17 +69,17 @@ public class MissioniResource {
     @Secured
     public Response creaMissione(MissioneRequest missioneRequest) {
         SoccorsoDataLayer dataLayer = null;
-        
+
         try {
             logger.info("=== CREAZIONE MISSIONE VIA REST (AGGIORNATA) ===");
-            
+
             // Validazione input base
             if (missioneRequest == null) {
                 return Response.status(Response.Status.BAD_REQUEST)
                         .entity(new ErrorResponse("Dati missione mancanti", "VALIDATION_ERROR"))
                         .build();
             }
-            
+
             // Verifica ruolo admin (dal token JWT)
             String userRole = (String) requestContext.getProperty("userRole");
             if (!"admin".equals(userRole)) {
@@ -90,7 +87,7 @@ public class MissioniResource {
                         .entity(new ErrorResponse("Solo gli amministratori possono creare missioni", "ACCESS_DENIED"))
                         .build();
             }
-            
+
             // Ottieni ID admin dal token
             Integer adminId = (Integer) requestContext.getProperty("userId");
             if (adminId == null) {
@@ -98,98 +95,115 @@ public class MissioniResource {
                         .entity(new ErrorResponse("ID amministratore non trovato nel token", "INVALID_TOKEN"))
                         .build();
             }
-            
+
             // Crea DataLayer
             dataLayer = createDataLayer();
-            
+
             // VALIDAZIONE SPECIFICA: Verifica che la richiesta sia in stato "Convalidata"
             RichiestaSoccorso richiesta = dataLayer.getRichiestaSoccorsoDAO()
                     .getRichiestaByCodice(missioneRequest.getRichiestaId());
-            
+
             if (richiesta == null) {
                 return Response.status(Response.Status.BAD_REQUEST)
                         .entity(new ErrorResponse("Richiesta non trovata", "RICHIESTA_NOT_FOUND"))
                         .build();
             }
-            
+
             if (!"Convalidata".equals(richiesta.getStato())) {
                 return Response.status(Response.Status.BAD_REQUEST)
                         .entity(new ErrorResponse("La richiesta deve essere in stato 'Convalidata' per creare una missione. Stato attuale: " + richiesta.getStato(), "INVALID_RICHIESTA_STATE"))
                         .build();
             }
-            
+
             // Prepara gli operatori con i ruoli corretti
             List<OperatoreConRuolo> operatoriConRuoli = preparaOperatoriConRuoli(missioneRequest);
-            
+
             if (operatoriConRuoli.isEmpty()) {
                 return Response.status(Response.Status.BAD_REQUEST)
                         .entity(new ErrorResponse("Almeno un caposquadra è obbligatorio", "NO_CAPOSQUADRA"))
                         .build();
             }
-            
+
             // Verifica che ci sia almeno un caposquadra
             boolean hasCaposquadra = operatoriConRuoli.stream()
                     .anyMatch(op -> "Caposquadra".equals(op.ruolo));
-            
+
             if (!hasCaposquadra) {
                 return Response.status(Response.Status.BAD_REQUEST)
                         .entity(new ErrorResponse("Almeno un caposquadra è obbligatorio", "NO_CAPOSQUADRA"))
                         .build();
             }
-            
+
             // Prepara le targhe dei mezzi (non più ID)
             List<String> targhe = parseTargheMezzi(missioneRequest.getMezzi());
-            
+
             // Prepara i materiali (rimangono ID)
             List<Integer> materialiIds = parseIntegerList(missioneRequest.getMateriali());
-            
+
+            // DEBUG RIMUOVI
+            logger.info("DEBUG: Iniziando creaMissioneCore...");
+
             // Riusa la logica del controller MVC con le modifiche
             Missione missione = creaMissioneCore(
-                dataLayer,
-                missioneRequest.getRichiestaId(),
-                missioneRequest.getNome(),
-                missioneRequest.getPosizione(),
-                missioneRequest.getObiettivo(),
-                operatoriConRuoli,
-                targhe,
-                materialiIds,
-                adminId
+                    dataLayer,
+                    missioneRequest.getRichiestaId(),
+                    missioneRequest.getNome(),
+                    missioneRequest.getPosizione(),
+                    missioneRequest.getObiettivo(),
+                    operatoriConRuoli,
+                    targhe,
+                    materialiIds,
+                    adminId
             );
-            
+
+            // DEBUG RIMUOVI
+            logger.info("DEBUG: creaMissioneCore completato con successo");
+
             // NUOVO: Cambia stato della richiesta da "Convalidata" ad "Attiva"
+            logger.info("DEBUG: Cambiando stato richiesta..."); //DEBUG RIMUOVI
             dataLayer.getRichiestaSoccorsoDAO().updateStato(
-                missioneRequest.getRichiestaId(), "Attiva");
-            
-            logger.info("Stato richiesta " + missioneRequest.getRichiestaId() + 
-                       " cambiato da 'Convalidata' ad 'Attiva'");
-            
+                    missioneRequest.getRichiestaId(), "Attiva");
+
+            logger.info("Stato richiesta " + missioneRequest.getRichiestaId()
+                    + " cambiato da 'Convalidata' ad 'Attiva'");
+
             // Raccoglie email operatori per notifica
+            //debug rimuovi
+            logger.info("DEBUG: Raccogliendo email operatori...");
+
             List<String> emailOperatori = raccogliEmailOperatori(dataLayer, operatoriConRuoli);
-            
+
+            logger.info("DEBUG: Email raccolte: " + emailOperatori.size());
+
+            //debug rimuovi
+            logger.info("DEBUG: Creando DTO di risposta...");
+
             // Successo
             MissioneResponse response = new MissioneResponse(
-                true,
-                "Missione creata con successo. La richiesta è ora in stato 'Attiva'.",
-                mapToMissioneDTO(missione),
-                emailOperatori
+                    true,
+                    "Missione creata con successo. La richiesta è ora in stato 'Attiva'.",
+                    mapToMissioneDTO(missione),
+                    emailOperatori
             );
-            
-            logger.info("Missione creata via REST: " + missione.getNome() + 
-                       " (Admin ID: " + adminId + ") - Richiesta " + 
-                       missioneRequest.getRichiestaId() + " ora ATTIVA");
-            
+            //debug rimuovi
+            logger.info("DEBUG: DTO creato, restituendo risposta di successo");
+
+            logger.info("Missione creata via REST: " + missione.getNome()
+                    + " (Admin ID: " + adminId + ") - Richiesta "
+                    + missioneRequest.getRichiestaId() + " ora ATTIVA");
+
             return Response.status(Response.Status.CREATED)
                     .entity(response)
                     .build();
-                    
+
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Errore nell'endpoint creazione missione", e);
-            
+
             String errorMessage = "Errore interno del server";
             if (e.getMessage() != null) {
                 errorMessage += ": " + e.getMessage();
             }
-            
+
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(new ErrorResponse(errorMessage, "INTERNAL_ERROR"))
                     .build();
@@ -203,13 +217,13 @@ public class MissioniResource {
             }
         }
     }
-    
+
     /**
-     * NUOVO METODO: Prepara la lista degli operatori con i loro ruoli.
+     * Prepara la lista degli operatori con i loro ruoli.
      */
     private List<OperatoreConRuolo> preparaOperatoriConRuoli(MissioneRequest request) {
         List<OperatoreConRuolo> operatori = new ArrayList<>();
-        
+
         // Aggiungi caposquadra
         if (request.getCaposquadra() != null && !request.getCaposquadra().trim().isEmpty()) {
             List<Integer> caposquadraIds = parseIntegerList(request.getCaposquadra());
@@ -217,7 +231,7 @@ public class MissioniResource {
                 operatori.add(new OperatoreConRuolo(id, "Caposquadra"));
             }
         }
-        
+
         // Aggiungi operatori standard
         if (request.getOperatoriStandard() != null && !request.getOperatoriStandard().trim().isEmpty()) {
             List<Integer> standardIds = parseIntegerList(request.getOperatoriStandard());
@@ -225,7 +239,7 @@ public class MissioniResource {
                 operatori.add(new OperatoreConRuolo(id, "Standard"));
             }
         }
-        
+
         // Fallback: se non ci sono caposquadra/standard specifici, usa il campo operatori
         if (operatori.isEmpty() && request.getOperatori() != null && !request.getOperatori().trim().isEmpty()) {
             List<Integer> allIds = parseIntegerList(request.getOperatori());
@@ -235,10 +249,10 @@ public class MissioniResource {
                 operatori.add(new OperatoreConRuolo(allIds.get(i), ruolo));
             }
         }
-        
+
         return operatori;
     }
-    
+
     /**
      * NUOVO METODO: Prepara la lista delle targhe dei mezzi.
      */
@@ -255,17 +269,17 @@ public class MissioniResource {
         }
         return targhe;
     }
-    
+
     /**
-     * Metodo core per la creazione della missione (AGGIORNATO).
-     * Versione modificata per gestire operatori con ruoli e targhe mezzi.
+     * Metodo core per la creazione della missione (AGGIORNATO). Versione
+     * modificata per gestire operatori con ruoli e targhe mezzi.
      */
-    private Missione creaMissioneCore(SoccorsoDataLayer dataLayer, int richiestaId, 
-                                    String nome, String posizione, String obiettivo,
-                                    List<OperatoreConRuolo> operatoriConRuoli, 
-                                    List<String> targhe, List<Integer> materialiIds, 
-                                    int adminId) throws Exception {
-        
+    private Missione creaMissioneCore(SoccorsoDataLayer dataLayer, int richiestaId,
+            String nome, String posizione, String obiettivo,
+            List<OperatoreConRuolo> operatoriConRuoli,
+            List<String> targhe, List<Integer> materialiIds,
+            int adminId) throws Exception {
+
         // Verifica che la richiesta esista e sia in stato "Convalidata"
         RichiestaSoccorso richiesta = dataLayer.getRichiestaSoccorsoDAO().getRichiestaByCodice(richiestaId);
         if (richiesta == null) {
@@ -275,23 +289,23 @@ public class MissioniResource {
             throw new IllegalArgumentException("La richiesta deve essere in stato 'Convalidata', stato attuale: " + richiesta.getStato());
         }
         try {
-        Missione missioneEsistente = dataLayer.getMissioneDAO().getMissioneByCodice(richiestaId);
-        if (missioneEsistente != null) {
-            throw new IllegalArgumentException("Esiste già una missione per la richiesta " + richiestaId + 
-                ". Non è possibile creare multiple missioni per la stessa richiesta di soccorso.");
-        }
-    
+            Missione missioneEsistente = dataLayer.getMissioneDAO().getMissioneByCodice(richiestaId);
+            if (missioneEsistente != null) {
+                throw new IllegalArgumentException("Esiste già una missione per la richiesta " + richiestaId
+                        + ". Non è possibile creare multiple missioni per la stessa richiesta di soccorso.");
+            }
+
         } catch (DataException e) {
-        // Se getMissioneByCodice restituisce null o dà errore, significa che non esiste
-        // Possiamo continuare
-        logger.info("Nessuna missione esistente trovata per richiesta " + richiestaId + " - OK per creare nuova missione");
-    
+            // Se getMissioneByCodice restituisce null o dà errore, significa che non esiste
+            // Possiamo continuare
+            logger.info("Nessuna missione esistente trovata per richiesta " + richiestaId + " - OK per creare nuova missione");
+
         }
         // Avvia transazione
         Connection conn = dataLayer.getConnection();
         boolean autoCommit = conn.getAutoCommit();
         conn.setAutoCommit(false);
-        
+
         try {
             // 1. Crea la missione
             Missione missione = new MissioneImpl();
@@ -303,35 +317,35 @@ public class MissioniResource {
             missione.setDataOraInizio(LocalDateTime.now());
             missione.setIdAmministratore(adminId);
             missione.setVersion(1);
-            
+
             // Salva la missione
             dataLayer.getMissioneDAO().storeMissione(missione);
-            
+
             // 2. Assegna operatori con ruoli corretti
             for (OperatoreConRuolo operatore : operatoriConRuoli) {
                 dataLayer.getMissioneDAO().assegnaOperatoreAMissione(
-                    operatore.idOperatore, richiestaId, operatore.ruolo);
+                        operatore.idOperatore, richiestaId, operatore.ruolo);
                 logger.info("Operatore " + operatore.idOperatore + " assegnato con ruolo " + operatore.ruolo);
             }
-            
+
             // 3. Assegna mezzi per targa (non più per ID)
             for (String targa : targhe) {
                 dataLayer.getMissioneDAO().assegnaMezzoAMissione(targa, richiestaId);
                 logger.info("Mezzo con targa " + targa + " assegnato alla missione");
             }
-            
+
             // 4. Assegna materiali
             for (Integer materialeId : materialiIds) {
                 dataLayer.getMissioneDAO().assegnaMaterialeAMissione(materialeId, richiestaId);
                 logger.info("Materiale " + materialeId + " assegnato alla missione");
             }
-            
+
             // Commit della transazione
             conn.commit();
             logger.info("Missione completa creata con successo per richiesta " + richiestaId);
-            
+
             return missione;
-            
+
         } catch (Exception ex) {
             // Rollback in caso di errore
             try {
@@ -350,55 +364,55 @@ public class MissioniResource {
             }
         }
     }
-    
+
     /**
      * NUOVO METODO: Raccoglie le email degli operatori per le notifiche.
      */
-    private List<String> raccogliEmailOperatori(SoccorsoDataLayer dataLayer, 
-                                               List<OperatoreConRuolo> operatori) {
+    private List<String> raccogliEmailOperatori(SoccorsoDataLayer dataLayer,
+            List<OperatoreConRuolo> operatori) {
         List<String> email = new ArrayList<>();
-        
+
         for (OperatoreConRuolo op : operatori) {
             try {
                 Operatore operatore = dataLayer.getOperatoreDAO().getOperatoreById(op.idOperatore);
-                if (operatore != null && operatore.getEmail() != null && 
-                    !operatore.getEmail().trim().isEmpty()) {
+                if (operatore != null && operatore.getEmail() != null
+                        && !operatore.getEmail().trim().isEmpty()) {
                     email.add(operatore.getEmail());
-                    logger.info("Email raccolta per notifica: " + operatore.getEmail() + 
-                               " (Ruolo: " + op.ruolo + ")");
+                    logger.info("Email raccolta per notifica: " + operatore.getEmail()
+                            + " (Ruolo: " + op.ruolo + ")");
                 }
             } catch (DataException e) {
                 logger.warning("Errore raccolta email per operatore " + op.idOperatore + ": " + e.getMessage());
             }
         }
-        
+
         return email;
     }
-    
+
     /**
-     * Lista delle richieste attive disponibili per creare missioni.
-     * GET /api/missioni/richieste-attive
+     * Lista delle richieste attive disponibili per creare missioni. GET
+     * /api/missioni/richieste-attive
      */
     @GET
     @Path("richieste-attive")
     @Secured
     public Response getRichiesteAttive() {
         SoccorsoDataLayer dataLayer = null;
-        
+
         try {
             dataLayer = createDataLayer();
-            
+
             // Trova le richieste in stato "Convalidata" (disponibili per creare missioni)
             List<RichiestaSoccorso> richieste = dataLayer.getRichiestaSoccorsoDAO()
                     .getRichiesteByStato("Convalidata");
-            
+
             List<RichiestaDTO> dtos = new ArrayList<>();
             for (RichiestaSoccorso r : richieste) {
                 dtos.add(mapToRichiestaDTO(r));
             }
-            
+
             return Response.ok(dtos).build();
-            
+
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Errore nel recupero richieste attive", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -414,208 +428,209 @@ public class MissioniResource {
             }
         }
     }
-    /**
- * Recupera i dettagli di una missione specifica.
- * GET /api/missioni/{id}
- * 
- * Richiede autenticazione: solo ADMIN può visualizzare i dettagli delle missioni
- * 
- * @param id ID della missione
- * @return Dettagli completi della missione
- */
-@GET
-@Path("{id}")
-@Secured
-public Response getDettagliMissione(@PathParam("id") int id) {
-    SoccorsoDataLayer dataLayer = null;
-    
-    try {
-        logger.info("=== DETTAGLI MISSIONE " + id + " ===");
-        
-        // Verifica ruolo admin (dal token JWT)
-        String userRole = (String) requestContext.getProperty("userRole");
-        if (!"ADMIN".equals(userRole)) {
-            return Response.status(Response.Status.FORBIDDEN)
-                    .entity(new ErrorResponse("Accesso negato. Solo gli admin possono visualizzare i dettagli delle missioni.", "ACCESS_DENIED"))
-                    .build();
-        }
-        
-        // Ottieni il DataLayer
-        dataLayer = createDataLayer();
-        
-        // Cerca la missione per ID
-        Missione missione = dataLayer.getMissioneDAO().getMissioneByCodice(id);
-        
-        if (missione == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity(new ErrorResponse("Missione non trovata", "MISSION_NOT_FOUND"))
-                    .build();
-        }
-        
-        // Crea DTO con dettagli completi
-        DettagliMissioneDTO dettagli = creaDettagliMissioneCompleti(dataLayer, missione);
-        
-        logger.info("Dettagli missione " + id + " recuperati con successo");
-        
-        return Response.ok(dettagli).build();
-        
-    } catch (DataException ex) {
-        logger.log(Level.SEVERE, "Errore database dettagli missione " + id, ex);
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(new ErrorResponse("Errore nel database", "DATABASE_ERROR"))
-                .build();
-                
-    } catch (Exception ex) {
-        logger.log(Level.SEVERE, "Errore generico dettagli missione " + id, ex);
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(new ErrorResponse("Errore interno del server", "INTERNAL_ERROR"))
-                .build();
-                
-    } finally {
-        if (dataLayer != null) {
-            dataLayer.destroy();
-        }
-    }
-}
 
-/**
- * Crea un DTO con tutti i dettagli di una missione.
- * Include operatori, mezzi, materiali e richiesta associata.
- */
-private DettagliMissioneDTO creaDettagliMissioneCompleti(SoccorsoDataLayer dataLayer, Missione missione) throws DataException {
-    DettagliMissioneDTO dettagli = new DettagliMissioneDTO();
-    
-    // Dati base della missione
-    dettagli.setId(missione.getCodiceRichiesta());
-    dettagli.setNome(missione.getNome());
-    dettagli.setPosizione(missione.getPosizione());
-    dettagli.setObiettivo(missione.getObiettivo());
-    dettagli.setNote(missione.getNota());
-    dettagli.setDataOraInizio(missione.getDataOraInizio());
-    // Data fine - ottienila dalle InfoMissione
-try {
-    InfoMissione infoMissione = dataLayer.getInfoMissioneDAO().getInfoByCodiceMissione(missione.getCodiceRichiesta());
-    if (infoMissione != null) {
-        dettagli.setDataOraFine(infoMissione.getDataOraFine());
-    } else {
-        dettagli.setDataOraFine(null); // Missione ancora attiva
-    }
-} catch (Exception e) {
-    logger.log(Level.WARNING, "Errore recupero info missione " + missione.getCodiceRichiesta(), e);
-    dettagli.setDataOraFine(null);
-}
-    dettagli.setIdAmministratore(missione.getIdAmministratore());
-    dettagli.setRichiestaId(missione.getCodiceRichiesta());
-    
-    // Richiesta di soccorso associata
-    try {
-        RichiestaSoccorso richiesta = dataLayer.getRichiestaSoccorsoDAO().getRichiestaByCodice(missione.getCodiceRichiesta());
-        if (richiesta != null) {
-            RichiestaDTO richiestaDTO = new RichiestaDTO();
-            richiestaDTO.setCodice(richiesta.getCodice());
-            richiestaDTO.setDescrizione(richiesta.getDescrizione());
-            richiestaDTO.setIndirizzo(richiesta.getIndirizzo());
-            richiestaDTO.setStato(richiesta.getStato());
-            richiestaDTO.setNomeSegnalante(richiesta.getNomeSegnalante());
-            richiestaDTO.setEmailSegnalante(richiesta.getEmailSegnalante());
-            
-    dettagli.setRichiesta(richiestaDTO);
-        }
-    } catch (Exception e) {
-        logger.log(Level.WARNING, "Errore recupero richiesta per missione " + missione.getCodiceRichiesta(), e);
-    }
-    
-    // Operatori tramite PartecipazioneSquadra
-try {
-    List<OperatoreAssegnatoDTO> operatori = new ArrayList<>();  
-    List<PartecipazioneSquadra> squadra = dataLayer.getMissioneDAO().getSquadraByMissione(missione.getCodiceRichiesta());
-    
-    for (PartecipazioneSquadra partecipazione : squadra) {
+    /**
+     * Recupera i dettagli di una missione specifica. GET /api/missioni/{id}
+     *
+     * Richiede autenticazione: solo ADMIN può visualizzare i dettagli delle
+     * missioni
+     *
+     * @param id ID della missione
+     * @return Dettagli completi della missione
+     */
+    @GET
+    @Path("{id}")
+    @Secured
+    public Response getDettagliMissione(@PathParam("id") int id) {
+        SoccorsoDataLayer dataLayer = null;
+
         try {
-            Operatore operatore = dataLayer.getOperatoreDAO().getOperatoreById(partecipazione.getIdOperatore());
-            if (operatore != null) {
-                OperatoreAssegnatoDTO opDTO = new OperatoreAssegnatoDTO();
-                opDTO.setId(operatore.getId());
-                opDTO.setNome(operatore.getNome());
-                opDTO.setCognome(operatore.getCognome());
-                opDTO.setEmail(operatore.getEmail());
-                opDTO.setRuolo(partecipazione.getRuolo().toString());
-                operatori.add(opDTO);
+            logger.info("=== DETTAGLI MISSIONE " + id + " ===");
+
+            // Verifica ruolo admin (dal token JWT)
+            String userRole = (String) requestContext.getProperty("userRole");
+            if (!"ADMIN".equals(userRole)) {
+                return Response.status(Response.Status.FORBIDDEN)
+                        .entity(new ErrorResponse("Accesso negato. Solo gli admin possono visualizzare i dettagli delle missioni.", "ACCESS_DENIED"))
+                        .build();
             }
-        } catch (Exception opEx) {
-            logger.log(Level.WARNING, "Errore caricamento operatore " + partecipazione.getIdOperatore(), opEx);
+
+            // Ottieni il DataLayer
+            dataLayer = createDataLayer();
+
+            // Cerca la missione per ID
+            Missione missione = dataLayer.getMissioneDAO().getMissioneByCodice(id);
+
+            if (missione == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(new ErrorResponse("Missione non trovata", "MISSION_NOT_FOUND"))
+                        .build();
+            }
+
+            // Crea DTO con dettagli completi
+            DettagliMissioneDTO dettagli = creaDettagliMissioneCompleti(dataLayer, missione);
+
+            logger.info("Dettagli missione " + id + " recuperati con successo");
+
+            return Response.ok(dettagli).build();
+
+        } catch (DataException ex) {
+            logger.log(Level.SEVERE, "Errore database dettagli missione " + id, ex);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorResponse("Errore nel database", "DATABASE_ERROR"))
+                    .build();
+
+        } catch (Exception ex) {
+            logger.log(Level.SEVERE, "Errore generico dettagli missione " + id, ex);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorResponse("Errore interno del server", "INTERNAL_ERROR"))
+                    .build();
+
+        } finally {
+            if (dataLayer != null) {
+                dataLayer.destroy();
+            }
         }
     }
-    dettagli.setOperatori(operatori);  
-} catch (Exception e) {
-    logger.log(Level.WARNING, "Errore recupero operatori per missione " + missione.getCodiceRichiesta(), e);
-    dettagli.setOperatori(new ArrayList<>());
-}
-    List<MezzoAssegnatoDTO> mezzi = new ArrayList<>();
-try {
-    List<Mezzo> mezziAssegnati = dataLayer.getMissioneDAO().getMezziByMissione(missione.getCodiceRichiesta());
-    
-    for (Mezzo mezzo : mezziAssegnati) {
-        MezzoAssegnatoDTO mezzoDTO = new MezzoAssegnatoDTO();
-        mezzoDTO.setTarga(mezzo.getTarga());
-        mezzoDTO.setTipo("N/A"); 
-        mezzoDTO.setModello(mezzo.getDescrizione() != null ? mezzo.getDescrizione() : "N/A");
-        mezzi.add(mezzoDTO);  
-    }
-    dettagli.setMezzi(mezzi); 
-} catch (Exception e) {
-    logger.log(Level.WARNING, "Errore recupero mezzi per missione " + missione.getCodiceRichiesta(), e);
-    dettagli.setMezzi(new ArrayList<>());
-}
-   
-try {
-    List<MaterialeAssegnatoDTO> materiali = new ArrayList<>();  
-    List<Materiale> materialiAssegnati = dataLayer.getMissioneDAO().getMaterialiByMissione(missione.getCodiceRichiesta());
-    
-    for (Materiale materiale : materialiAssegnati) {
-        MaterialeAssegnatoDTO matDTO = new MaterialeAssegnatoDTO();
-        matDTO.setId(materiale.getId());
-        matDTO.setNome(materiale.getNome());
-        matDTO.setQuantita(1); // Default
-        materiali.add(matDTO);
-    }
-    dettagli.setMateriali(materiali); 
-} catch (Exception e) {
-    logger.log(Level.WARNING, "Errore recupero materiali per missione " + missione.getCodiceRichiesta(), e);
-    dettagli.setMateriali(new ArrayList<>());
-}
-    
-    // Informazioni di valutazione (se la missione è stata conclusa)
-    try {
-        InfoMissione infoMissione = dataLayer.getInfoMissioneDAO().getInfoByCodiceMissione(missione.getCodiceRichiesta());
-        if (infoMissione != null) {
-            ValutazioneMissioneDTO valutazione = new ValutazioneMissioneDTO();
-            valutazione.setSuccesso(infoMissione.getSuccesso());
-            valutazione.setCommento(infoMissione.getCommento());
-            valutazione.setDataOraFine(infoMissione.getDataOraFine());
-            dettagli.setValutazione(valutazione);
+
+    /**
+     * Crea un DTO con tutti i dettagli di una missione. Include operatori,
+     * mezzi, materiali e richiesta associata.
+     */
+    private DettagliMissioneDTO creaDettagliMissioneCompleti(SoccorsoDataLayer dataLayer, Missione missione) throws DataException {
+        DettagliMissioneDTO dettagli = new DettagliMissioneDTO();
+
+        // Dati base della missione
+        dettagli.setId(missione.getCodiceRichiesta());
+        dettagli.setNome(missione.getNome());
+        dettagli.setPosizione(missione.getPosizione());
+        dettagli.setObiettivo(missione.getObiettivo());
+        dettagli.setNote(missione.getNota());
+        dettagli.setDataOraInizio(missione.getDataOraInizio());
+        // Data fine - ottienila dalle InfoMissione
+        try {
+            InfoMissione infoMissione = dataLayer.getInfoMissioneDAO().getInfoByCodiceMissione(missione.getCodiceRichiesta());
+            if (infoMissione != null) {
+                dettagli.setDataOraFine(infoMissione.getDataOraFine());
+            } else {
+                dettagli.setDataOraFine(null); // Missione ancora attiva
+            }
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Errore recupero info missione " + missione.getCodiceRichiesta(), e);
+            dettagli.setDataOraFine(null);
         }
-    } catch (Exception e) {
-        logger.log(Level.WARNING, "Errore recupero valutazione per missione " + missione.getCodiceRichiesta(), e);
+        dettagli.setIdAmministratore(missione.getIdAmministratore());
+        dettagli.setRichiestaId(missione.getCodiceRichiesta());
+
+        // Richiesta di soccorso associata
+        try {
+            RichiestaSoccorso richiesta = dataLayer.getRichiestaSoccorsoDAO().getRichiestaByCodice(missione.getCodiceRichiesta());
+            if (richiesta != null) {
+                RichiestaDTO richiestaDTO = new RichiestaDTO();
+                richiestaDTO.setCodice(richiesta.getCodice());
+                richiestaDTO.setDescrizione(richiesta.getDescrizione());
+                richiestaDTO.setIndirizzo(richiesta.getIndirizzo());
+                richiestaDTO.setStato(richiesta.getStato());
+                richiestaDTO.setNomeSegnalante(richiesta.getNomeSegnalante());
+                richiestaDTO.setEmailSegnalante(richiesta.getEmailSegnalante());
+
+                dettagli.setRichiesta(richiestaDTO);
+            }
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Errore recupero richiesta per missione " + missione.getCodiceRichiesta(), e);
+        }
+
+        // Operatori tramite PartecipazioneSquadra
+        try {
+            List<OperatoreAssegnatoDTO> operatori = new ArrayList<>();
+            List<PartecipazioneSquadra> squadra = dataLayer.getMissioneDAO().getSquadraByMissione(missione.getCodiceRichiesta());
+
+            for (PartecipazioneSquadra partecipazione : squadra) {
+                try {
+                    Operatore operatore = dataLayer.getOperatoreDAO().getOperatoreById(partecipazione.getIdOperatore());
+                    if (operatore != null) {
+                        OperatoreAssegnatoDTO opDTO = new OperatoreAssegnatoDTO();
+                        opDTO.setId(operatore.getId());
+                        opDTO.setNome(operatore.getNome());
+                        opDTO.setCognome(operatore.getCognome());
+                        opDTO.setEmail(operatore.getEmail());
+                        opDTO.setRuolo(partecipazione.getRuolo().toString());
+                        operatori.add(opDTO);
+                    }
+                } catch (Exception opEx) {
+                    logger.log(Level.WARNING, "Errore caricamento operatore " + partecipazione.getIdOperatore(), opEx);
+                }
+            }
+            dettagli.setOperatori(operatori);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Errore recupero operatori per missione " + missione.getCodiceRichiesta(), e);
+            dettagli.setOperatori(new ArrayList<>());
+        }
+        List<MezzoAssegnatoDTO> mezzi = new ArrayList<>();
+        try {
+            List<Mezzo> mezziAssegnati = dataLayer.getMissioneDAO().getMezziByMissione(missione.getCodiceRichiesta());
+
+            for (Mezzo mezzo : mezziAssegnati) {
+                MezzoAssegnatoDTO mezzoDTO = new MezzoAssegnatoDTO();
+                mezzoDTO.setTarga(mezzo.getTarga());
+                mezzoDTO.setTipo("N/A");
+                mezzoDTO.setModello(mezzo.getDescrizione() != null ? mezzo.getDescrizione() : "N/A");
+                mezzi.add(mezzoDTO);
+            }
+            dettagli.setMezzi(mezzi);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Errore recupero mezzi per missione " + missione.getCodiceRichiesta(), e);
+            dettagli.setMezzi(new ArrayList<>());
+        }
+
+        try {
+            List<MaterialeAssegnatoDTO> materiali = new ArrayList<>();
+            List<Materiale> materialiAssegnati = dataLayer.getMissioneDAO().getMaterialiByMissione(missione.getCodiceRichiesta());
+
+            for (Materiale materiale : materialiAssegnati) {
+                MaterialeAssegnatoDTO matDTO = new MaterialeAssegnatoDTO();
+                matDTO.setId(materiale.getId());
+                matDTO.setNome(materiale.getNome());
+                matDTO.setQuantita(1); // Default
+                materiali.add(matDTO);
+            }
+            dettagli.setMateriali(materiali);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Errore recupero materiali per missione " + missione.getCodiceRichiesta(), e);
+            dettagli.setMateriali(new ArrayList<>());
+        }
+
+        // Informazioni di valutazione (se la missione è stata conclusa)
+        try {
+            InfoMissione infoMissione = dataLayer.getInfoMissioneDAO().getInfoByCodiceMissione(missione.getCodiceRichiesta());
+            if (infoMissione != null) {
+                ValutazioneMissioneDTO valutazione = new ValutazioneMissioneDTO();
+                valutazione.setSuccesso(infoMissione.getSuccesso());
+                valutazione.setCommento(infoMissione.getCommento());
+                valutazione.setDataOraFine(infoMissione.getDataOraFine());
+                dettagli.setValutazione(valutazione);
+            }
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Errore recupero valutazione per missione " + missione.getCodiceRichiesta(), e);
+        }
+        return dettagli;
     }
-    return dettagli;
-}
-    
+
     // === METODI HELPER ===
-    
     /**
      * Classe helper per operatori con ruolo.
      */
     private static class OperatoreConRuolo {
+
         final int idOperatore;
         final String ruolo;
-        
+
         OperatoreConRuolo(int idOperatore, String ruolo) {
             this.idOperatore = idOperatore;
             this.ruolo = ruolo;
         }
     }
-    
+
     /**
      * Parser per liste di interi da stringhe separate da virgola.
      */
@@ -634,13 +649,13 @@ try {
         }
         return result;
     }
-    
+
     /**
      * Crea il DataLayer per l'accesso al database.
      */
     /**
-     * Crea il DataLayer per l'accesso al database.
-     * AGGIORNATO: Aggiunge la chiamata a init() per inizializzare i DAO.
+     * Crea il DataLayer per l'accesso al database. AGGIORNATO: Aggiunge la
+     * chiamata a init() per inizializzare i DAO.
      */
     private SoccorsoDataLayer createDataLayer() throws Exception {
         try {
@@ -654,7 +669,7 @@ try {
             throw new Exception("Impossibile accedere al database", e);
         }
     }
-    
+
     /**
      * Converte Missione in MissioneDTO.
      */
@@ -664,11 +679,19 @@ try {
         dto.setNome(missione.getNome());
         dto.setPosizione(missione.getPosizione());
         dto.setObiettivo(missione.getObiettivo());
-        dto.setDataOraInizio(missione.getDataOraInizio());
+        dto.setNota(missione.getNota()); // Aggiungo anche le note se mancavano
+
+        // ✅ CORREZIONE: Converte LocalDateTime in String
+        if (missione.getDataOraInizio() != null) {
+            dto.setDataOraInizio(missione.getDataOraInizio().toString());
+        } else {
+            dto.setDataOraInizio(null);
+        }
+
         dto.setIdAmministratore(missione.getIdAmministratore());
         return dto;
     }
-    
+
     /**
      * Converte RichiestaSoccorso in RichiestaDTO.
      */

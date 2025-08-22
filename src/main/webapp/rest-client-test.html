@@ -35,7 +35,7 @@
                 border-bottom: 2px solid #667eea;
                 padding-bottom: 10px;
             }
-.form-section {
+            .form-section {
                 background: #f8f9fa;
                 padding: 20px;
                 border-radius: 8px;
@@ -435,7 +435,6 @@
                         <label for="filtroStato">Filtra per Stato:</label>
                         <select id="filtroStato">
                             <option value="">Tutte le richieste</option>
-                            <option value="Inviata">Inviata</option>
                             <option value="Convalidata">Convalidata</option>
                             <option value="Attiva">Attiva</option>
                             <option value="Annullata">Annullata</option>
@@ -492,116 +491,121 @@
                 </div>
             </div>
 
-           <!-- Sezione 7: Creazione Missione (AGGIORNATA) -->
-    <!-- Sezione 7: Creazione Missione (AGGIORNATA - sempre visibile per admin) -->
-    <div class="section">
-        <h2>🎯 7. Creazione Missione</h2>
+            <!-- Sezione 7: Creazione Missione (AGGIORNATA) -->
+            <!-- Sezione 7: Creazione Missione (AGGIORNATA - sempre visibile per admin) -->
+            <div class="section">
+                <h2>🎯 7. Creazione Missione</h2>
 
-        <!-- Form per creare missione (visibile solo per admin autenticati) -->
-        <div id="sezionFormMissione" class="form-section hidden">
-            <h3 style="color: #007bff; margin-bottom: 20px;">📝 Compila Dati Missione</h3>
+                <!-- Form per creare missione (visibile solo per admin autenticati) -->
+                <div id="sezionFormMissione" class="form-section hidden">
+                    <h3 style="color: #007bff;
+                        margin-bottom: 20px;">📝 Compila Dati Missione</h3>
 
-            <!-- Informazioni richiesta -->
-            <div class="form-group">
-                <label for="richiestaIdMissione">ID Richiesta di Soccorso <span class="required">*</span>:</label>
-                <input type="number" id="richiestaIdMissione" min="1" placeholder="ID della richiesta convalidata">
-                <small style="color: #666;">Solo richieste in stato "Convalidata" possono essere utilizzate per creare missioni</small>
-            </div>
+                    <!-- Informazioni richiesta -->
+                    <div class="form-group">
+                        <label for="richiestaIdMissione">ID Richiesta di Soccorso <span class="required">*</span>:</label>
+                        <input type="number" id="richiestaIdMissione" min="1" placeholder="ID della richiesta convalidata">
+                        <small style="color: #666;">Solo richieste in stato "Convalidata" possono essere utilizzate per creare missioni</small>
+                    </div>
 
-            <!-- Dati missione -->
-            <div class="two-column">
-                <div class="form-group">
-                    <label for="nomeMissione">Nome Missione <span class="required">*</span>:</label>
-                    <input type="text" id="nomeMissione" maxlength="45" placeholder="Nome identificativo della missione">
+                    <!-- Dati missione -->
+                    <div class="two-column">
+                        <div class="form-group">
+                            <label for="nomeMissione">Nome Missione <span class="required">*</span>:</label>
+                            <input type="text" id="nomeMissione" maxlength="45" placeholder="Nome identificativo della missione">
+                        </div>
+                        <div class="form-group">
+                            <label for="posizioneMissione">Posizione <span class="required">*</span>:</label>
+                            <input type="text" id="posizioneMissione" maxlength="100" placeholder="Luogo dell'intervento">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="obiettivoMissione">Obiettivo <span class="required">*</span>:</label>
+                        <textarea id="obiettivoMissione" rows="3" placeholder="Descrizione dell'obiettivo della missione"></textarea>
+                    </div>
+
+                    <!-- Sezione Operatori -->
+                    <div class="operator-section">
+                        <h5>👥 Assegnazione Operatori</h5>
+
+                        <div class="form-group">
+                            <label for="caposquadraMissione">Caposquadra <span class="required">*</span>:</label>
+                            <input type="text" id="caposquadraMissione" placeholder="ID del caposquadra (es: 1,2)">
+                            <small style="color: #666;">Inserire almeno un ID di operatore che farà da caposquadra</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="operatoriStandardMissione">Operatori Standard:</label>
+                            <input type="text" id="operatoriStandardMissione" placeholder="ID operatori separati da virgola (es: 3,4,5)">
+                            <small style="color: #666;">Operatori che supporteranno il caposquadra (opzionale)</small>
+                        </div>
+                    </div>
+
+                    <!-- Sezione Mezzi -->
+                    <div class="form-group">
+                        <label for="mezziMissione">Mezzi (Targhe):</label>
+                        <input type="text" id="mezziMissione" placeholder="Targhe separate da virgola (es: AB123CD,EF456GH)">
+                        <small style="color: #666;">Inserire le targhe dei mezzi, non gli ID</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="materialiMissione">Materiali (ID):</label>
+                        <input type="text" id="materialiMissione" placeholder="ID materiali separati da virgola (es: 1,2,3)">
+                        <small style="color: #666;">ID dei materiali necessari per la missione</small>
+                    </div>
+
+                    <!-- Info orario -->
+                    <div style="background-color: #f8f9fa;
+                         padding: 10px;
+                         border-radius: 5px;
+                         margin: 15px 0;">
+                        <strong>🕐 Orario di creazione:</strong>
+                        <span id="orarioCreazione">--</span>
+                    </div>
+
+                    <!-- Pulsanti azione (RIMOSSO il pulsante pulisci) -->
+                    <!-- Pulsanti azione -->
+
+                    <div class="button-row">
+                        <button onclick="creaMissione()" style="background-color: #28a745;">
+                            🚀 Crea Missione
+                        </button>
+                        <button onclick="pulisciFormMissione()" style="background-color: #17a2b8;">
+                            🧹 Pulisci Form
+                        </button>
+                    </div>
+
+                    <!-- Info validazione -->
+                    <div class="info-box">
+                        <h5>💡 Requisiti per la creazione:</h5>
+                        <ul style="margin: 0;
+                            padding-left: 20px;
+                            font-size: 14px;
+                            color: #0c5460;">
+                            <li><strong>ID Richiesta:</strong> Deve essere una richiesta esistente in stato "CONVALIDATA"</li>
+                            <li><strong>Caposquadra:</strong> Almeno un operatore deve essere assegnato come caposquadra</li>
+                            <li><strong>Operatori:</strong> Devono essere disponibili (non impegnati in altre missioni)</li>
+                            <li><strong>Mezzi:</strong> Inserire le targhe, non gli ID</li>
+                            <li><strong>Stato richiesta:</strong> Dopo la creazione, la richiesta passerà da "Convalidata" ad "Attiva"</li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="posizioneMissione">Posizione <span class="required">*</span>:</label>
-                    <input type="text" id="posizioneMissione" maxlength="100" placeholder="Luogo dell'intervento">
+
+                <!-- Messaggio per non-admin -->
+                <div id="messaggioNonAdmin" class="response-area" style="display: none;
+                     background-color: #fff3cd;
+                     border-color: #ffeaa7;
+                     color: #856404;">
+                    ⚠️ Solo gli amministratori possono creare missioni. Effettua il login come amministratore per accedere a questa funzionalità.
+                </div>
+
+                <!-- Area di risposta generale -->
+                <div class="response-area" id="missioneResponse">
+                    Effettua il login come amministratore per creare missioni...
                 </div>
             </div>
-
-            <div class="form-group">
-                <label for="obiettivoMissione">Obiettivo <span class="required">*</span>:</label>
-                <textarea id="obiettivoMissione" rows="3" placeholder="Descrizione dell'obiettivo della missione"></textarea>
-            </div>
-
-            <!-- Sezione Operatori -->
-            <div class="operator-section">
-                <h5>👥 Assegnazione Operatori</h5>
-                
-                <div class="form-group">
-                    <label for="caposquadraMissione">Caposquadra <span class="required">*</span>:</label>
-                    <input type="text" id="caposquadraMissione" placeholder="ID del caposquadra (es: 1,2)">
-                    <small style="color: #666;">Inserire almeno un ID di operatore che farà da caposquadra</small>
-                </div>
-                
-                <div class="form-group">
-                    <label for="operatoriStandardMissione">Operatori Standard:</label>
-                    <input type="text" id="operatoriStandardMissione" placeholder="ID operatori separati da virgola (es: 3,4,5)">
-                    <small style="color: #666;">Operatori che supporteranno il caposquadra (opzionale)</small>
-                </div>
-            </div>
-
-            <!-- Sezione Mezzi -->
-            <div class="form-group">
-                <label for="mezziMissione">Mezzi (Targhe):</label>
-                <input type="text" id="mezziMissione" placeholder="Targhe separate da virgola (es: AB123CD,EF456GH)">
-                <small style="color: #666;">Inserire le targhe dei mezzi, non gli ID</small>
-            </div>
-
-            <div class="form-group">
-                <label for="materialiMissione">Materiali (ID):</label>
-                <input type="text" id="materialiMissione" placeholder="ID materiali separati da virgola (es: 1,2,3)">
-                <small style="color: #666;">ID dei materiali necessari per la missione</small>
-            </div>
-
-            <!-- Info orario -->
-            <div style="background-color: #f8f9fa; padding: 10px; border-radius: 5px; margin: 15px 0;">
-                <strong>🕐 Orario di creazione:</strong>
-                <span id="orarioCreazione">--</span>
-            </div>
-
-            <!-- Pulsanti azione (RIMOSSO il pulsante pulisci) -->
-           <!-- Pulsanti azione -->
-
-           <div class="button-row">
-    
-               <button onclick="creaMissione()" style="background-color: #28a745;">
-        🚀 Crea Missione
-    
-               </button>
-    <button onclick="pulisciFormMissione()" style="background-color: #17a2b8;">
-        🧹 Pulisci Form
-    </button>
-    <button onclick="nascondiFormMissione()" style="background-color: #6c757d;">
-        ❌ Chiudi Form
-    </button>
-</div>
-
-            <!-- Info validazione -->
-            <div class="info-box">
-                <h5>💡 Requisiti per la creazione:</h5>
-                <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #0c5460;">
-                    <li><strong>ID Richiesta:</strong> Deve essere una richiesta esistente in stato "CONVALIDATA"</li>
-                    <li><strong>Caposquadra:</strong> Almeno un operatore deve essere assegnato come caposquadra</li>
-                    <li><strong>Operatori:</strong> Devono essere disponibili (non impegnati in altre missioni)</li>
-                    <li><strong>Mezzi:</strong> Inserire le targhe, non gli ID</li>
-                    <li><strong>Stato richiesta:</strong> Dopo la creazione, la richiesta passerà da "Convalidata" ad "Attiva"</li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Messaggio per non-admin -->
-        <div id="messaggioNonAdmin" class="response-area" style="display: none; background-color: #fff3cd; border-color: #ffeaa7; color: #856404;">
-            ⚠️ Solo gli amministratori possono creare missioni. Effettua il login come amministratore per accedere a questa funzionalità.
-        </div>
-
-        <!-- Area di risposta generale -->
-        <div class="response-area" id="missioneResponse">
-            Effettua il login come amministratore per creare missioni...
-        </div>
-    </div>
-    <!-- Sezione 9: Annullamento Richiesta di Soccorso (NUOVO) -->
+            <!-- Sezione 9: Annullamento Richiesta di Soccorso (NUOVO) -->
             <div class="section">
                 <h2>❌ 9. Annullamento Richiesta di Soccorso (Solo Admin)</h2>
 
@@ -613,7 +617,10 @@
 
                 <div class="info-box">
                     <h5>⚠️ Condizioni per l'annullamento:</h5>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #0c5460;">
+                    <ul style="margin: 0;
+                        padding-left: 20px;
+                        font-size: 14px;
+                        color: #0c5460;">
                         <li><strong>Solo amministratori</strong> possono annullare richieste</li>
                         <li><strong>Non si possono annullare</strong> richieste già chiuse</li>
                         <li><strong>Non si possono annullare</strong> richieste con missioni attive</li>
@@ -633,211 +640,219 @@
                     Effettua il login come amministratore per annullare richieste...
                 </div>
                 <!-- Sezione 10: Dettagli Missione -->
-<div class="section">
-    <h2>📋 10. Dettagli di una Missione (Solo Admin)</h2>
+                <div class="section">
+                    <h2>📋 10. Dettagli di una Missione (Solo Admin)</h2>
 
-    <div class="form-group">
-        <label for="dettagliMissioneId">ID Missione:</label>
-        <input type="number" id="dettagliMissioneId" min="1" placeholder="Inserisci l'ID della missione">
-        <small style="color: #666;">Visualizza tutti i dettagli di una missione specifica</small>
-    </div>
+                    <div class="form-group">
+                        <label for="dettagliMissioneId">ID Missione:</label>
+                        <input type="number" id="dettagliMissioneId" min="1" placeholder="Inserisci l'ID della missione">
+                        <small style="color: #666;">Visualizza tutti i dettagli di una missione specifica</small>
+                    </div>
 
-    <div class="info-box">
-        <h5>📋 Informazioni incluse nei dettagli:</h5>
-        <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #0c5460;">
-            <li><strong>Dati base:</strong> Nome, posizione, obiettivo, note, date</li>
-            <li><strong>Richiesta associata:</strong> Dettagli della richiesta di soccorso originale</li>
-            <li><strong>Team:</strong> Operatori assegnati con i loro ruoli (Caposquadra/Standard)</li>
-            <li><strong>Risorse:</strong> Mezzi e materiali utilizzati</li>
-            <li><strong>Valutazione:</strong> Livello di successo e commenti (se conclusa)</li>
-        </ul>
-    </div>
+                    <div class="info-box">
+                        <h5>📋 Informazioni incluse nei dettagli:</h5>
+                        <ul style="margin: 0;
+                            padding-left: 20px;
+                            font-size: 14px;
+                            color: #0c5460;">
+                            <li><strong>Dati base:</strong> Nome, posizione, obiettivo, note, date</li>
+                            <li><strong>Richiesta associata:</strong> Dettagli della richiesta di soccorso originale</li>
+                            <li><strong>Team:</strong> Operatori assegnati con i loro ruoli (Caposquadra/Standard)</li>
+                            <li><strong>Risorse:</strong> Mezzi e materiali utilizzati</li>
+                            <li><strong>Valutazione:</strong> Livello di successo e commenti (se conclusa)</li>
+                        </ul>
+                    </div>
 
-    <div class="button-row">
-        <button onclick="getDettagliMissione()" id="dettagliMissioneBtn" disabled style="background-color: #007bff;">
-            📋 Visualizza Dettagli
-        </button>
-        <button onclick="clearDettagliMissioneForm()">🧹 Pulisci Form</button>
-        <button onclick="fillDettagliMissioneExample()">📋 Esempio</button>
-    </div>
+                    <div class="button-row">
+                        <button onclick="getDettagliMissione()" id="dettagliMissioneBtn" disabled style="background-color: #007bff;">
+                            📋 Visualizza Dettagli
+                        </button>
+                        <button onclick="clearDettagliMissioneForm()">🧹 Pulisci Form</button>
+                        <button onclick="fillDettagliMissioneExample()">📋 Esempio</button>
+                    </div>
 
-    <div class="response-area" id="dettagliMissioneResponse">
-        Effettua il login come amministratore per visualizzare i dettagli delle missioni...
-    </div>
-</div>
+                    <div class="response-area" id="dettagliMissioneResponse">
+                        Effettua il login come amministratore per visualizzare i dettagli delle missioni...
+                    </div>
+                </div>
 
-<script>
-// === FUNZIONI DETTAGLI MISSIONE ===
+                <script>
+                    // === FUNZIONI DETTAGLI MISSIONE ===
 
-async function getDettagliMissione() {
-    if (!authToken) {
-        showResponse('dettagliMissioneResponse', 'Devi prima effettuare il login', 'error');
-        return;
-    }
+                    async function getDettagliMissione() {
+                        if (!authToken) {
+                            showResponse('dettagliMissioneResponse', 'Devi prima effettuare il login', 'error');
+                            return;
+                        }
 
-    const missioneId = parseInt(document.getElementById('dettagliMissioneId').value);
-    
-    if (!missioneId || missioneId <= 0) {
-        showResponse('dettagliMissioneResponse', '❌ Inserisci un ID missione valido', 'error');
-        return;
-    }
+                        const missioneId = parseInt(document.getElementById('dettagliMissioneId').value);
 
-    showResponse('dettagliMissioneResponse', 'Caricamento dettagli missione...', 'info');
+                        if (!missioneId || missioneId <= 0) {
+                            showResponse('dettagliMissioneResponse', '❌ Inserisci un ID missione valido', 'error');
+                            return;
+                        }
 
-    try {
-        const result = await apiCall(`/missioni/${missioneId}`, {
-            method: 'GET'
-        });
+                        showResponse('dettagliMissioneResponse', 'Caricamento dettagli missione...', 'info');
 
-        if (result.ok) {
-            const dettagli = result.data;
-            
-            let response = `✅ Dettagli Missione ${dettagli.id}\n\n`;
-            
-            // Dati base
-            response += `📊 INFORMAZIONI GENERALI:\n`;
-            response += `• Nome: ${dettagli.nome}\n`;
-            response += `• Posizione: ${dettagli.posizione}\n`;
-            response += `• Obiettivo: ${dettagli.obiettivo}\n`;
-            response += `• Stato: ${dettagli.stato}\n`;
-            response += `• Admin ID: ${dettagli.idAmministratore}\n`;
-            response += `• Data Inizio: ${formatDateTime(dettagli.dataOraInizio)}\n`;
-            
-            if (dettagli.dataOraFine) {
-                response += `• Data Fine: ${formatDateTime(dettagli.dataOraFine)}\n`;
-            }
-            
-            if (dettagli.note && dettagli.note.trim()) {
-                response += `• Note: ${dettagli.note}\n`;
-            }
-            
-            // Richiesta associata
-            if (dettagli.richiesta) {
-                response += `\n🆘 RICHIESTA DI SOCCORSO (#${dettagli.richiesta.codice}):\n`;
-                response += `• Descrizione: ${dettagli.richiesta.descrizione}\n`;
-                response += `• Indirizzo: ${dettagli.richiesta.indirizzo}\n`;
-                response += `• Stato: ${dettagli.richiesta.stato}\n`;
-                response += `• Segnalante: ${dettagli.richiesta.nomeSegnalante}\n`;
-                response += `• Email: ${dettagli.richiesta.emailSegnalante}\n`;
-                if (dettagli.richiesta.telefono) {
-                    response += `• Telefono: ${dettagli.richiesta.telefono}\n`;
-                }
-                response += `• Data Inserimento: ${formatDateTime(dettagli.richiesta.dataOraInserimento)}\n`;
-            }
-            
-            // Team operatori
-            if (dettagli.operatori && dettagli.operatori.length > 0) {
-                response += `\n👥 TEAM OPERATORI (${dettagli.operatori.length}):\n`;
-                dettagli.operatori.forEach(op => {
-                    response += `• ${op.nomeCompleto || (op.nome + ' ' + op.cognome)} - ${op.ruolo}\n`;
-                    if (op.email) {
-                        response += `  📧 ${op.email}\n`;
+                        try {
+                            const result = await apiCall(`/missioni/${missioneId}`, {
+                                method: 'GET'
+                            });
+
+                            if (result.ok) {
+                                const dettagli = result.data;
+
+                                let response = `✅ Dettagli Missione ${dettagli.id}\n\n`;
+
+                                // Dati base
+                                response += `📊 INFORMAZIONI GENERALI:\n`;
+                                response += `• Nome: ${dettagli.nome}\n`;
+                                response += `• Posizione: ${dettagli.posizione}\n`;
+                                response += `• Obiettivo: ${dettagli.obiettivo}\n`;
+                                response += `• Stato: ${dettagli.stato}\n`;
+                                response += `• Admin ID: ${dettagli.idAmministratore}\n`;
+                                response += `• Data Inizio: ${formatDateTime(dettagli.dataOraInizio)}\n`;
+
+                                if (dettagli.dataOraFine) {
+                                    response += `• Data Fine: ${formatDateTime(dettagli.dataOraFine)}\n`;
+                                }
+
+                                if (dettagli.note && dettagli.note.trim()) {
+                                    response += `• Note: ${dettagli.note}\n`;
+                                }
+
+                                // Richiesta associata
+                                if (dettagli.richiesta) {
+                                    response += `\n🆘 RICHIESTA DI SOCCORSO (#${dettagli.richiesta.codice}):\n`;
+                                    response += `• Descrizione: ${dettagli.richiesta.descrizione}\n`;
+                                    response += `• Indirizzo: ${dettagli.richiesta.indirizzo}\n`;
+                                    response += `• Stato: ${dettagli.richiesta.stato}\n`;
+                                    response += `• Segnalante: ${dettagli.richiesta.nomeSegnalante}\n`;
+                                    response += `• Email: ${dettagli.richiesta.emailSegnalante}\n`;
+                                    if (dettagli.richiesta.telefono) {
+                                        response += `• Telefono: ${dettagli.richiesta.telefono}\n`;
+                                    }
+                                    response += `• Data Inserimento: ${formatDateTime(dettagli.richiesta.dataOraInserimento)}\n`;
+                                }
+
+                                // Team operatori
+                                if (dettagli.operatori && dettagli.operatori.length > 0) {
+                                    response += `\n👥 TEAM OPERATORI (${dettagli.operatori.length}):\n`;
+                                    dettagli.operatori.forEach(op => {
+                                        response += `• ${op.nomeCompleto || (op.nome + ' ' + op.cognome)} - ${op.ruolo}\n`;
+                                        if (op.email) {
+                                            response += `  📧 ${op.email}\n`;
+                                        }
+                                    });
+                                }
+
+                                // Mezzi
+                                if (dettagli.mezzi && dettagli.mezzi.length > 0) {
+                                    response += `\n🚗 MEZZI ASSEGNATI (${dettagli.mezzi.length}):\n`;
+                                    dettagli.mezzi.forEach(mezzo => {
+                                        response += `• Targa: ${mezzo.targa}`;
+                                        if (mezzo.tipo && mezzo.tipo !== 'N/A') {
+                                            response += ` - Tipo: ${mezzo.tipo}`;
+                                        }
+                                        if (mezzo.modello && mezzo.modello !== 'N/A') {
+                                            response += ` - Modello: ${mezzo.modello}`;
+                                        }
+                                        response += `\n`;
+                                    });
+                                }
+
+                                // Materiali
+                                if (dettagli.materiali && dettagli.materiali.length > 0) {
+                                    response += `\n📦 MATERIALI UTILIZZATI (${dettagli.materiali.length}):\n`;
+                                    dettagli.materiali.forEach(mat => {
+                                        response += `• ${mat.nome || ('Materiale ID: ' + mat.id)}`;
+                                        if (mat.quantita && mat.quantita > 1) {
+                                            response += ` (Quantità: ${mat.quantita})`;
+                                        }
+                                        response += `\n`;
+                                    });
+                                }
+
+                                // Valutazione (se conclusa)
+                                if (dettagli.valutazione) {
+                                    response += `\n⭐ VALUTAZIONE FINALE:\n`;
+                                    response += `• Livello di Successo: ${dettagli.valutazione.successo}/10\n`;
+                                    if (dettagli.valutazione.commento && dettagli.valutazione.commento.trim()) {
+                                        response += `• Commento: ${dettagli.valutazione.commento}\n`;
+                                    }
+                                    response += `• Data Valutazione: ${formatDateTime(dettagli.valutazione.dataOraFine)}\n`;
+
+                                    // Interpretazione del livello di successo
+                                    let interpretazione = '';
+                                    if (dettagli.valutazione.successo >= 9)
+                                        interpretazione = '🌟 Eccellente';
+                                    else if (dettagli.valutazione.successo >= 7)
+                                        interpretazione = '✅ Buono';
+                                    else if (dettagli.valutazione.successo >= 5)
+                                        interpretazione = '⚠️ Sufficiente';
+                                    else
+                                        interpretazione = '❌ Insufficiente';
+
+                                    response += `• Interpretazione: ${interpretazione}\n`;
+                                }
+
+                                showResponse('dettagliMissioneResponse', response, 'success');
+
+                            } else {
+                                let errorMessage = `❌ Errore nel caricamento: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
+
+                                if (result.status === 404) {
+                                    errorMessage = '❌ Missione non trovata. Verifica l\'ID inserito.';
+                                } else if (result.status === 401) {
+                                    errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
+                                } else if (result.status === 403) {
+                                    errorMessage = '❌ Accesso negato. Solo gli amministratori possono visualizzare i dettagli delle missioni.';
+                                }
+
+                                showResponse('dettagliMissioneResponse', errorMessage, 'error');
+                            }
+                        } catch (error) {
+                            showResponse('dettagliMissioneResponse', `❌ Errore di rete: ${error.message}`, 'error');
+                        }
                     }
-                });
-            }
-            
-            // Mezzi
-            if (dettagli.mezzi && dettagli.mezzi.length > 0) {
-                response += `\n🚗 MEZZI ASSEGNATI (${dettagli.mezzi.length}):\n`;
-                dettagli.mezzi.forEach(mezzo => {
-                    response += `• Targa: ${mezzo.targa}`;
-                    if (mezzo.tipo && mezzo.tipo !== 'N/A') {
-                        response += ` - Tipo: ${mezzo.tipo}`;
+
+                    function clearDettagliMissioneForm() {
+                        document.getElementById('dettagliMissioneId').value = '';
+                        showResponse('dettagliMissioneResponse', 'Form pulito. Inserisci l\'ID della missione da visualizzare.', 'info');
                     }
-                    if (mezzo.modello && mezzo.modello !== 'N/A') {
-                        response += ` - Modello: ${mezzo.modello}`;
+
+                    function fillDettagliMissioneExample() {
+                        document.getElementById('dettagliMissioneId').value = '1';
+                        showResponse('dettagliMissioneResponse',
+                                '📋 Form riempito con dati di esempio.\n\n' +
+                                '💡 SUGGERIMENTO:\n' +
+                                '• L\'ID deve corrispondere a una missione esistente\n' +
+                                '• Solo gli amministratori possono visualizzare i dettagli\n' +
+                                '• I dettagli includono team, mezzi, materiali e valutazione\n' +
+                                '• Se la missione è conclusa, vedrai anche la valutazione finale',
+                                'info');
                     }
-                    response += `\n`;
-                });
-            }
-            
-            // Materiali
-            if (dettagli.materiali && dettagli.materiali.length > 0) {
-                response += `\n📦 MATERIALI UTILIZZATI (${dettagli.materiali.length}):\n`;
-                dettagli.materiali.forEach(mat => {
-                    response += `• ${mat.nome || ('Materiale ID: ' + mat.id)}`;
-                    if (mat.quantita && mat.quantita > 1) {
-                        response += ` (Quantità: ${mat.quantita})`;
+
+                    // Funzione di utilità per formattare date/ore
+                    function formatDateTime(dateTimeString) {
+                        if (!dateTimeString)
+                            return 'N/A';
+
+                        try {
+                            const date = new Date(dateTimeString);
+                            return date.toLocaleString('it-IT', {
+                                year: 'numeric',
+                                month: '2-digit',
+                                day: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit'
+                            });
+                        } catch (e) {
+                            return dateTimeString; // Fallback se il parsing fallisce
+                        }
                     }
-                    response += `\n`;
-                });
-            }
-            
-            // Valutazione (se conclusa)
-            if (dettagli.valutazione) {
-                response += `\n⭐ VALUTAZIONE FINALE:\n`;
-                response += `• Livello di Successo: ${dettagli.valutazione.successo}/10\n`;
-                if (dettagli.valutazione.commento && dettagli.valutazione.commento.trim()) {
-                    response += `• Commento: ${dettagli.valutazione.commento}\n`;
-                }
-                response += `• Data Valutazione: ${formatDateTime(dettagli.valutazione.dataOraFine)}\n`;
-                
-                // Interpretazione del livello di successo
-                let interpretazione = '';
-                if (dettagli.valutazione.successo >= 9) interpretazione = '🌟 Eccellente';
-                else if (dettagli.valutazione.successo >= 7) interpretazione = '✅ Buono';
-                else if (dettagli.valutazione.successo >= 5) interpretazione = '⚠️ Sufficiente';
-                else interpretazione = '❌ Insufficiente';
-                
-                response += `• Interpretazione: ${interpretazione}\n`;
-            }
-            
-            showResponse('dettagliMissioneResponse', response, 'success');
-            
-        } else {
-            let errorMessage = `❌ Errore nel caricamento: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
-            
-            if (result.status === 404) {
-                errorMessage = '❌ Missione non trovata. Verifica l\'ID inserito.';
-            } else if (result.status === 401) {
-                errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
-            } else if (result.status === 403) {
-                errorMessage = '❌ Accesso negato. Solo gli amministratori possono visualizzare i dettagli delle missioni.';
-            }
-
-            showResponse('dettagliMissioneResponse', errorMessage, 'error');
-        }
-    } catch (error) {
-        showResponse('dettagliMissioneResponse', `❌ Errore di rete: ${error.message}`, 'error');
-    }
-}
-
-function clearDettagliMissioneForm() {
-    document.getElementById('dettagliMissioneId').value = '';
-    showResponse('dettagliMissioneResponse', 'Form pulito. Inserisci l\'ID della missione da visualizzare.', 'info');
-}
-
-function fillDettagliMissioneExample() {
-    document.getElementById('dettagliMissioneId').value = '1';
-    showResponse('dettagliMissioneResponse', 
-        '📋 Form riempito con dati di esempio.\n\n' +
-        '💡 SUGGERIMENTO:\n' +
-        '• L\'ID deve corrispondere a una missione esistente\n' +
-        '• Solo gli amministratori possono visualizzare i dettagli\n' +
-        '• I dettagli includono team, mezzi, materiali e valutazione\n' +
-        '• Se la missione è conclusa, vedrai anche la valutazione finale',
-        'info');
-}
-
-// Funzione di utilità per formattare date/ore
-function formatDateTime(dateTimeString) {
-    if (!dateTimeString) return 'N/A';
-    
-    try {
-        const date = new Date(dateTimeString);
-        return date.toLocaleString('it-IT', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-    } catch (e) {
-        return dateTimeString; // Fallback se il parsing fallisce
-    }
-}
-</script>
+                </script>
             </div>
             <!-- Sezione Test Vari -->
             <div class="section">
@@ -859,7 +874,7 @@ function formatDateTime(dateTimeString) {
                 let currentUser = null;
 
                 // === FUNZIONI HELPER ===
-                
+
                 // Utility function per le chiamate API
                 async function apiCall(endpoint, options = {}) {
                     const url = `${API_BASE_URL}${endpoint}`;
@@ -902,7 +917,7 @@ function formatDateTime(dateTimeString) {
                             data: {error: 'NETWORK_ERROR', message: error.message},
                             headers: null
                         };
-                    }
+                }
                 }
 
                 function showResponse(elementId, message, type = 'info') {
@@ -912,7 +927,7 @@ function formatDateTime(dateTimeString) {
                 }
 
                 // === FUNZIONI DI AUTENTICAZIONE ===
-                
+
                 async function doLogin() {
                     const email = document.getElementById('email').value;
                     const password = document.getElementById('password').value;
@@ -927,7 +942,7 @@ function formatDateTime(dateTimeString) {
                     try {
                         const result = await apiCall('/auth/login', {
                             method: 'POST',
-                            body: JSON.stringify({ email, password })
+                            body: JSON.stringify({email, password})
                         });
 
                         // DEBUG: Stampa tutta la risposta per vedere cosa arriva
@@ -939,50 +954,50 @@ function formatDateTime(dateTimeString) {
 
                         if (result.ok) {
                             authToken = result.data.token;
-                            
+
                             // DEBUG: Controlla come viene estratto il ruolo
                             console.log('Token estratto:', authToken);
                             console.log('result.data.role:', result.data.role);
                             console.log('result.data.user:', result.data.user);
-                            
+
                             // Prova diversi modi di estrarre il ruolo
                             let userRole = null;
                             let isAdmin = false;
-                            
+
                             if (result.data.role) {
                                 userRole = result.data.role;
                             } else if (result.data.user && result.data.user.role) {
                                 userRole = result.data.user.role;
                             }
-                            
+
                             console.log('userRole estratto:', userRole);
-                            
+
                             // Controlla se è admin con diverse varianti
                             if (userRole) {
-                                isAdmin = userRole.toLowerCase() === 'admin' || 
-                                         userRole.toLowerCase() === 'amministratore' ||
-                                         userRole.toUpperCase() === 'ADMIN';
+                                isAdmin = userRole.toLowerCase() === 'admin' ||
+                                        userRole.toLowerCase() === 'amministratore' ||
+                                        userRole.toUpperCase() === 'ADMIN';
                             }
-                            
+
                             console.log('isAdmin calcolato:', isAdmin);
-                            
+
                             // Salva i dati utente
                             currentUser = {
                                 email: email,
                                 role: userRole,
                                 isAdmin: isAdmin
                             };
-                            
-                            updateAuthUI(true, isAdmin);
-                            
+
+                            updateAuthUI(true, currentUser);
+
                             let message = `✅ Login effettuato con successo!\n\n`;
                             message += `Email: ${email}\n`;
                             message += `Ruolo estratto: ${userRole || 'NON TROVATO'}\n`;
                             message += `È admin: ${isAdmin ? 'SÌ' : 'NO'}\n`;
                             message += `Token: ${authToken.substring(0, 30)}...\n`;
-                            
+
                             showResponse('authResponse', message, 'success');
-                            
+
                             // Se è admin, mostra automaticamente il form missione
                             if (isAdmin) {
                                 mostraFormMissioneAutomatic();
@@ -1002,12 +1017,12 @@ function formatDateTime(dateTimeString) {
                     authToken = null;
                     currentUser = null;
                     updateAuthUI(false, null);
-                    
+
                     // Nascondi il form missione
                     document.getElementById('sezionFormMissione').style.display = 'none';
                     document.getElementById('messaggioNonAdmin').style.display = 'none';
                     showResponse('missioneResponse', 'Effettua il login come amministratore per creare missioni...', 'info');
-                    
+
                     showResponse('authResponse', '👋 Logout effettuato', 'info');
                 }
 
@@ -1035,68 +1050,84 @@ function formatDateTime(dateTimeString) {
 
                 // Aggiorna la lista dei pulsanti che devono essere abilitati/disabilitati
 // in base allo stato di autenticazione
-function updateAuthUI(isAuthenticated, currentUser) {
-    const statusElement = document.getElementById('authStatus');
-    
-    // Lista completa dei pulsanti che richiedono autenticazione
-    const buttons = [
-        'listaRichiesteBtn',
-        'richiesteNonPositiveBtn', 
-        'operatoriBtn',
-        'dettagliRichiestaBtn',
-        'dettagliOperatoreBtn',
-        'missioni13Btn',
-        'annullaBtn',
-        'dettagliMissioneBtn'  
-    ];
-    
-    if (isAuthenticated && currentUser) {
-        const isAdmin = currentUser.role === 'ADMIN';
-        
-        statusElement.textContent = `✅ Autenticato come ${currentUser.username || currentUser.email || 'Utente'} (${currentUser.role || 'N/A'})`;
-        statusElement.className = 'auth-status logged-in';
-        
-        // Abilita tutti i pulsanti per admin
-        buttons.forEach(id => {
-            const btn = document.getElementById(id);
-            if (btn) btn.disabled = false;
-        });
-        
-        // Gestisci visibilità form missione basata sul ruolo
-        if (isAdmin) {
-            document.getElementById('messaggioNonAdmin').style.display = 'none';
-        } else {
-            document.getElementById('sezionFormMissione').style.display = 'none';
-            document.getElementById('messaggioNonAdmin').style.display = 'block';
-            showResponse('missioneResponse', '', '');
-        }
-    } else {
-        statusElement.textContent = '❌ Non autenticato';
-        statusElement.className = 'auth-status logged-out';
-        
-        // Disabilita tutti i pulsanti
-        buttons.forEach(id => {
-            const btn = document.getElementById(id);
-            if (btn) btn.disabled = true;
-        });
-        
-        // Nascondi tutto quando non autenticato
-        document.getElementById('sezionFormMissione').style.display = 'none';
-        document.getElementById('messaggioNonAdmin').style.display = 'none';
-    }
-}
-                // === FUNZIONI MISSIONE ===
-                
+                function updateAuthUI(isAuthenticated, currentUser) {
+                    const statusElement = document.getElementById('authStatus');
+
+                    // Lista corretta dei pulsanti che richiedono autenticazione
+                    const buttons = [
+                        'verifyBtn', // ✅ Pulsante verifica token
+                        'logoutBtn', // ✅ Pulsante logout
+                        'listaBtn', // ✅ Pulsante "Carica Lista" (era 'listaRichiesteBtn')
+                        'richiesteNonPositiveBtn', // ✅ Pulsante richieste non positive
+                        'operatoriBtn', // ✅ Pulsante operatori (da verificare se esiste)
+                        'dettagliRichiestaBtn', // ✅ Pulsante dettagli richiesta (da verificare se esiste)
+                        'dettagliOperatoreBtn', // ✅ Pulsante dettagli operatore (da verificare se esiste)
+                        'missioni13Btn', // ✅ Pulsante missioni (da verificare se esiste)
+                        'annullaBtn', // ✅ Pulsante annulla (da verificare se esiste)
+                        'dettagliMissioneBtn'     // ✅ Pulsante dettagli missione
+                    ];
+
+                    if (isAuthenticated && currentUser) {
+                        const isAdmin = currentUser.role === 'ADMIN' || currentUser.role === 'admin';
+
+                        statusElement.textContent = `✅ Autenticato come ${currentUser.email || 'Utente'} (${currentUser.role || 'N/A'})`;
+                        statusElement.className = 'auth-status logged-in';
+
+                        // Abilita tutti i pulsanti per utenti autenticati
+                        buttons.forEach(id => {
+                            const btn = document.getElementById(id);
+                            if (btn) {
+                                btn.disabled = false;
+                                console.log(`✅ Abilitato pulsante: ${id}`);
+                            } else {
+                                console.log(`⚠️ Pulsante non trovato: ${id}`);
+                            }
+                        });
+
+                        // Gestisci visibilità form missione basata sul ruolo
+                        const sezionFormMissione = document.getElementById('sezionFormMissione');
+                        const messaggioNonAdmin = document.getElementById('messaggioNonAdmin');
+
+                        if (isAdmin) {
+                            if (sezionFormMissione)
+                                sezionFormMissione.style.display = 'block';
+                            if (messaggioNonAdmin)
+                                messaggioNonAdmin.style.display = 'none';
+                        } else {
+                            if (sezionFormMissione)
+                                sezionFormMissione.style.display = 'none';
+                            if (messaggioNonAdmin)
+                                messaggioNonAdmin.style.display = 'block';
+                            showResponse('missioneResponse', '⚠️ Solo gli admin possono creare missioni.', 'warning');
+                        }
+                    } else {
+                        statusElement.textContent = '❌ Non autenticato';
+                        statusElement.className = 'auth-status logged-out';
+
+                        // Disabilita tutti i pulsanti
+                        buttons.forEach(id => {
+                            const btn = document.getElementById(id);
+                            if (btn) {
+                                btn.disabled = true;
+                                console.log(`❌ Disabilitato pulsante: ${id}`);
+                            }
+                        });
+
+                        // Nascondi tutto quando non autenticato
+                        const sezionFormMissione = document.getElementById('sezionFormMissione');
+                        const messaggioNonAdmin = document.getElementById('messaggioNonAdmin');
+                        if (sezionFormMissione)
+                            sezionFormMissione.style.display = 'none';
+                        if (messaggioNonAdmin)
+                            messaggioNonAdmin.style.display = 'none';
+                    }
+                }                // === FUNZIONI MISSIONE ===
+
                 function mostraFormMissioneAutomatic() {
                     document.getElementById('sezionFormMissione').style.display = 'block';
                     document.getElementById('messaggioNonAdmin').style.display = 'none';
                     updateOrarioCreazione();
                     showResponse('missioneResponse', '✅ Accesso autorizzato! Compila i campi per creare una nuova missione.', 'success');
-                }
-
-                function nascondiFormMissione() {
-                    document.getElementById('sezionFormMissione').style.display = 'none';
-                    showResponse('missioneResponse', 'Form chiuso.', 'info');
                 }
 
                 function updateOrarioCreazione() {
@@ -1191,7 +1222,7 @@ function updateAuthUI(isAuthenticated, currentUser) {
                             message += `• Obiettivo: ${response.missione.obiettivo}\n`;
                             message += `• ID Richiesta: ${response.missione.codiceRichiesta}\n`;
                             message += `• Data/Ora Inizio: ${new Date(response.missione.dataOraInizio).toLocaleString('it-IT')}\n`;
-                            
+
                             if (response.emailOperatori && response.emailOperatori.length > 0) {
                                 message += `\n📧 Email notifiche inviate a:\n`;
                                 response.emailOperatori.forEach(email => {
@@ -1203,7 +1234,7 @@ function updateAuthUI(isAuthenticated, currentUser) {
                             clearMissioneFormSilent();
                         } else {
                             let errorMessage = `❌ Errore nella creazione: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
-                            
+
                             if (result.status === 400) {
                                 errorMessage = `❌ Dati non validi: ${result.data.error || 'Controlla i campi inseriti'}`;
                             } else if (result.status === 401) {
@@ -1218,10 +1249,11 @@ function updateAuthUI(isAuthenticated, currentUser) {
                         showResponse('missioneResponse', `❌ Errore di rete: ${error.message}`, 'error');
                     }
                 }
-function pulisciFormMissione() {
-    clearMissioneFormSilent();
-    showResponse('missioneResponse', '🧹 Form pulito! Compila i campi per creare una nuova missione.', 'info');
-}
+
+                function pulisciFormMissione() {
+                    clearMissioneFormSilent();
+                    showResponse('missioneResponse', '🧹 Form pulito! Compila i campi per creare una nuova missione.', 'info');
+                }
                 function clearMissioneFormSilent() {
                     document.getElementById('richiestaIdMissione').value = '';
                     document.getElementById('nomeMissione').value = '';
@@ -1235,7 +1267,7 @@ function pulisciFormMissione() {
                 }
 
                 // === FUNZIONI RICHIESTE ===
-                
+
                 async function inserisciRichiesta() {
                     const descrizione = document.getElementById('descrizione').value;
                     const indirizzo = document.getElementById('indirizzo').value;
@@ -1340,7 +1372,7 @@ function pulisciFormMissione() {
                 }
 
                 // === FUNZIONI CONVALIDA ===
-                
+
                 async function doConvalida() {
                     const id = document.getElementById('convalidaId').value;
                     const token = document.getElementById('convalidaToken').value;
@@ -1428,7 +1460,7 @@ function pulisciFormMissione() {
                 }
 
                 // === ALTRE FUNZIONI ===
-                
+
                 async function getListaRichieste() {
                     if (!authToken) {
                         showResponse('listaResponse', 'Devi prima effettuare il login per vedere le richieste', 'error');
@@ -1605,7 +1637,7 @@ function pulisciFormMissione() {
                 }
 
                 // === FUNZIONI TEST ===
-                
+
                 async function testHealth() {
                     showResponse('testResponse', 'Testing basic connectivity...', 'info');
 
@@ -1674,7 +1706,7 @@ function pulisciFormMissione() {
                     showResponse('testResponse', 'Pronto per i test di connettività...');
                 });
                 // === FUNZIONI ANNULLAMENTO RICHIESTA ===
-                
+
                 async function annullaRichiesta() {
                     if (!authToken) {
                         showResponse('annullaResponse', 'Devi prima effettuare il login come amministratore', 'error');
@@ -1691,7 +1723,7 @@ function pulisciFormMissione() {
 
                     // Conferma dall'utente
                     const conferma = confirm(`⚠️ ATTENZIONE!\n\nSei sicuro di voler ANNULLARE la richiesta ${richiestaId}?\n\nQuesta azione:\n• Cambierà lo stato in "Annullata"\n• NON può essere annullata\n• Renderà la richiesta non più gestibile\n\nConfermi l'annullamento?`);
-                    
+
                     if (!conferma) {
                         showResponse('annullaResponse', '🚫 Annullamento richiesta cancellato dall\'utente', 'info');
                         return;
@@ -1706,7 +1738,7 @@ function pulisciFormMissione() {
 
                         if (result.ok) {
                             const response = result.data;
-                            
+
                             let message = `✅ ${response.message}\n\n`;
                             message += `📋 Dettagli operazione:\n`;
                             message += `• ID Richiesta: ${response.richiesta.codice}\n`;
@@ -1717,15 +1749,15 @@ function pulisciFormMissione() {
                             message += `• Indirizzo: ${response.richiesta.indirizzo}\n`;
                             message += `• Annullata da Admin ID: ${response.adminId}\n`;
                             message += `• Descrizione: ${response.richiesta.descrizione.substring(0, 100)}${response.richiesta.descrizione.length > 100 ? '...' : ''}\n`;
-                            
+
                             showResponse('annullaResponse', message, 'success');
-                            
+
                             // Pulisci il form dopo il successo
                             clearAnnullaForm();
-                            
+
                         } else {
                             let errorMessage = `❌ Errore nell'annullamento: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
-                            
+
                             // Gestione errori specifici
                             if (result.status === 400) {
                                 if (result.data.error === 'ALREADY_CANCELLED') {
@@ -1759,14 +1791,14 @@ function pulisciFormMissione() {
 
                 function fillAnnullaExample() {
                     document.getElementById('annullaRichiestaId').value = '1';
-                    showResponse('annullaResponse', 
-                        '📋 Form riempito con dati di esempio.\n\n' +
-                        '⚠️ IMPORTANTE: Questo è solo un esempio!\n' +
-                        '• L\'ID deve corrispondere a una richiesta reale\n' +
-                        '• La richiesta deve essere in uno stato annullabile\n' +
-                        '• L\'annullamento è irreversibile\n' +
-                        '• Solo gli amministratori possono eseguire questa operazione',
-                        'info');
+                    showResponse('annullaResponse',
+                            '📋 Form riempito con dati di esempio.\n\n' +
+                            '⚠️ IMPORTANTE: Questo è solo un esempio!\n' +
+                            '• L\'ID deve corrispondere a una richiesta reale\n' +
+                            '• La richiesta deve essere in uno stato annullabile\n' +
+                            '• L\'annullamento è irreversibile\n' +
+                            '• Solo gli amministratori possono eseguire questa operazione',
+                            'info');
                 }
             </script>
         </body>
