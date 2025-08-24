@@ -633,7 +633,6 @@
                         ❌ Annulla Richiesta
                     </button>
                     <button onclick="clearAnnullaForm()">🧹 Pulisci Form</button>
-                    <button onclick="fillAnnullaExample()">📋 Esempio</button>
                 </div>
 
                 <div class="response-area" id="annullaResponse">
@@ -1721,14 +1720,36 @@
                         return;
                     }
 
-                    // Conferma dall'utente
-                    const conferma = confirm(`⚠️ ATTENZIONE!\n\nSei sicuro di voler ANNULLARE la richiesta ${richiestaId}?\n\nQuesta azione:\n• Cambierà lo stato in "Annullata"\n• NON può essere annullata\n• Renderà la richiesta non più gestibile\n\nConfermi l'annullamento?`);
+                    // ✅ SOSTITUISCI IL CONFIRM CON UNA CONFERMA PERSONALIZZATA
+                    showResponse('annullaResponse',
+                            `⚠️ CONFERMA ANNULLAMENTO\n\n` +
+                            `Sei sicuro di voler ANNULLARE la richiesta ${richiestaId}?\n\n` +
+                            `• Questa azione cambierà lo stato in "Annullata"\n` +
+                            `• L'operazione NON può essere annullata\n` +
+                            `• La richiesta non sarà più gestibile\n\n` +
+                            `Clicca nuovamente "Annulla Richiesta" per confermare, o "Pulisci Form" per annullare.`,
+                            'warning');
 
-                    if (!conferma) {
-                        showResponse('annullaResponse', '🚫 Annullamento richiesta cancellato dall\'utente', 'info');
-                        return;
-                    }
+                    // Cambia il pulsante per la conferma
+                    const btnAnnulla = document.getElementById('annullaBtn');
+                    const testoOriginale = btnAnnulla.innerHTML;
+                    btnAnnulla.innerHTML = '⚠️ CONFERMA ANNULLAMENTO';
+                    btnAnnulla.style.backgroundColor = '#ff6b35';
 
+                    // Sostituisci temporaneamente la funzione del pulsante
+                    btnAnnulla.onclick = async function () {
+                        // Ripristina il pulsante
+                        btnAnnulla.innerHTML = testoOriginale;
+                        btnAnnulla.style.backgroundColor = '#dc3545';
+                        btnAnnulla.onclick = annullaRichiesta;
+
+                        // Procedi con l'annullamento
+                        await eseguiAnnullamento(richiestaId);
+                    };
+                }
+
+                // Esegue effettivamente l'annullamento
+                async function eseguiAnnullamento(richiestaId) {
                     showResponse('annullaResponse', 'Annullamento richiesta in corso...', 'info');
 
                     try {
@@ -1738,43 +1759,39 @@
 
                         if (result.ok) {
                             const response = result.data;
-
                             let message = `✅ ${response.message}\n\n`;
-                            message += `📋 Dettagli operazione:\n`;
-                            message += `• ID Richiesta: ${response.richiesta.codice}\n`;
-                            message += `• Stato precedente: ${response.statoOriginale}\n`;
-                            message += `• Stato attuale: ${response.richiesta.stato}\n`;
-                            message += `• Segnalante: ${response.richiesta.nomeSegnalante}\n`;
-                            message += `• Email: ${response.richiesta.emailSegnalante}\n`;
-                            message += `• Indirizzo: ${response.richiesta.indirizzo}\n`;
-                            message += `• Annullata da Admin ID: ${response.adminId}\n`;
-                            message += `• Descrizione: ${response.richiesta.descrizione.substring(0, 100)}${response.richiesta.descrizione.length > 100 ? '...' : ''}\n`;
+
+                            if (response.richiesta) {
+                                message += `📋 Dettagli richiesta annullata:\n`;
+                                message += `• ID: ${response.richiesta.codice}\n`;
+                                message += `• Descrizione: ${response.richiesta.descrizione || 'N/A'}\n`;
+                                message += `• Stato precedente: ${response.statoOriginale}\n`;
+                                message += `• Nuovo stato: ${response.richiesta.stato}\n`;
+
+                                if (response.richiesta.nomeSegnalante) {
+                                    message += `• Segnalante: ${response.richiesta.nomeSegnalante}\n`;
+                                }
+                            }
 
                             showResponse('annullaResponse', message, 'success');
 
-                            // Pulisci il form dopo il successo
-                            clearAnnullaForm();
+                            // Pulisci il form dopo successo
+                            document.getElementById('annullaRichiestaId').value = '';
 
                         } else {
-                            let errorMessage = `❌ Errore nell'annullamento: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
+                            // Messaggi di errore
+                            let errorMessage;
 
-                            // Gestione errori specifici
                             if (result.status === 400) {
-                                if (result.data.error === 'ALREADY_CANCELLED') {
-                                    errorMessage = '⚠️ La richiesta è già stata annullata in precedenza';
-                                } else if (result.data.error === 'CANNOT_CANCEL_CLOSED') {
-                                    errorMessage = '❌ Non è possibile annullare una richiesta già chiusa';
-                                } else if (result.data.error === 'HAS_ACTIVE_MISSIONS') {
-                                    errorMessage = '❌ La richiesta ha missioni attive. Chiudi prima le missioni associate.';
-                                } else {
-                                    errorMessage = `❌ Richiesta non valida: ${result.data.message || 'Controlla l\'ID inserito'}`;
-                                }
+                                errorMessage = `❌ ${result.data.message || result.data.error || 'Richiesta non valida'}`;
                             } else if (result.status === 401) {
                                 errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
                             } else if (result.status === 403) {
                                 errorMessage = '❌ Accesso negato. Solo gli amministratori possono annullare richieste.';
                             } else if (result.status === 404) {
                                 errorMessage = '❌ Richiesta non trovata. Verifica l\'ID inserito.';
+                            } else {
+                                errorMessage = `❌ Errore del server: ${result.data.message || result.data.error || 'Errore sconosciuto'}`;
                             }
 
                             showResponse('annullaResponse', errorMessage, 'error');
@@ -1784,22 +1801,19 @@
                     }
                 }
 
+
                 function clearAnnullaForm() {
                     document.getElementById('annullaRichiestaId').value = '';
+
+                    // Ripristina il pulsante se era in stato di conferma
+                    const btnAnnulla = document.getElementById('annullaBtn');
+                    btnAnnulla.innerHTML = '❌ Annulla Richiesta';
+                    btnAnnulla.style.backgroundColor = '#dc3545';
+                    btnAnnulla.onclick = annullaRichiesta;
+
                     showResponse('annullaResponse', 'Form pulito. Inserisci l\'ID della richiesta da annullare.', 'info');
                 }
 
-                function fillAnnullaExample() {
-                    document.getElementById('annullaRichiestaId').value = '1';
-                    showResponse('annullaResponse',
-                            '📋 Form riempito con dati di esempio.\n\n' +
-                            '⚠️ IMPORTANTE: Questo è solo un esempio!\n' +
-                            '• L\'ID deve corrispondere a una richiesta reale\n' +
-                            '• La richiesta deve essere in uno stato annullabile\n' +
-                            '• L\'annullamento è irreversibile\n' +
-                            '• Solo gli amministratori possono eseguire questa operazione',
-                            'info');
-                }
             </script>
         </body>
     </html>
