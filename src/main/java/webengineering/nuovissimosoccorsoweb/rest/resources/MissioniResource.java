@@ -34,6 +34,8 @@ import webengineering.nuovissimosoccorsoweb.model.PartecipazioneSquadra;
 import webengineering.nuovissimosoccorsoweb.rest.dto.DettagliMissioneDTO;
 import webengineering.nuovissimosoccorsoweb.rest.dto.MaterialeAssegnatoDTO;
 import webengineering.nuovissimosoccorsoweb.rest.dto.MezzoAssegnatoDTO;
+import webengineering.nuovissimosoccorsoweb.rest.dto.MissioneOperatoreDTO;
+import webengineering.nuovissimosoccorsoweb.rest.dto.MissioniOperatoreResponse;
 import webengineering.nuovissimosoccorsoweb.rest.dto.OperatoreAssegnatoDTO;
 import webengineering.nuovissimosoccorsoweb.rest.dto.ValutazioneMissioneDTO;
 
@@ -616,6 +618,157 @@ public class MissioniResource {
         return dettagli;
     }
 
+    /**
+     * Lista delle missioni in cui un operatore è stato coinvolto. GET
+     * /api/missioni/operatore/{idOperatore}
+     *
+     * Richiede autenticazione: solo ADMIN può vedere le missioni degli
+     * operatori
+     *
+     * @param idOperatore ID dell'operatore
+     * @return Lista delle missioni con dettagli
+     */
+    @GET
+    @Path("operatore/{idOperatore}")
+    @Secured
+    public Response getMissioniOperatore(@PathParam("idOperatore") int idOperatore) {
+        SoccorsoDataLayer dataLayer = null;
+
+        try {
+            logger.info("=== LISTA MISSIONI OPERATORE " + idOperatore + " ===");
+
+            // Verifica ruolo admin (dal token JWT)
+            String userRole = (String) requestContext.getProperty("userRole");
+            if (!"ADMIN".equals(userRole) && !"admin".equals(userRole)) {
+                return Response.status(Response.Status.FORBIDDEN)
+                        .entity(new ErrorResponse("Accesso negato. Solo gli admin possono vedere le missioni degli operatori.", "ACCESS_DENIED"))
+                        .build();
+            }
+
+            // Validazione input
+            if (idOperatore <= 0) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(new ErrorResponse("ID operatore non valido", "VALIDATION_ERROR"))
+                        .build();
+            }
+
+            // Ottieni il DataLayer
+            dataLayer = createDataLayer();
+
+            // Verifica che l'operatore esista
+            Operatore operatore = dataLayer.getOperatoreDAO().getOperatoreById(idOperatore);
+            if (operatore == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(new ErrorResponse("Operatore non trovato", "OPERATORE_NOT_FOUND"))
+                        .build();
+            }
+
+            // ✅ USA IL METODO ESISTENTE del MissioneDAO
+            List<Missione> missioni = dataLayer.getMissioneDAO().getMissioniByOperatore(idOperatore);
+
+            // Converte in DTO con dettagli aggiuntivi
+            List<MissioneOperatoreDTO> missioniDTO = new ArrayList<>();
+            for (Missione missione : missioni) {
+                missioniDTO.add(creaMissioneOperatoreDTO(dataLayer, missione, idOperatore));
+            }
+
+            // Crea risposta
+            MissioniOperatoreResponse response = new MissioniOperatoreResponse(
+                    operatore.getId(),
+                    operatore.getNome() + " " + operatore.getCognome(),
+                    operatore.getEmail(),
+                    missioniDTO,
+                    missioniDTO.size()
+            );
+
+            logger.info("Restituite " + missioniDTO.size() + " missioni per operatore "
+                    + operatore.getNome() + " " + operatore.getCognome());
+
+            return Response.ok(response).build();
+
+        } catch (DataException ex) {
+            logger.log(Level.SEVERE, "Errore database recupero missioni operatore " + idOperatore, ex);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorResponse("Errore nel database", "DATABASE_ERROR"))
+                    .build();
+
+        } catch (Exception ex) {
+            logger.log(Level.SEVERE, "Errore generico recupero missioni operatore " + idOperatore, ex);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorResponse("Errore interno del server", "INTERNAL_ERROR"))
+                    .build();
+
+        } finally {
+            if (dataLayer != null) {
+                dataLayer.destroy();
+            }
+        }
+    }
+
+    /**
+     * Crea un DTO con le informazioni di una missione per un operatore
+     * specifico.
+     */
+    private MissioneOperatoreDTO creaMissioneOperatoreDTO(SoccorsoDataLayer dataLayer, Missione missione, int idOperatore) throws DataException {
+        MissioneOperatoreDTO dto = new MissioneOperatoreDTO();
+
+        // Dati base della missione
+        dto.setId(missione.getCodiceRichiesta());
+        dto.setNome(missione.getNome());
+        dto.setPosizione(missione.getPosizione());
+        dto.setObiettivo(missione.getObiettivo());
+        dto.setDataOraInizio(missione.getDataOraInizio().toString());
+
+        // Trova il ruolo dell'operatore in questa missione
+        try {
+            List<PartecipazioneSquadra> squadra = dataLayer.getMissioneDAO().getSquadraByMissione(missione.getCodiceRichiesta());
+            String ruolo = "Standard"; // Default
+
+            for (PartecipazioneSquadra partecipazione : squadra) {
+                if (partecipazione.getIdOperatore() == idOperatore) {
+                    ruolo = partecipazione.getRuolo().toString();
+                    break;
+                }
+            }
+            dto.setRuoloOperatore(ruolo);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Errore recupero ruolo operatore " + idOperatore + " in missione " + missione.getCodiceRichiesta(), e);
+            dto.setRuoloOperatore("Standard");
+        }
+
+        // Stato della missione (conclusa o attiva)
+        try {
+            InfoMissione infoMissione = dataLayer.getInfoMissioneDAO().getInfoByCodiceMissione(missione.getCodiceRichiesta());
+            if (infoMissione != null) {
+                dto.setStato("CONCLUSA");
+                dto.setDataOraFine(infoMissione.getDataOraFine().toString());
+                dto.setLivelloSuccesso(infoMissione.getSuccesso());
+            } else {
+                dto.setStato("ATTIVA");
+                dto.setDataOraFine(null);
+                dto.setLivelloSuccesso(0);
+            }
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Errore recupero info missione " + missione.getCodiceRichiesta(), e);
+            dto.setStato("ATTIVA");
+            dto.setDataOraFine(null);
+            dto.setLivelloSuccesso(0);
+        }
+
+        // Informazioni richiesta associata
+        try {
+            RichiestaSoccorso richiesta = dataLayer.getRichiestaSoccorsoDAO().getRichiestaByCodice(missione.getCodiceRichiesta());
+            if (richiesta != null) {
+                dto.setDescrizioneRichiesta(richiesta.getDescrizione());
+                dto.setIndirizzoIntervento(richiesta.getIndirizzo());
+            }
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Errore recupero richiesta per missione " + missione.getCodiceRichiesta(), e);
+        }
+
+        return dto;
+    }
+
     // === METODI HELPER ===
     /**
      * Classe helper per operatori con ruolo.
@@ -653,16 +806,12 @@ public class MissioniResource {
     /**
      * Crea il DataLayer per l'accesso al database.
      */
-    /**
-     * Crea il DataLayer per l'accesso al database. AGGIORNATO: Aggiunge la
-     * chiamata a init() per inizializzare i DAO.
-     */
     private SoccorsoDataLayer createDataLayer() throws Exception {
         try {
             InitialContext ctx = new InitialContext();
             DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/soccorso");
             SoccorsoDataLayer dataLayer = new SoccorsoDataLayer(ds);
-            dataLayer.init(); // QUESTO ERA MANCANTE!
+            dataLayer.init();
             return dataLayer;
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Errore nella creazione del DataLayer", e);

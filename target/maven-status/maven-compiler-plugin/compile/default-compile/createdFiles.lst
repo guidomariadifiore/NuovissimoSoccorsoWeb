@@ -62,7 +62,9 @@ webengineering\nuovissimosoccorsoweb\controller\AdminNuovoMaterialeController.cl
 webengineering\nuovissimosoccorsoweb\rest\dto\ErrorResponse.class
 webengineering\nuovissimosoccorsoweb\dao\impl\MaterialeDAO_MySQL.class
 webengineering\nuovissimosoccorsoweb\dao\MaterialeDAO.class
+webengineering\nuovissimosoccorsoweb\rest\dto\MissioniOperatoreResponse.class
 webengineering\nuovissimosoccorsoweb\rest\dto\RichiestaDTO.class
+webengineering\nuovissimosoccorsoweb\rest\dto\MissioneOperatoreDTO.class
 webengineering\nuovissimosoccorsoweb\controller\RichiesteListController.class
 webengineering\nuovissimosoccorsoweb\dao\impl\PatenteDAO_MySQL.class
 webengineering\nuovissimosoccorsoweb\controller\AdminNuovoMaterialeController$ValidationResult.class

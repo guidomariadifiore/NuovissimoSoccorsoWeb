@@ -491,8 +491,7 @@
                 </div>
             </div>
 
-            <!-- Sezione 7: Creazione Missione (AGGIORNATA) -->
-            <!-- Sezione 7: Creazione Missione (AGGIORNATA - sempre visibile per admin) -->
+            <!-- Sezione 7: Creazione Missione -->
             <div class="section">
                 <h2>🎯 7. Creazione Missione</h2>
 
@@ -637,222 +636,259 @@
 
                 <div class="response-area" id="annullaResponse">
                     Effettua il login come amministratore per annullare richieste...
-                </div>
-                <!-- Sezione 10: Dettagli Missione -->
-                <div class="section">
-                    <h2>📋 10. Dettagli di una Missione (Solo Admin)</h2>
-
-                    <div class="form-group">
-                        <label for="dettagliMissioneId">ID Missione:</label>
-                        <input type="number" id="dettagliMissioneId" min="1" placeholder="Inserisci l'ID della missione">
-                        <small style="color: #666;">Visualizza tutti i dettagli di una missione specifica</small>
-                    </div>
-
-                    <div class="info-box">
-                        <h5>📋 Informazioni incluse nei dettagli:</h5>
-                        <ul style="margin: 0;
-                            padding-left: 20px;
-                            font-size: 14px;
-                            color: #0c5460;">
-                            <li><strong>Dati base:</strong> Nome, posizione, obiettivo, note, date</li>
-                            <li><strong>Richiesta associata:</strong> Dettagli della richiesta di soccorso originale</li>
-                            <li><strong>Team:</strong> Operatori assegnati con i loro ruoli (Caposquadra/Standard)</li>
-                            <li><strong>Risorse:</strong> Mezzi e materiali utilizzati</li>
-                            <li><strong>Valutazione:</strong> Livello di successo e commenti (se conclusa)</li>
-                        </ul>
-                    </div>
-
-                    <div class="button-row">
-                        <button onclick="getDettagliMissione()" id="dettagliMissioneBtn" disabled style="background-color: #007bff;">
-                            📋 Visualizza Dettagli
-                        </button>
-                        <button onclick="clearDettagliMissioneForm()">🧹 Pulisci Form</button>
-                        <button onclick="fillDettagliMissioneExample()">📋 Esempio</button>
-                    </div>
-
-                    <div class="response-area" id="dettagliMissioneResponse">
-                        Effettua il login come amministratore per visualizzare i dettagli delle missioni...
-                    </div>
-                </div>
-
-                <script>
-                    // === FUNZIONI DETTAGLI MISSIONE ===
-
-                    async function getDettagliMissione() {
-                        if (!authToken) {
-                            showResponse('dettagliMissioneResponse', 'Devi prima effettuare il login', 'error');
-                            return;
-                        }
-
-                        const missioneId = parseInt(document.getElementById('dettagliMissioneId').value);
-
-                        if (!missioneId || missioneId <= 0) {
-                            showResponse('dettagliMissioneResponse', '❌ Inserisci un ID missione valido', 'error');
-                            return;
-                        }
-
-                        showResponse('dettagliMissioneResponse', 'Caricamento dettagli missione...', 'info');
-
-                        try {
-                            const result = await apiCall(`/missioni/${missioneId}`, {
-                                method: 'GET'
-                            });
-
-                            if (result.ok) {
-                                const dettagli = result.data;
-
-                                let response = `✅ Dettagli Missione ${dettagli.id}\n\n`;
-
-                                // Dati base
-                                response += `📊 INFORMAZIONI GENERALI:\n`;
-                                response += `• Nome: ${dettagli.nome}\n`;
-                                response += `• Posizione: ${dettagli.posizione}\n`;
-                                response += `• Obiettivo: ${dettagli.obiettivo}\n`;
-                                response += `• Stato: ${dettagli.stato}\n`;
-                                response += `• Admin ID: ${dettagli.idAmministratore}\n`;
-                                response += `• Data Inizio: ${formatDateTime(dettagli.dataOraInizio)}\n`;
-
-                                if (dettagli.dataOraFine) {
-                                    response += `• Data Fine: ${formatDateTime(dettagli.dataOraFine)}\n`;
-                                }
-
-                                if (dettagli.note && dettagli.note.trim()) {
-                                    response += `• Note: ${dettagli.note}\n`;
-                                }
-
-                                // Richiesta associata
-                                if (dettagli.richiesta) {
-                                    response += `\n🆘 RICHIESTA DI SOCCORSO (#${dettagli.richiesta.codice}):\n`;
-                                    response += `• Descrizione: ${dettagli.richiesta.descrizione}\n`;
-                                    response += `• Indirizzo: ${dettagli.richiesta.indirizzo}\n`;
-                                    response += `• Stato: ${dettagli.richiesta.stato}\n`;
-                                    response += `• Segnalante: ${dettagli.richiesta.nomeSegnalante}\n`;
-                                    response += `• Email: ${dettagli.richiesta.emailSegnalante}\n`;
-                                    if (dettagli.richiesta.telefono) {
-                                        response += `• Telefono: ${dettagli.richiesta.telefono}\n`;
-                                    }
-                                    response += `• Data Inserimento: ${formatDateTime(dettagli.richiesta.dataOraInserimento)}\n`;
-                                }
-
-                                // Team operatori
-                                if (dettagli.operatori && dettagli.operatori.length > 0) {
-                                    response += `\n👥 TEAM OPERATORI (${dettagli.operatori.length}):\n`;
-                                    dettagli.operatori.forEach(op => {
-                                        response += `• ${op.nomeCompleto || (op.nome + ' ' + op.cognome)} - ${op.ruolo}\n`;
-                                        if (op.email) {
-                                            response += `  📧 ${op.email}\n`;
-                                        }
-                                    });
-                                }
-
-                                // Mezzi
-                                if (dettagli.mezzi && dettagli.mezzi.length > 0) {
-                                    response += `\n🚗 MEZZI ASSEGNATI (${dettagli.mezzi.length}):\n`;
-                                    dettagli.mezzi.forEach(mezzo => {
-                                        response += `• Targa: ${mezzo.targa}`;
-                                        if (mezzo.tipo && mezzo.tipo !== 'N/A') {
-                                            response += ` - Tipo: ${mezzo.tipo}`;
-                                        }
-                                        if (mezzo.modello && mezzo.modello !== 'N/A') {
-                                            response += ` - Modello: ${mezzo.modello}`;
-                                        }
-                                        response += `\n`;
-                                    });
-                                }
-
-                                // Materiali
-                                if (dettagli.materiali && dettagli.materiali.length > 0) {
-                                    response += `\n📦 MATERIALI UTILIZZATI (${dettagli.materiali.length}):\n`;
-                                    dettagli.materiali.forEach(mat => {
-                                        response += `• ${mat.nome || ('Materiale ID: ' + mat.id)}`;
-                                        if (mat.quantita && mat.quantita > 1) {
-                                            response += ` (Quantità: ${mat.quantita})`;
-                                        }
-                                        response += `\n`;
-                                    });
-                                }
-
-                                // Valutazione (se conclusa)
-                                if (dettagli.valutazione) {
-                                    response += `\n⭐ VALUTAZIONE FINALE:\n`;
-                                    response += `• Livello di Successo: ${dettagli.valutazione.successo}/10\n`;
-                                    if (dettagli.valutazione.commento && dettagli.valutazione.commento.trim()) {
-                                        response += `• Commento: ${dettagli.valutazione.commento}\n`;
-                                    }
-                                    response += `• Data Valutazione: ${formatDateTime(dettagli.valutazione.dataOraFine)}\n`;
-
-                                    // Interpretazione del livello di successo
-                                    let interpretazione = '';
-                                    if (dettagli.valutazione.successo >= 9)
-                                        interpretazione = '🌟 Eccellente';
-                                    else if (dettagli.valutazione.successo >= 7)
-                                        interpretazione = '✅ Buono';
-                                    else if (dettagli.valutazione.successo >= 5)
-                                        interpretazione = '⚠️ Sufficiente';
-                                    else
-                                        interpretazione = '❌ Insufficiente';
-
-                                    response += `• Interpretazione: ${interpretazione}\n`;
-                                }
-
-                                showResponse('dettagliMissioneResponse', response, 'success');
-
-                            } else {
-                                let errorMessage = `❌ Errore nel caricamento: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
-
-                                if (result.status === 404) {
-                                    errorMessage = '❌ Missione non trovata. Verifica l\'ID inserito.';
-                                } else if (result.status === 401) {
-                                    errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
-                                } else if (result.status === 403) {
-                                    errorMessage = '❌ Accesso negato. Solo gli amministratori possono visualizzare i dettagli delle missioni.';
-                                }
-
-                                showResponse('dettagliMissioneResponse', errorMessage, 'error');
-                            }
-                        } catch (error) {
-                            showResponse('dettagliMissioneResponse', `❌ Errore di rete: ${error.message}`, 'error');
-                        }
-                    }
-
-                    function clearDettagliMissioneForm() {
-                        document.getElementById('dettagliMissioneId').value = '';
-                        showResponse('dettagliMissioneResponse', 'Form pulito. Inserisci l\'ID della missione da visualizzare.', 'info');
-                    }
-
-                    function fillDettagliMissioneExample() {
-                        document.getElementById('dettagliMissioneId').value = '1';
-                        showResponse('dettagliMissioneResponse',
-                                '📋 Form riempito con dati di esempio.\n\n' +
-                                '💡 SUGGERIMENTO:\n' +
-                                '• L\'ID deve corrispondere a una missione esistente\n' +
-                                '• Solo gli amministratori possono visualizzare i dettagli\n' +
-                                '• I dettagli includono team, mezzi, materiali e valutazione\n' +
-                                '• Se la missione è conclusa, vedrai anche la valutazione finale',
-                                'info');
-                    }
-
-                    // Funzione di utilità per formattare date/ore
-                    function formatDateTime(dateTimeString) {
-                        if (!dateTimeString)
-                            return 'N/A';
-
-                        try {
-                            const date = new Date(dateTimeString);
-                            return date.toLocaleString('it-IT', {
-                                year: 'numeric',
-                                month: '2-digit',
-                                day: '2-digit',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                                second: '2-digit'
-                            });
-                        } catch (e) {
-                            return dateTimeString; // Fallback se il parsing fallisce
-                        }
-                    }
-                </script>
+                </div>                
             </div>
+
+            <!-- Sezione 10: Dettagli Missione -->
+            <div class="section">
+                <h2>📋 10. Dettagli di una Missione (Solo Admin)</h2>
+
+                <div class="form-group">
+                    <label for="dettagliMissioneId">ID Missione:</label>
+                    <input type="number" id="dettagliMissioneId" min="1" placeholder="Inserisci l'ID della missione">
+                    <small style="color: #666;">Visualizza tutti i dettagli di una missione specifica</small>
+                </div>
+
+                <div class="info-box">
+                    <h5>📋 Informazioni incluse nei dettagli:</h5>
+                    <ul style="margin: 0;
+                        padding-left: 20px;
+                        font-size: 14px;
+                        color: #0c5460;">
+                        <li><strong>Dati base:</strong> Nome, posizione, obiettivo, note, date</li>
+                        <li><strong>Richiesta associata:</strong> Dettagli della richiesta di soccorso originale</li>
+                        <li><strong>Team:</strong> Operatori assegnati con i loro ruoli (Caposquadra/Standard)</li>
+                        <li><strong>Risorse:</strong> Mezzi e materiali utilizzati</li>
+                        <li><strong>Valutazione:</strong> Livello di successo e commenti (se conclusa)</li>
+                    </ul>
+                </div>
+
+                <div class="button-row">
+                    <button onclick="getDettagliMissione()" id="dettagliMissioneBtn" disabled style="background-color: #007bff;">
+                        📋 Visualizza Dettagli
+                    </button>
+                    <button onclick="clearDettagliMissioneForm()">🧹 Pulisci Form</button>
+                    <button onclick="fillDettagliMissioneExample()">📋 Esempio</button>
+                </div>
+
+                <div class="response-area" id="dettagliMissioneResponse">
+                    Effettua il login come amministratore per visualizzare i dettagli delle missioni...
+                </div>
+            </div>
+
+            <!-- Sezione 13 Lista Missioni Operatore -->
+            <div class="section">
+                <h2>👨‍🚒 13. Lista delle Missioni in cui un Operatore è stato coinvolto (Solo Admin)</h2>
+
+                <div class="form-group">
+                    <label for="missioniOperatoreId">ID Operatore:</label>
+                    <input type="number" id="missioniOperatoreId" min="1" placeholder="Inserisci l'ID dell'operatore">
+                    <small style="color: #666;">Visualizza tutte le missioni (passate e attuali) di un operatore</small>
+                </div>
+
+                <div class="info-box">
+                    <h5>📋 Informazioni incluse per ogni missione:</h5>
+                    <ul style="margin: 0;
+                        padding-left: 20px;
+                        font-size: 14px;
+                        color: #0c5460;">
+                        <li><strong>Dati missione:</strong> Nome, posizione, obiettivo, date</li>
+                        <li><strong>Ruolo operatore:</strong> Caposquadra o Standard</li>
+                        <li><strong>Stato:</strong> Attiva o Conclusa</li>
+                        <li><strong>Livello successo:</strong> Valutazione finale (se conclusa)</li>
+                        <li><strong>Richiesta:</strong> Descrizione e indirizzo dell'intervento</li>
+                    </ul>
+                </div>
+
+                <div class="button-row">
+                    <button onclick="getMissioniOperatore()" id="missioni13Btn" disabled style="background-color: #6f42c1;">
+                        📋 Carica Missioni Operatore
+                    </button>
+                    <button onclick="clearMissioniOperatoreForm()">🧹 Pulisci Form</button>
+                </div>
+
+                <div class="response-area" id="missioniOperatoreResponse">
+                    Effettua il login come amministratore per visualizzare le missioni degli operatori...
+                </div>
+            </div>
+
+            <script>
+                // === FUNZIONI DETTAGLI MISSIONE ===
+
+                async function getDettagliMissione() {
+                    if (!authToken) {
+                        showResponse('dettagliMissioneResponse', 'Devi prima effettuare il login', 'error');
+                        return;
+                    }
+
+                    const missioneId = parseInt(document.getElementById('dettagliMissioneId').value);
+
+                    if (!missioneId || missioneId <= 0) {
+                        showResponse('dettagliMissioneResponse', '❌ Inserisci un ID missione valido', 'error');
+                        return;
+                    }
+
+                    showResponse('dettagliMissioneResponse', 'Caricamento dettagli missione...', 'info');
+
+                    try {
+                        const result = await apiCall(`/missioni/${missioneId}`, {
+                            method: 'GET'
+                        });
+
+                        if (result.ok) {
+                            const dettagli = result.data;
+
+                            let response = `✅ Dettagli Missione ${dettagli.id}\n\n`;
+
+                            // Dati base
+                            response += `📊 INFORMAZIONI GENERALI:\n`;
+                            response += `• Nome: ${dettagli.nome}\n`;
+                            response += `• Posizione: ${dettagli.posizione}\n`;
+                            response += `• Obiettivo: ${dettagli.obiettivo}\n`;
+                            response += `• Stato: ${dettagli.stato}\n`;
+                            response += `• Admin ID: ${dettagli.idAmministratore}\n`;
+                            response += `• Data Inizio: ${formatDateTime(dettagli.dataOraInizio)}\n`;
+
+                            if (dettagli.dataOraFine) {
+                                response += `• Data Fine: ${formatDateTime(dettagli.dataOraFine)}\n`;
+                            }
+
+                            if (dettagli.note && dettagli.note.trim()) {
+                                response += `• Note: ${dettagli.note}\n`;
+                            }
+
+                            // Richiesta associata
+                            if (dettagli.richiesta) {
+                                response += `\n🆘 RICHIESTA DI SOCCORSO (#${dettagli.richiesta.codice}):\n`;
+                                response += `• Descrizione: ${dettagli.richiesta.descrizione}\n`;
+                                response += `• Indirizzo: ${dettagli.richiesta.indirizzo}\n`;
+                                response += `• Stato: ${dettagli.richiesta.stato}\n`;
+                                response += `• Segnalante: ${dettagli.richiesta.nomeSegnalante}\n`;
+                                response += `• Email: ${dettagli.richiesta.emailSegnalante}\n`;
+                                if (dettagli.richiesta.telefono) {
+                                    response += `• Telefono: ${dettagli.richiesta.telefono}\n`;
+                                }
+                                response += `• Data Inserimento: ${formatDateTime(dettagli.richiesta.dataOraInserimento)}\n`;
+                            }
+
+                            // Team operatori
+                            if (dettagli.operatori && dettagli.operatori.length > 0) {
+                                response += `\n👥 TEAM OPERATORI (${dettagli.operatori.length}):\n`;
+                                dettagli.operatori.forEach(op => {
+                                    response += `• ${op.nomeCompleto || (op.nome + ' ' + op.cognome)} - ${op.ruolo}\n`;
+                                    if (op.email) {
+                                        response += `  📧 ${op.email}\n`;
+                                    }
+                                });
+                            }
+
+                            // Mezzi
+                            if (dettagli.mezzi && dettagli.mezzi.length > 0) {
+                                response += `\n🚗 MEZZI ASSEGNATI (${dettagli.mezzi.length}):\n`;
+                                dettagli.mezzi.forEach(mezzo => {
+                                    response += `• Targa: ${mezzo.targa}`;
+                                    if (mezzo.tipo && mezzo.tipo !== 'N/A') {
+                                        response += ` - Tipo: ${mezzo.tipo}`;
+                                    }
+                                    if (mezzo.modello && mezzo.modello !== 'N/A') {
+                                        response += ` - Modello: ${mezzo.modello}`;
+                                    }
+                                    response += `\n`;
+                                });
+                            }
+
+                            // Materiali
+                            if (dettagli.materiali && dettagli.materiali.length > 0) {
+                                response += `\n📦 MATERIALI UTILIZZATI (${dettagli.materiali.length}):\n`;
+                                dettagli.materiali.forEach(mat => {
+                                    response += `• ${mat.nome || ('Materiale ID: ' + mat.id)}`;
+                                    if (mat.quantita && mat.quantita > 1) {
+                                        response += ` (Quantità: ${mat.quantita})`;
+                                    }
+                                    response += `\n`;
+                                });
+                            }
+
+                            // Valutazione (se conclusa)
+                            if (dettagli.valutazione) {
+                                response += `\n⭐ VALUTAZIONE FINALE:\n`;
+                                response += `• Livello di Successo: ${dettagli.valutazione.successo}/10\n`;
+                                if (dettagli.valutazione.commento && dettagli.valutazione.commento.trim()) {
+                                    response += `• Commento: ${dettagli.valutazione.commento}\n`;
+                                }
+                                response += `• Data Valutazione: ${formatDateTime(dettagli.valutazione.dataOraFine)}\n`;
+
+                                // Interpretazione del livello di successo
+                                let interpretazione = '';
+                                if (dettagli.valutazione.successo >= 9)
+                                    interpretazione = '🌟 Eccellente';
+                                else if (dettagli.valutazione.successo >= 7)
+                                    interpretazione = '✅ Buono';
+                                else if (dettagli.valutazione.successo >= 5)
+                                    interpretazione = '⚠️ Sufficiente';
+                                else
+                                    interpretazione = '❌ Insufficiente';
+
+                                response += `• Interpretazione: ${interpretazione}\n`;
+                            }
+
+                            showResponse('dettagliMissioneResponse', response, 'success');
+
+                        } else {
+                            let errorMessage = `❌ Errore nel caricamento: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
+
+                            if (result.status === 404) {
+                                errorMessage = '❌ Missione non trovata. Verifica l\'ID inserito.';
+                            } else if (result.status === 401) {
+                                errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
+                            } else if (result.status === 403) {
+                                errorMessage = '❌ Accesso negato. Solo gli amministratori possono visualizzare i dettagli delle missioni.';
+                            }
+
+                            showResponse('dettagliMissioneResponse', errorMessage, 'error');
+                        }
+                    } catch (error) {
+                        showResponse('dettagliMissioneResponse', `❌ Errore di rete: ${error.message}`, 'error');
+                    }
+                }
+
+                function clearDettagliMissioneForm() {
+                    document.getElementById('dettagliMissioneId').value = '';
+                    showResponse('dettagliMissioneResponse', 'Form pulito. Inserisci l\'ID della missione da visualizzare.', 'info');
+                }
+
+                function fillDettagliMissioneExample() {
+                    document.getElementById('dettagliMissioneId').value = '1';
+                    showResponse('dettagliMissioneResponse',
+                            '📋 Form riempito con dati di esempio.\n\n' +
+                            '💡 SUGGERIMENTO:\n' +
+                            '• L\'ID deve corrispondere a una missione esistente\n' +
+                            '• Solo gli amministratori possono visualizzare i dettagli\n' +
+                            '• I dettagli includono team, mezzi, materiali e valutazione\n' +
+                            '• Se la missione è conclusa, vedrai anche la valutazione finale',
+                            'info');
+                }
+
+                // Funzione di utilità per formattare date/ore
+                function formatDateTime(dateTimeString) {
+                    if (!dateTimeString)
+                        return 'N/A';
+
+                    try {
+                        const date = new Date(dateTimeString);
+                        return date.toLocaleString('it-IT', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit'
+                        });
+                    } catch (e) {
+                        return dateTimeString; // Fallback se il parsing fallisce
+                    }
+                }
+            </script>
             <!-- Sezione Test Vari -->
             <div class="section">
                 <h2>🧪 Test Vari</h2>
@@ -1048,7 +1084,7 @@
                 }
 
                 // Aggiorna la lista dei pulsanti che devono essere abilitati/disabilitati
-// in base allo stato di autenticazione
+                // in base allo stato di autenticazione
                 function updateAuthUI(isAuthenticated, currentUser) {
                     const statusElement = document.getElementById('authStatus');
 
@@ -1813,6 +1849,115 @@
 
                     showResponse('annullaResponse', 'Form pulito. Inserisci l\'ID della richiesta da annullare.', 'info');
                 }
+
+                async function getMissioniOperatore() {
+                    if (!authToken) {
+                        showResponse('missioniOperatoreResponse', 'Devi prima effettuare il login come amministratore', 'error');
+                        return;
+                    }
+
+                    const operatoreId = parseInt(document.getElementById('missioniOperatoreId').value);
+
+                    // Validazione input
+                    if (!operatoreId || operatoreId <= 0) {
+                        showResponse('missioniOperatoreResponse', '❌ Inserisci un ID operatore valido', 'error');
+                        return;
+                    }
+
+                    showResponse('missioniOperatoreResponse', 'Caricamento missioni operatore...', 'info');
+
+                    try {
+                        const result = await apiCall(`/missioni/operatore/${operatoreId}`, {
+                            method: 'GET'
+                        });
+
+                        if (result.ok) {
+                            const data = result.data;
+
+                            if (data.missioni.length === 0) {
+                                showResponse('missioniOperatoreResponse',
+                                        `📭 Nessuna missione trovata\n\n` +
+                                        `L'operatore ${data.nomeOperatore} (ID: ${data.operatoreId}) non ha partecipato ad alcuna missione.`,
+                                        'info');
+                                return;
+                            }
+
+                            let response = `👨‍🚒 MISSIONI DI ${data.nomeOperatore.toUpperCase()}\n\n`;
+                            response += `📧 Email: ${data.emailOperatore}\n`;
+                            response += `🎯 Totale missioni: ${data.totaleMissioni}\n\n`;
+
+                            // Raggruppa per stato
+                            const missioniAttive = data.missioni.filter(m => m.stato === 'ATTIVA');
+                            const missioniConcluse = data.missioni.filter(m => m.stato === 'CONCLUSA');
+
+                            if (missioniAttive.length > 0) {
+                                response += `🔥 MISSIONI ATTIVE (${missioniAttive.length}):\n`;
+                                missioniAttive.forEach((missione, index) => {
+                                    response += `\n${index + 1}. ${missione.nome}\n`;
+                                    response += `   • Ruolo: ${missione.ruoloOperatore}\n`;
+                                    response += `   • Posizione: ${missione.posizione}\n`;
+                                    response += `   • Obiettivo: ${missione.obiettivo}\n`;
+                                    response += `   • Inizio: ${formatDateTime(missione.dataOraInizio)}\n`;
+                                    if (missione.indirizzoIntervento) {
+                                        response += `   • Indirizzo: ${missione.indirizzoIntervento}\n`;
+                                    }
+                                });
+                                response += `\n`;
+                            }
+
+                            if (missioniConcluse.length > 0) {
+                                response += `✅ MISSIONI CONCLUSE (${missioniConcluse.length}):\n`;
+                                missioniConcluse.forEach((missione, index) => {
+                                    response += `\n${index + 1}. ${missione.nome}\n`;
+                                    response += `   • Ruolo: ${missione.ruoloOperatore}\n`;
+                                    response += `   • Posizione: ${missione.posizione}\n`;
+                                    response += `   • Durata: ${formatDateTime(missione.dataOraInizio)} → ${formatDateTime(missione.dataOraFine)}\n`;
+
+                                    if (missione.livelloSuccesso > 0) {
+                                        let valutazione = '';
+                                        if (missione.livelloSuccesso >= 8)
+                                            valutazione = '🌟 Eccellente';
+                                        else if (missione.livelloSuccesso >= 6)
+                                            valutazione = '✅ Buono';
+                                        else if (missione.livelloSuccesso >= 4)
+                                            valutazione = '⚠️ Sufficiente';
+                                        else
+                                            valutazione = '❌ Insufficiente';
+
+                                        response += `   • Successo: ${missione.livelloSuccesso}/10 (${valutazione})\n`;
+                                    }
+
+                                    if (missione.indirizzoIntervento) {
+                                        response += `   • Indirizzo: ${missione.indirizzoIntervento}\n`;
+                                    }
+                                });
+                            }
+
+                            showResponse('missioniOperatoreResponse', response, 'success');
+
+                        } else {
+                            let errorMessage = `❌ Errore nel caricamento: ${result.data.message || result.data.error || 'Errore sconosciuto'}`;
+
+                            if (result.status === 404) {
+                                errorMessage = '❌ Operatore non trovato. Verifica l\'ID inserito.';
+                            } else if (result.status === 401) {
+                                errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
+                            } else if (result.status === 403) {
+                                errorMessage = '❌ Accesso negato. Solo gli amministratori possono visualizzare le missioni degli operatori.';
+                            }
+
+                            showResponse('missioniOperatoreResponse', errorMessage, 'error');
+                        }
+                    } catch (error) {
+                        showResponse('missioniOperatoreResponse', `❌ Errore di rete: ${error.message}`, 'error');
+                    }
+                }
+
+                function clearMissioniOperatoreForm() {
+                    document.getElementById('missioniOperatoreId').value = '';
+                    showResponse('missioniOperatoreResponse', 'Form pulito. Inserisci l\'ID dell\'operatore.', 'info');
+                }
+
 
             </script>
         </body>
