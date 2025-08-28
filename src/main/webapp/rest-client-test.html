@@ -445,7 +445,8 @@
                 </div>
 
                 <div class="button-row">
-                    <button onclick="doConvalida()" style="background-color: #28a745;display: none;">✅ Convalida Richiesta</button>
+                    <button onclick="doConvalida()" style="background-color: #28a745;
+                            display: none;">✅ Convalida Richiesta</button>
                     <button onclick="fillConvalidaExample()">📋 Esempio Dati</button>
                     <button onclick="clearConvalidaForm()">🧹 Pulisci Form</button>
                 </div>
@@ -497,7 +498,8 @@
                 <h2>👨‍🚒 6. Lista Operatori Attualmente Liberi</h2>
 
                 <div class="button-row">
-                    <button onclick="getOperatoriLiberiConDettagli()" id="operatoriBtn" disabled style="background-color: #28a745;display: none;">
+                    <button onclick="getOperatoriLiberiConDettagli()" id="operatoriBtn" disabled style="background-color: #28a745;
+                            display: none;">
                         👨‍🚒 Operatori Liberi
                     </button>
                 </div>
@@ -597,10 +599,12 @@
                     <!-- Pulsanti azione -->
 
                     <div class="button-row">
-                        <button onclick="creaMissione()" style="background-color: #28a745;display: none;">
+                        <button onclick="creaMissione()" style="background-color: #28a745;
+                                display: none;">
                             🚀 Crea Missione
                         </button>
-                        <button onclick="pulisciFormMissione()" style="background-color: #17a2b8;display: none;">
+                        <button onclick="pulisciFormMissione()" style="background-color: #17a2b8;
+                                display: none;">
                             🧹 Pulisci Form
                         </button>
                     </div>
@@ -658,7 +662,8 @@
                 </div>
 
                 <div class="button-row">
-                    <button onclick="annullaRichiesta()" id="annullaBtn" disabled style="background-color: #dc3545;display: none;">
+                    <button onclick="annullaRichiesta()" id="annullaBtn" disabled style="background-color: #dc3545;
+                            display: none;">
                         ❌ Annulla Richiesta
                     </button>
                     <button onclick="clearAnnullaForm()" style="display: none;">🧹 Pulisci Form</button>
@@ -694,7 +699,8 @@
                 </div>
 
                 <div class="button-row">
-                    <button onclick="getDettagliMissione()" id="dettagliMissioneBtn" disabled style="background-color: #007bff;display: none;">
+                    <button onclick="getDettagliMissione()" id="dettagliMissioneBtn" disabled style="background-color: #007bff;
+                            display: none;">
                         📋 Visualizza Dettagli
                     </button>
                     <button onclick="clearDettagliMissioneForm()" style="display: none;">🧹 Pulisci Form</button>
@@ -731,7 +737,8 @@
                 </div>
 
                 <div class="button-row">
-                    <button onclick="getDettagliRichiesta()" id="dettagliRichiestaBtn" disabled style="background-color: #007bff;display: none;">
+                    <button onclick="getDettagliRichiesta()" id="dettagliRichiestaBtn" disabled style="background-color: #007bff;
+                            display: none;">
                         📋 Visualizza Dettagli
                     </button>
                     <button onclick="clearDettagliRichiestaForm()" style="display: none;">🧹 Pulisci Form</button>
@@ -768,7 +775,8 @@
                 </div>
 
                 <div class="button-row">
-                    <button onclick="getMissioniOperatore()" id="missioni13Btn" disabled style="background-color: #6f42c1;display: none;">
+                    <button onclick="getMissioniOperatore()" id="missioni13Btn" disabled style="background-color: #6f42c1;
+                            display: none;">
                         📋 Carica Missioni Operatore
                     </button>
                     <button onclick="clearMissioniOperatoreForm()" style="display: none;">🧹 Pulisci Form</button>
@@ -1057,45 +1065,26 @@
                         if (result.ok) {
                             authToken = result.data.token;
 
-                            // DEBUG: Controlla come viene estratto il ruolo
-                            console.log('Token estratto:', authToken);
-                            console.log('result.data.role:', result.data.role);
-                            console.log('result.data.user:', result.data.user);
-
-                            // Prova diversi modi di estrarre il ruolo
-                            let userRole = null;
-                            let isAdmin = false;
-
-                            if (result.data.role) {
-                                userRole = result.data.role;
-                            } else if (result.data.user && result.data.user.role) {
-                                userRole = result.data.user.role;
-                            }
-
-                            console.log('userRole estratto:', userRole);
-
-                            // Controlla se è admin con diverse varianti
-                            if (userRole) {
-                                isAdmin = userRole.toLowerCase() === 'admin' ||
-                                        userRole.toLowerCase() === 'amministratore' ||
-                                        userRole.toUpperCase() === 'ADMIN';
-                            }
-
-                            console.log('isAdmin calcolato:', isAdmin);
-
-                            // Salva i dati utente
-                            currentUser = {
+                            // ✅ QUESTO È IL FIX IMPORTANTE: Assegna currentUser
+                            currentUser = result.data.user || {
                                 email: email,
-                                role: userRole,
-                                isAdmin: isAdmin
+                                role: result.data.role || 'ADMIN'  // Default per test
                             };
 
+                            // DEBUG: Verifica che currentUser sia impostato
+                            console.log('currentUser assegnato:', currentUser);
+
+                            // ✅ CHIAMA updateAuthUI con i dati corretti
                             updateAuthUI(true, currentUser);
 
-                            let message = `✅ Login effettuato con successo!\n\n`;
-                            message += `Email: ${email}\n`;
-                            message += `Ruolo estratto: ${userRole || 'NON TROVATO'}\n`;
-                            message += `È admin: ${isAdmin ? 'SÌ' : 'NO'}\n`;
+                            // DEBUG: Info per controllare il ruolo
+                            const isAdmin = currentUser.role === 'ADMIN' || currentUser.role === 'admin';
+                            console.log('isAdmin?', isAdmin);
+
+                            let message = `✅ Login riuscito!\n`;
+                            message += `Email: ${currentUser.email}\n`;
+                            message += `Ruolo: ${currentUser.role}\n`;
+                            message += `Admin: ${isAdmin ? 'SÌ' : 'NO'}\n`;
                             message += `Token: ${authToken.substring(0, 30)}...\n`;
 
                             showResponse('authResponse', message, 'success');
