@@ -284,6 +284,36 @@
                         padding: 8px 12px;
                     }
                 }
+
+                /* Quando disabilitato: diventa grigio */
+                .button-row button:disabled {
+                    background-color: #6c757d !important;  /* Grigio */
+                    color: #ffffff !important;
+                    cursor: not-allowed !important;
+                    opacity: 0.65 !important;
+                    transform: none !important;
+                    box-shadow: none !important;
+                }
+
+                /* Impedisci hover sui pulsanti disabilitati */
+                .button-row button:disabled:hover {
+                    background-color: #6c757d !important;  /* Resta grigio */
+                    transform: none !important;
+                }
+
+                /* Quando abilitato: mantiene il colore originale dallo style="" */
+                .button-row button:not(:disabled) {
+                    /* I colori sono già definiti negli attributi style="" dei pulsanti */
+                    cursor: pointer;
+                }
+
+                /* Hover generico per tutti i pulsanti abilitati */
+                .button-row button:not(:disabled):hover {
+                    transform: translateY(-2px);
+                    opacity: 0.9;
+                    transition: all 0.3s ease;
+                }
+
             </style>
         </head>
         <body>
@@ -415,7 +445,7 @@
                 </div>
 
                 <div class="button-row">
-                    <button onclick="doConvalida()" style="background-color: #28a745;">✅ Convalida Richiesta</button>
+                    <button onclick="doConvalida()" style="background-color: #28a745;display: none;">✅ Convalida Richiesta</button>
                     <button onclick="fillConvalidaExample()">📋 Esempio Dati</button>
                     <button onclick="clearConvalidaForm()">🧹 Pulisci Form</button>
                 </div>
@@ -448,10 +478,10 @@
                     </div>
                 </div>
 
-                <div class="button-row">
-                    <button id="listaBtn" onclick="getListaRichieste()" disabled>Carica Lista</button>
+                <div class="button-row" >
+                    <button id="listaBtn" onclick="getListaRichieste()" disabled style="display: none;">Carica Lista</button>
                     <button id="richiesteNonPositiveBtn" onclick="getRichiesteNonPositive()" disabled>Richieste Non Positive</button>
-                    <button onclick="clearListaForm()">Pulisci Filtri</button>
+                    <button onclick="clearListaForm()" style="display: none;">Pulisci Filtri</button>
                 </div>
 
                 <div class="response-area" id="listaResponse">
@@ -467,7 +497,7 @@
                 <h2>👨‍🚒 6. Lista Operatori Attualmente Liberi</h2>
 
                 <div class="button-row">
-                    <button onclick="getOperatoriLiberiConDettagli()" id="operatoriBtn" disabled style="background-color: #28a745;">
+                    <button onclick="getOperatoriLiberiConDettagli()" id="operatoriBtn" disabled style="background-color: #28a745;display: none;">
                         👨‍🚒 Operatori Liberi
                     </button>
                 </div>
@@ -567,10 +597,10 @@
                     <!-- Pulsanti azione -->
 
                     <div class="button-row">
-                        <button onclick="creaMissione()" style="background-color: #28a745;">
+                        <button onclick="creaMissione()" style="background-color: #28a745;display: none;">
                             🚀 Crea Missione
                         </button>
-                        <button onclick="pulisciFormMissione()" style="background-color: #17a2b8;">
+                        <button onclick="pulisciFormMissione()" style="background-color: #17a2b8;display: none;">
                             🧹 Pulisci Form
                         </button>
                     </div>
@@ -628,10 +658,10 @@
                 </div>
 
                 <div class="button-row">
-                    <button onclick="annullaRichiesta()" id="annullaBtn" disabled style="background-color: #dc3545;">
+                    <button onclick="annullaRichiesta()" id="annullaBtn" disabled style="background-color: #dc3545;display: none;">
                         ❌ Annulla Richiesta
                     </button>
-                    <button onclick="clearAnnullaForm()">🧹 Pulisci Form</button>
+                    <button onclick="clearAnnullaForm()" style="display: none;">🧹 Pulisci Form</button>
                 </div>
 
                 <div class="response-area" id="annullaResponse">
@@ -664,11 +694,11 @@
                 </div>
 
                 <div class="button-row">
-                    <button onclick="getDettagliMissione()" id="dettagliMissioneBtn" disabled style="background-color: #007bff;">
+                    <button onclick="getDettagliMissione()" id="dettagliMissioneBtn" disabled style="background-color: #007bff;display: none;">
                         📋 Visualizza Dettagli
                     </button>
-                    <button onclick="clearDettagliMissioneForm()">🧹 Pulisci Form</button>
-                    <button onclick="fillDettagliMissioneExample()">📋 Esempio</button>
+                    <button onclick="clearDettagliMissioneForm()" style="display: none;">🧹 Pulisci Form</button>
+                    <button onclick="fillDettagliMissioneExample()" style="display: none;">📋 Esempio</button>
                 </div>
 
                 <div class="response-area" id="dettagliMissioneResponse">
@@ -678,7 +708,7 @@
 
             <!-- Sezione 11: Dettagli Richiesta di Soccorso -->
             <div class="section">
-                <h2>📋 12. Dettagli di una Richiesta di Soccorso (Solo Admin)</h2>
+                <h2>📋 11. Dettagli di una Richiesta di Soccorso (Solo Admin)</h2>
 
                 <div class="form-group">
                     <label for="dettagliRichiestaId">ID Richiesta:</label>
@@ -701,10 +731,10 @@
                 </div>
 
                 <div class="button-row">
-                    <button onclick="getDettagliRichiesta()" id="dettagliRichiestaBtn" disabled style="background-color: #007bff;">
+                    <button onclick="getDettagliRichiesta()" id="dettagliRichiestaBtn" disabled style="background-color: #007bff;display: none;">
                         📋 Visualizza Dettagli
                     </button>
-                    <button onclick="clearDettagliRichiestaForm()">🧹 Pulisci Form</button>
+                    <button onclick="clearDettagliRichiestaForm()" style="display: none;">🧹 Pulisci Form</button>
                 </div>
 
                 <div class="response-area" id="dettagliRichiestaResponse">
@@ -738,10 +768,10 @@
                 </div>
 
                 <div class="button-row">
-                    <button onclick="getMissioniOperatore()" id="missioni13Btn" disabled style="background-color: #6f42c1;">
+                    <button onclick="getMissioniOperatore()" id="missioni13Btn" disabled style="background-color: #6f42c1;display: none;">
                         📋 Carica Missioni Operatore
                     </button>
-                    <button onclick="clearMissioniOperatoreForm()">🧹 Pulisci Form</button>
+                    <button onclick="clearMissioniOperatoreForm()" style="display: none;">🧹 Pulisci Form</button>
                 </div>
 
                 <div class="response-area" id="missioniOperatoreResponse">
@@ -1120,23 +1150,27 @@
                     }
                 }
 
-                // Aggiorna la lista dei pulsanti che devono essere abilitati/disabilitati
+// Aggiorna la lista dei pulsanti che devono essere mostrati/nascosti
                 // in base allo stato di autenticazione
                 function updateAuthUI(isAuthenticated, currentUser) {
                     const statusElement = document.getElementById('authStatus');
 
-                    // Lista corretta dei pulsanti che richiedono autenticazione
-                    const buttons = [
-                        'verifyBtn', // ✅ Pulsante verifica token
-                        'logoutBtn', // ✅ Pulsante logout
-                        'listaBtn', // ✅ Pulsante "Carica Lista" (era 'listaRichiesteBtn')
+                    // Lista dei pulsanti che richiedono autenticazione ADMIN
+                    const adminOnlyButtons = [
+                        'listaBtn', // ✅ Pulsante "Carica Lista" 
                         'richiesteNonPositiveBtn', // ✅ Pulsante richieste non positive
-                        'operatoriBtn', // ✅ Pulsante operatori (da verificare se esiste)
-                        'dettagliRichiestaBtn', // ✅ Pulsante dettagli richiesta (da verificare se esiste)
-                        'dettagliOperatoreBtn', // ✅ Pulsante dettagli operatore (da verificare se esiste)
-                        'missioni13Btn', // ✅ Pulsante missioni (da verificare se esiste)
-                        'annullaBtn', // ✅ Pulsante annulla (da verificare se esiste)
-                        'dettagliMissioneBtn'     // ✅ Pulsante dettagli missione
+                        'operatoriBtn', // ✅ Pulsante operatori 
+                        'dettagliRichiestaBtn', // ✅ NUOVO: Pulsante dettagli richiesta 
+                        'dettagliOperatoreBtn', // ✅ NUOVO: Pulsante dettagli operatore 
+                        'missioni13Btn', // ✅ Pulsante missioni operatore
+                        'annullaBtn', // ✅ Pulsante annulla
+                        'dettagliMissioneBtn'         // ✅ Pulsante dettagli missione
+                    ];
+
+                    // Pulsanti che possono essere visibili per tutti gli utenti autenticati
+                    const userButtons = [
+                        'verifyBtn', // ✅ Pulsante verifica token
+                        'logoutBtn'                   // ✅ Pulsante logout
                     ];
 
                     if (isAuthenticated && currentUser) {
@@ -1145,27 +1179,60 @@
                         statusElement.textContent = `✅ Autenticato come ${currentUser.email || 'Utente'} (${currentUser.role || 'N/A'})`;
                         statusElement.className = 'auth-status logged-in';
 
-                        // Abilita tutti i pulsanti per utenti autenticati
-                        buttons.forEach(id => {
-                            const btn = document.getElementById(id);
-                            if (btn) {
-                                btn.disabled = false;
-                                console.log(`✅ Abilitato pulsante: ${id}`);
-                            } else {
-                                console.log(`⚠️ Pulsante non trovato: ${id}`);
-                            }
-                        });
-
-                        // Gestisci visibilità form missione basata sul ruolo
-                        const sezionFormMissione = document.getElementById('sezionFormMissione');
-                        const messaggioNonAdmin = document.getElementById('messaggioNonAdmin');
-
                         if (isAdmin) {
+                            // ADMIN: Mostra tutti i pulsanti
+                            adminOnlyButtons.forEach(id => {
+                                const btn = document.getElementById(id);
+                                if (btn) {
+                                    btn.style.display = 'inline-block';  // Mostra il pulsante
+                                    btn.disabled = false;                 // E abilitalo
+                                    console.log(`✅ ADMIN - Mostrato pulsante: ${id}`);
+                                } else {
+                                    console.log(`⚠️ Pulsante non trovato: ${id}`);
+                                }
+                            });
+
+                            // Mostra anche i pulsanti utente
+                            userButtons.forEach(id => {
+                                const btn = document.getElementById(id);
+                                if (btn) {
+                                    btn.style.display = 'inline-block';
+                                    btn.disabled = false;
+                                    console.log(`✅ ADMIN - Mostrato pulsante utente: ${id}`);
+                                }
+                            });
+
+                            // Gestisci form missione per admin
+                            const sezionFormMissione = document.getElementById('sezionFormMissione');
+                            const messaggioNonAdmin = document.getElementById('messaggioNonAdmin');
                             if (sezionFormMissione)
                                 sezionFormMissione.style.display = 'block';
                             if (messaggioNonAdmin)
                                 messaggioNonAdmin.style.display = 'none';
+
                         } else {
+                            // UTENTE NON ADMIN: Nascondi i pulsanti admin
+                            adminOnlyButtons.forEach(id => {
+                                const btn = document.getElementById(id);
+                                if (btn) {
+                                    btn.style.display = 'none';  // Nascondi il pulsante
+                                    console.log(`❌ UTENTE - Nascosto pulsante admin-only: ${id}`);
+                                }
+                            });
+
+                            // Mostra solo i pulsanti utente
+                            userButtons.forEach(id => {
+                                const btn = document.getElementById(id);
+                                if (btn) {
+                                    btn.style.display = 'inline-block';
+                                    btn.disabled = false;
+                                    console.log(`✅ UTENTE - Mostrato pulsante utente: ${id}`);
+                                }
+                            });
+
+                            // Nascondi form missione per utenti normali
+                            const sezionFormMissione = document.getElementById('sezionFormMissione');
+                            const messaggioNonAdmin = document.getElementById('messaggioNonAdmin');
                             if (sezionFormMissione)
                                 sezionFormMissione.style.display = 'none';
                             if (messaggioNonAdmin)
@@ -1173,15 +1240,16 @@
                             showResponse('missioneResponse', '⚠️ Solo gli admin possono creare missioni.', 'warning');
                         }
                     } else {
+                        // NON AUTENTICATO: Nascondi tutti i pulsanti admin
                         statusElement.textContent = '❌ Non autenticato';
                         statusElement.className = 'auth-status logged-out';
 
-                        // Disabilita tutti i pulsanti
-                        buttons.forEach(id => {
+                        // Nascondi tutti i pulsanti che richiedono autenticazione
+                        [...adminOnlyButtons, ...userButtons].forEach(id => {
                             const btn = document.getElementById(id);
                             if (btn) {
-                                btn.disabled = true;
-                                console.log(`❌ Disabilitato pulsante: ${id}`);
+                                btn.style.display = 'none';  // Nascondi il pulsante
+                                console.log(`❌ NON AUTENTICATO - Nascosto pulsante: ${id}`);
                             }
                         });
 
@@ -1193,7 +1261,9 @@
                         if (messaggioNonAdmin)
                             messaggioNonAdmin.style.display = 'none';
                     }
-                }                // === FUNZIONI MISSIONE ===
+                }
+
+                // === FUNZIONI MISSIONE ===
 
                 function mostraFormMissioneAutomatic() {
                     document.getElementById('sezionFormMissione').style.display = 'block';

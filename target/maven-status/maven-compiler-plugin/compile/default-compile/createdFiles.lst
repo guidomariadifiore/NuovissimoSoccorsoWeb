@@ -44,6 +44,7 @@ webengineering\nuovissimosoccorsoweb\controller\AdminDashboardController$Dashboa
 webengineering\nuovissimosoccorsoweb\controller\AdminMaterialiController.class
 webengineering\nuovissimosoccorsoweb\rest\resources\OperatoriQueryResource.class
 webengineering\nuovissimosoccorsoweb\model\impl\MezzoImpl.class
+webengineering\nuovissimosoccorsoweb\rest\dto\MissioneAssociataDTO.class
 webengineering\nuovissimosoccorsoweb\service\OperatoriQueryService$OperatoreInfo.class
 webengineering\nuovissimosoccorsoweb\service\RichiestaService$RichiestaInput.class
 webengineering\framework\data\OptimisticLockException.class
@@ -168,6 +169,7 @@ webengineering\nuovissimosoccorsoweb\model\impl\RichiestaSoccorsoImpl.class
 webengineering\nuovissimosoccorsoweb\controller\ConfermaRichiesta.class
 webengineering\nuovissimosoccorsoweb\dao\impl\OperatoreHaPatenteDAO_MySQL.class
 webengineering\nuovissimosoccorsoweb\dao\InfoMissioneDAO.class
+webengineering\nuovissimosoccorsoweb\rest\dto\DettagliRichiestaDTO.class
 webengineering\nuovissimosoccorsoweb\dao\AbilitaDAO.class
 webengineering\nuovissimosoccorsoweb\util\RateLimiter$RateLimiterStats.class
 webengineering\nuovissimosoccorsoweb\rest\dto\MezzoAssegnatoDTO.class

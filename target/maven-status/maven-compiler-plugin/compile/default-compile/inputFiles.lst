@@ -122,10 +122,12 @@ C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\we
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\dto\AnnullaRichiestaResponse.java
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\dto\ConvalidaResponse.java
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\dto\DettagliMissioneDTO.java
+C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\dto\DettagliRichiestaDTO.java
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\dto\ErrorResponse.java
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\dto\ListaRichiesteResponse.java
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\dto\MaterialeAssegnatoDTO.java
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\dto\MezzoAssegnatoDTO.java
+C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\dto\MissioneAssociataDTO.java
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\dto\MissioneDTO.java
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\dto\MissioneOperatoreDTO.java
 C:\Users\lampa\Documents\NetBeansProjects\NuovissimoSoccorsoWeb\src\main\java\webengineering\nuovissimosoccorsoweb\rest\dto\MissioneRequest.java
