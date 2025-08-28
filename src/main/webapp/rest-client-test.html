@@ -676,6 +676,43 @@
                 </div>
             </div>
 
+            <!-- Sezione 11: Dettagli Richiesta di Soccorso -->
+            <div class="section">
+                <h2>📋 12. Dettagli di una Richiesta di Soccorso (Solo Admin)</h2>
+
+                <div class="form-group">
+                    <label for="dettagliRichiestaId">ID Richiesta:</label>
+                    <input type="number" id="dettagliRichiestaId" min="1" placeholder="Inserisci l'ID della richiesta">
+                    <small style="color: #666;">Visualizza tutti i dettagli di una richiesta specifica</small>
+                </div>
+
+                <div class="info-box">
+                    <h5>📋 Informazioni incluse nei dettagli:</h5>
+                    <ul style="margin: 0;
+                        padding-left: 20px;
+                        font-size: 14px;
+                        color: #0c5460;">
+                        <li><strong>Dati richiesta:</strong> Descrizione, indirizzo, segnalante, coordinate</li>
+                        <li><strong>Stato:</strong> Inviata, Convalidata, Attiva, Chiusa, Annullata</li>
+                        <li><strong>Amministratore:</strong> Chi ha gestito la richiesta (se presente)</li>
+                        <li><strong>Missione associata:</strong> Dettagli della missione creata (se esistente)</li>
+                        <li><strong>Valutazione:</strong> Livello di successo se la missione è conclusa</li>
+                    </ul>
+                </div>
+
+                <div class="button-row">
+                    <button onclick="getDettagliRichiesta()" id="dettagliRichiestaBtn" disabled style="background-color: #007bff;">
+                        📋 Visualizza Dettagli
+                    </button>
+                    <button onclick="clearDettagliRichiestaForm()">🧹 Pulisci Form</button>
+                </div>
+
+                <div class="response-area" id="dettagliRichiestaResponse">
+                    Effettua il login come amministratore per visualizzare i dettagli delle richieste...
+                </div>
+            </div>
+
+
             <!-- Sezione 13 Lista Missioni Operatore -->
             <div class="section">
                 <h2>👨‍🚒 13. Lista delle Missioni in cui un Operatore è stato coinvolto (Solo Admin)</h2>

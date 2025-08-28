@@ -23,7 +23,10 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 import webengineering.nuovissimosoccorsoweb.model.InfoMissione;
 import webengineering.nuovissimosoccorsoweb.model.Missione;
+import webengineering.nuovissimosoccorsoweb.model.PartecipazioneSquadra;
 import webengineering.nuovissimosoccorsoweb.rest.dto.AnnullaRichiestaResponse;
+import webengineering.nuovissimosoccorsoweb.rest.dto.DettagliRichiestaDTO;
+import webengineering.nuovissimosoccorsoweb.rest.dto.MissioneAssociataDTO;
 
 /**
  * Resource REST per le operazioni di query/lettura delle richieste di soccorso.
@@ -49,7 +52,7 @@ public class RichiesteQueryResource {
      * Lista (paginata) delle richieste di soccorso, filtrata in base alla
      * tipologia. GET /api/richieste?stato={stato}&page={page}&size={size}
      *
-     * Richiede autenticazione: solo ADMIN può vedere tutte le richieste
+     * Richiede autenticazione: solo admin può vedere tutte le richieste
      *
      * @param stato Stato delle richieste (ATTIVA, IN_CORSO, CHIUSA, IGNORATA) -
      * opzionale
@@ -231,7 +234,7 @@ public class RichiesteQueryResource {
         SoccorsoDataLayer dataLayer = null;
 
         try {
-            logger.info("=== DETTAGLI RICHIESTA ===");
+            logger.info("=== DETTAGLI RICHIESTA COMPLETI ===");
             logger.info("ID richiesta: " + id);
 
             if (id <= 0) {
@@ -240,11 +243,19 @@ public class RichiesteQueryResource {
                         .build();
             }
 
+            // Verifica ruolo admin
+            String userRole = (String) requestContext.getProperty("userRole");
+            if (!"ADMIN".equals(userRole) && !"admin".equals(userRole)) {
+                return Response.status(Response.Status.FORBIDDEN)
+                        .entity(new ErrorResponse("Accesso negato. Solo gli admin possono vedere i dettagli delle richieste.", "ACCESS_DENIED"))
+                        .build();
+            }
+
             // Crea DataLayer
             dataLayer = createDataLayer();
 
-            // USA IL SERVICE DEDICATO
-            RichiestaSoccorso richiesta = RichiesteQueryService.getRichiestaById(id, dataLayer);
+            // Carica richiesta base
+            RichiestaSoccorso richiesta = dataLayer.getRichiestaSoccorsoDAO().getRichiestaByCodice(id);
 
             if (richiesta == null) {
                 return Response.status(Response.Status.NOT_FOUND)
@@ -252,13 +263,13 @@ public class RichiesteQueryResource {
                         .build();
             }
 
-            // Converte in DTO
-            RichiestaDTO richiestaDTO = mapToRichiestaDTO(richiesta);
+            // Crea DTO con dettagli completi
+            DettagliRichiestaDTO dettagli = creaDettagliRichiestaCompleti(dataLayer, richiesta);
 
-            logger.info("Restituiti dettagli per richiesta: " + richiesta.getCodice()
+            logger.info("Restituiti dettagli completi per richiesta: " + richiesta.getCodice()
                     + " - Stato: " + richiesta.getStato());
 
-            return Response.ok(richiestaDTO).build();
+            return Response.ok(dettagli).build();
 
         } catch (DataException e) {
             logger.log(Level.SEVERE, "Errore database nel recupero dettagli richiesta", e);
@@ -281,6 +292,83 @@ public class RichiesteQueryResource {
                 }
             }
         }
+    }
+
+    /**
+     * Crea DTO con tutti i dettagli di una richiesta di soccorso. Include
+     * informazioni sulla missione associata (se esistente).
+     */
+    private DettagliRichiestaDTO creaDettagliRichiestaCompleti(SoccorsoDataLayer dataLayer, RichiestaSoccorso richiesta) throws DataException {
+        DettagliRichiestaDTO dettagli = new DettagliRichiestaDTO();
+
+        // Dati base della richiesta
+        dettagli.setId(richiesta.getCodice());
+        dettagli.setStato(richiesta.getStato());
+        dettagli.setDescrizione(richiesta.getDescrizione());
+        dettagli.setIndirizzo(richiesta.getIndirizzo());
+        dettagli.setNome(richiesta.getNome());
+        dettagli.setCoordinate(richiesta.getCoordinate());
+        dettagli.setFoto(richiesta.getFoto());
+        dettagli.setIp(richiesta.getIp());
+        dettagli.setEmailSegnalante(richiesta.getEmailSegnalante());
+        dettagli.setNomeSegnalante(richiesta.getNomeSegnalante());
+        dettagli.setIdAmministratore(richiesta.getIdAmministratore() > 0 ? richiesta.getIdAmministratore() : null);
+
+        // Informazioni amministratore (se presente)
+        if (richiesta.getIdAmministratore() > 0) {
+            try {
+                // Prova a caricare info amministratore se hai il DAO
+                // Altrimenti lascia solo l'ID
+                dettagli.setNomeAmministratore("Admin ID: " + richiesta.getIdAmministratore());
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Errore recupero info amministratore " + richiesta.getIdAmministratore(), e);
+            }
+        }
+
+        // Informazioni missione associata (se esistente)
+        try {
+            Missione missione = dataLayer.getMissioneDAO().getMissioneByCodice(richiesta.getCodice());
+            if (missione != null) {
+                MissioneAssociataDTO missioneDTO = new MissioneAssociataDTO();
+                missioneDTO.setId(missione.getCodiceRichiesta());
+                missioneDTO.setNome(missione.getNome());
+                missioneDTO.setPosizione(missione.getPosizione());
+                missioneDTO.setObiettivo(missione.getObiettivo());
+                missioneDTO.setDataOraInizio(missione.getDataOraInizio().toString());
+
+                // Verifica se la missione è conclusa
+                try {
+                    InfoMissione infoMissione = dataLayer.getInfoMissioneDAO().getInfoByCodiceMissione(missione.getCodiceRichiesta());
+                    if (infoMissione != null) {
+                        missioneDTO.setStato("CONCLUSA");
+                        missioneDTO.setDataOraFine(infoMissione.getDataOraFine().toString());
+                        missioneDTO.setLivelloSuccesso(infoMissione.getSuccesso());
+                        missioneDTO.setCommento(infoMissione.getCommento());
+                    } else {
+                        missioneDTO.setStato("ATTIVA");
+                    }
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, "Errore recupero info conclusione missione " + missione.getCodiceRichiesta(), e);
+                    missioneDTO.setStato("ATTIVA");
+                }
+
+                // Conta operatori assegnati
+                try {
+                    List<PartecipazioneSquadra> squadra = dataLayer.getMissioneDAO().getSquadraByMissione(missione.getCodiceRichiesta());
+                    missioneDTO.setNumeroOperatori(squadra.size());
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, "Errore conteggio operatori missione " + missione.getCodiceRichiesta(), e);
+                    missioneDTO.setNumeroOperatori(0);
+                }
+
+                dettagli.setMissioneAssociata(missioneDTO);
+            }
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Errore recupero missione per richiesta " + richiesta.getCodice(), e);
+            dettagli.setMissioneAssociata(null);
+        }
+
+        return dettagli;
     }
 
     /**
