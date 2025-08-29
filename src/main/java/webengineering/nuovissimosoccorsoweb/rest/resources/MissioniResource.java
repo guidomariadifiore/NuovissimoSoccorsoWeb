@@ -830,7 +830,7 @@ public class MissioniResource {
         dto.setObiettivo(missione.getObiettivo());
         dto.setNota(missione.getNota()); // Aggiungo anche le note se mancavano
 
-        // ✅ CORREZIONE: Converte LocalDateTime in String
+        // Converte LocalDateTime in String
         if (missione.getDataOraInizio() != null) {
             dto.setDataOraInizio(missione.getDataOraInizio().toString());
         } else {

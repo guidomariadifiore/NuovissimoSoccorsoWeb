@@ -787,183 +787,6 @@
                 </div>
             </div>
 
-            <script>
-                // === FUNZIONI DETTAGLI MISSIONE ===
-
-                async function getDettagliMissione() {
-                    if (!authToken) {
-                        showResponse('dettagliMissioneResponse', 'Devi prima effettuare il login', 'error');
-                        return;
-                    }
-
-                    const missioneId = parseInt(document.getElementById('dettagliMissioneId').value);
-
-                    if (!missioneId || missioneId <= 0) {
-                        showResponse('dettagliMissioneResponse', '❌ Inserisci un ID missione valido', 'error');
-                        return;
-                    }
-
-                    showResponse('dettagliMissioneResponse', 'Caricamento dettagli missione...', 'info');
-
-                    try {
-                        const result = await apiCall(`/missioni/${missioneId}`, {
-                            method: 'GET'
-                        });
-
-                        if (result.ok) {
-                            const dettagli = result.data;
-
-                            let response = `✅ Dettagli Missione ${dettagli.id}\n\n`;
-
-                            // Dati base
-                            response += `📊 INFORMAZIONI GENERALI:\n`;
-                            response += `• Nome: ${dettagli.nome}\n`;
-                            response += `• Posizione: ${dettagli.posizione}\n`;
-                            response += `• Obiettivo: ${dettagli.obiettivo}\n`;
-                            response += `• Stato: ${dettagli.stato}\n`;
-                            response += `• Admin ID: ${dettagli.idAmministratore}\n`;
-                            response += `• Data Inizio: ${formatDateTime(dettagli.dataOraInizio)}\n`;
-
-                            if (dettagli.dataOraFine) {
-                                response += `• Data Fine: ${formatDateTime(dettagli.dataOraFine)}\n`;
-                            }
-
-                            if (dettagli.note && dettagli.note.trim()) {
-                                response += `• Note: ${dettagli.note}\n`;
-                            }
-
-                            // Richiesta associata
-                            if (dettagli.richiesta) {
-                                response += `\n🆘 RICHIESTA DI SOCCORSO (#${dettagli.richiesta.codice}):\n`;
-                                response += `• Descrizione: ${dettagli.richiesta.descrizione}\n`;
-                                response += `• Indirizzo: ${dettagli.richiesta.indirizzo}\n`;
-                                response += `• Stato: ${dettagli.richiesta.stato}\n`;
-                                response += `• Segnalante: ${dettagli.richiesta.nomeSegnalante}\n`;
-                                response += `• Email: ${dettagli.richiesta.emailSegnalante}\n`;
-                                if (dettagli.richiesta.telefono) {
-                                    response += `• Telefono: ${dettagli.richiesta.telefono}\n`;
-                                }
-                                response += `• Data Inserimento: ${formatDateTime(dettagli.richiesta.dataOraInserimento)}\n`;
-                            }
-
-                            // Team operatori
-                            if (dettagli.operatori && dettagli.operatori.length > 0) {
-                                response += `\n👥 TEAM OPERATORI (${dettagli.operatori.length}):\n`;
-                                dettagli.operatori.forEach(op => {
-                                    response += `• ${op.nomeCompleto || (op.nome + ' ' + op.cognome)} - ${op.ruolo}\n`;
-                                    if (op.email) {
-                                        response += `  📧 ${op.email}\n`;
-                                    }
-                                });
-                            }
-
-                            // Mezzi
-                            if (dettagli.mezzi && dettagli.mezzi.length > 0) {
-                                response += `\n🚗 MEZZI ASSEGNATI (${dettagli.mezzi.length}):\n`;
-                                dettagli.mezzi.forEach(mezzo => {
-                                    response += `• Targa: ${mezzo.targa}`;
-                                    if (mezzo.tipo && mezzo.tipo !== 'N/A') {
-                                        response += ` - Tipo: ${mezzo.tipo}`;
-                                    }
-                                    if (mezzo.modello && mezzo.modello !== 'N/A') {
-                                        response += ` - Modello: ${mezzo.modello}`;
-                                    }
-                                    response += `\n`;
-                                });
-                            }
-
-                            // Materiali
-                            if (dettagli.materiali && dettagli.materiali.length > 0) {
-                                response += `\n📦 MATERIALI UTILIZZATI (${dettagli.materiali.length}):\n`;
-                                dettagli.materiali.forEach(mat => {
-                                    response += `• ${mat.nome || ('Materiale ID: ' + mat.id)}`;
-                                    if (mat.quantita && mat.quantita > 1) {
-                                        response += ` (Quantità: ${mat.quantita})`;
-                                    }
-                                    response += `\n`;
-                                });
-                            }
-
-                            // Valutazione (se conclusa)
-                            if (dettagli.valutazione) {
-                                response += `\n⭐ VALUTAZIONE FINALE:\n`;
-                                response += `• Livello di Successo: ${dettagli.valutazione.successo}/10\n`;
-                                if (dettagli.valutazione.commento && dettagli.valutazione.commento.trim()) {
-                                    response += `• Commento: ${dettagli.valutazione.commento}\n`;
-                                }
-                                response += `• Data Valutazione: ${formatDateTime(dettagli.valutazione.dataOraFine)}\n`;
-
-                                // Interpretazione del livello di successo
-                                let interpretazione = '';
-                                if (dettagli.valutazione.successo >= 9)
-                                    interpretazione = '🌟 Eccellente';
-                                else if (dettagli.valutazione.successo >= 7)
-                                    interpretazione = '✅ Buono';
-                                else if (dettagli.valutazione.successo >= 5)
-                                    interpretazione = '⚠️ Sufficiente';
-                                else
-                                    interpretazione = '❌ Insufficiente';
-
-                                response += `• Interpretazione: ${interpretazione}\n`;
-                            }
-
-                            showResponse('dettagliMissioneResponse', response, 'success');
-
-                        } else {
-                            let errorMessage = `❌ Errore nel caricamento: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
-
-                            if (result.status === 404) {
-                                errorMessage = '❌ Missione non trovata. Verifica l\'ID inserito.';
-                            } else if (result.status === 401) {
-                                errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
-                            } else if (result.status === 403) {
-                                errorMessage = '❌ Accesso negato. Solo gli amministratori possono visualizzare i dettagli delle missioni.';
-                            }
-
-                            showResponse('dettagliMissioneResponse', errorMessage, 'error');
-                        }
-                    } catch (error) {
-                        showResponse('dettagliMissioneResponse', `❌ Errore di rete: ${error.message}`, 'error');
-                    }
-                }
-
-                function clearDettagliMissioneForm() {
-                    document.getElementById('dettagliMissioneId').value = '';
-                    showResponse('dettagliMissioneResponse', 'Form pulito. Inserisci l\'ID della missione da visualizzare.', 'info');
-                }
-
-                function fillDettagliMissioneExample() {
-                    document.getElementById('dettagliMissioneId').value = '1';
-                    showResponse('dettagliMissioneResponse',
-                            '📋 Form riempito con dati di esempio.\n\n' +
-                            '💡 SUGGERIMENTO:\n' +
-                            '• L\'ID deve corrispondere a una missione esistente\n' +
-                            '• Solo gli amministratori possono visualizzare i dettagli\n' +
-                            '• I dettagli includono team, mezzi, materiali e valutazione\n' +
-                            '• Se la missione è conclusa, vedrai anche la valutazione finale',
-                            'info');
-                }
-
-                // Funzione di utilità per formattare date/ore
-                function formatDateTime(dateTimeString) {
-                    if (!dateTimeString)
-                        return 'N/A';
-
-                    try {
-                        const date = new Date(dateTimeString);
-                        return date.toLocaleString('it-IT', {
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            second: '2-digit'
-                        });
-                    } catch (e) {
-                        return dateTimeString; // Fallback se il parsing fallisce
-                    }
-                }
-            </script>
             <!-- Sezione Test Vari -->
             <div class="section">
                 <h2>🧪 Test Vari</h2>
@@ -1065,14 +888,25 @@
                         if (result.ok) {
                             authToken = result.data.token;
 
-                            // ✅ QUESTO È IL FIX IMPORTANTE: Assegna currentUser
+                            // ✅ FIX: Normalizza il ruolo da 'admin' a 'ADMIN' per il backend
+                            let userRole = result.data.role || 'ADMIN';
+                            if (userRole.toLowerCase() === 'admin') {
+                                userRole = 'ADMIN';  // Converti a maiuscolo per il backend
+                            }
+
+                            // ✅ Assegna currentUser con ruolo normalizzato
                             currentUser = result.data.user || {
+                                id: result.data.userId || result.data.id,
                                 email: email,
-                                role: result.data.role || 'ADMIN'  // Default per test
+                                role: userRole  // Usa il ruolo normalizzato
                             };
 
-                            // DEBUG: Verifica che currentUser sia impostato
-                            console.log('currentUser assegnato:', currentUser);
+                            // DEBUG: Verifica che currentUser sia impostato correttamente
+                            console.log('=== DEBUG LOGIN FIX ===');
+                            console.log('Ruolo originale dal server:', result.data.role);
+                            console.log('Ruolo normalizzato:', userRole);
+                            console.log('currentUser finale:', currentUser);
+                            console.log('========================');
 
                             // ✅ CHIAMA updateAuthUI con i dati corretti
                             updateAuthUI(true, currentUser);
@@ -1590,8 +1424,6 @@
                     showResponse('convalidaResponse', 'Form di convalida pulito. Pronto per nuovi dati...', 'info');
                 }
 
-                // === ALTRE FUNZIONI ===
-
                 async function getListaRichieste() {
                     if (!authToken) {
                         showResponse('listaResponse', 'Devi prima effettuare il login per vedere le richieste', 'error');
@@ -2054,6 +1886,319 @@
                     showResponse('missioniOperatoreResponse', 'Form pulito. Inserisci l\'ID dell\'operatore.', 'info');
                 }
 
+                async function getDettagliMissione() {
+                    if (!authToken) {
+                        showResponse('dettagliMissioneResponse', 'Devi prima effettuare il login come amministratore', 'error');
+                        return;
+                    }
+
+                    const missioneId = parseInt(document.getElementById('dettagliMissioneId').value);
+
+                    if (!missioneId || missioneId <= 0) {
+                        showResponse('dettagliMissioneResponse', '❌ Inserisci un ID missione valido', 'error');
+                        return;
+                    }
+
+                    showResponse('dettagliMissioneResponse', 'Caricamento dettagli missione...', 'info');
+
+                    try {
+                        const result = await apiCall(`/missioni/${missioneId}`, {
+                            method: 'GET'
+                        });
+
+                        if (result.ok) {
+                            const dettagli = result.data;
+
+                            // DEBUG: Stampa i dati ricevuti per capire la struttura
+                            console.log('=== DEBUG DETTAGLI MISSIONE ===');
+                            console.log('dettagli:', dettagli);
+                            console.log('==============================');
+
+                            let response = `✅ Dettagli Missione #${dettagli.id}\n\n`;
+
+                            // === INFORMAZIONI GENERALI ===
+                            response += `📊 INFORMAZIONI GENERALI:\n`;
+                            response += `• Nome: ${dettagli.nome}\n`;
+                            response += `• Posizione: ${dettagli.posizione}\n`;
+                            response += `• Obiettivo: ${dettagli.obiettivo}\n`;
+
+                            if (dettagli.note && dettagli.note.trim()) {
+                                response += `• Note: ${dettagli.note}\n`;
+                            }
+
+                            response += `• Admin ID: ${dettagli.idAmministratore}\n`;
+                            response += `• Data Inizio: ${formatDateTime(dettagli.dataOraInizio)}\n`;
+
+                            if (dettagli.dataOraFine) {
+                                response += `• Data Fine: ${formatDateTime(dettagli.dataOraFine)}\n`;
+                                response += `• Stato: Missione Conclusa\n`;
+                            } else {
+                                response += `• Stato: Missione Attiva\n`;
+                            }
+
+                            // === RICHIESTA ASSOCIATA ===
+                            if (dettagli.richiesta) {
+                                const richiesta = dettagli.richiesta;
+                                response += `\n🆘 RICHIESTA DI SOCCORSO (#${richiesta.codice}):\n`;
+                                response += `• Descrizione: ${richiesta.descrizione}\n`;
+                                response += `• Indirizzo: ${richiesta.indirizzo}\n`;
+                                response += `• Stato richiesta: ${richiesta.stato}\n`;
+                                response += `• Segnalante: ${richiesta.nomeSegnalante}\n`;
+                                response += `• Email: ${richiesta.emailSegnalante}\n`;
+                            }
+
+                            // === TEAM OPERATORI ===
+                            if (dettagli.operatori && dettagli.operatori.length > 0) {
+                                response += `\n👥 TEAM OPERATORI (${dettagli.operatori.length}):\n`;
+                                dettagli.operatori.forEach((operatore, index) => {
+                                    response += `${index + 1}. ${operatore.nome} ${operatore.cognome}\n`;
+                                    response += `   • Ruolo: ${operatore.ruolo}\n`;
+                                    response += `   • Email: ${operatore.email}\n`;
+                                });
+                            }
+
+                            // === MEZZI UTILIZZATI ===
+                            if (dettagli.mezzi && dettagli.mezzi.length > 0) {
+                                response += `\n🚛 MEZZI UTILIZZATI (${dettagli.mezzi.length}):\n`;
+                                dettagli.mezzi.forEach((mezzo, index) => {
+                                    response += `${index + 1}. Targa: ${mezzo.targa}\n`;
+                                    response += `   • Tipo: ${mezzo.tipo || 'N/A'}\n`;
+                                    response += `   • Descrizione: ${mezzo.descrizione || 'N/A'}\n`;
+                                });
+                            }
+
+                            // === MATERIALI UTILIZZATI ===
+                            if (dettagli.materiali && dettagli.materiali.length > 0) {
+                                response += `\n📦 MATERIALI UTILIZZATI (${dettagli.materiali.length}):\n`;
+                                dettagli.materiali.forEach((materiale, index) => {
+                                    response += `${index + 1}. ${materiale.nome}\n`;
+                                    response += `   • Quantità: ${materiale.quantita || 1}\n`;
+                                });
+                            }
+
+                            // === VALUTAZIONE FINALE ===
+                            if (dettagli.valutazione) {
+                                const val = dettagli.valutazione;
+                                response += `\n⭐ VALUTAZIONE FINALE:\n`;
+                                response += `• Livello successo: ${val.successo}/5 `;
+
+                                // Aggiungi emoji in base al livello
+                                if (val.successo >= 4)
+                                    response += '🌟';
+                                else if (val.successo >= 3)
+                                    response += '👍';
+                                else if (val.successo >= 2)
+                                    response += '⚠️';
+                                else
+                                    response += '❌';
+
+                                response += `\n`;
+
+                                if (val.commento && val.commento.trim()) {
+                                    response += `• Commenti: ${val.commento}\n`;
+                                }
+
+                                if (val.dataOraFine) {
+                                    response += `• Completata il: ${formatDateTime(val.dataOraFine)}\n`;
+                                }
+                            }
+
+                            showResponse('dettagliMissioneResponse', response, 'success');
+
+                        } else {
+                            let errorMessage = '❌ Errore nel recupero dettagli missione.\n\n';
+
+                            if (result.status === 404) {
+                                errorMessage += 'La missione con questo ID non esiste.';
+                            } else if (result.status === 403) {
+                                errorMessage += 'Accesso negato. Solo gli amministratori possono visualizzare i dettagli delle missioni.';
+                            } else if (result.status === 401) {
+                                errorMessage += 'Non sei autenticato. Effettua prima il login come amministratore.';
+                            } else {
+                                errorMessage += `Errore del server (${result.status}): ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
+                            }
+
+                            showResponse('dettagliMissioneResponse', errorMessage, 'error');
+                        }
+
+                    } catch (error) {
+                        console.error('Errore dettagli missione:', error);
+                        showResponse('dettagliMissioneResponse',
+                                '❌ Errore di connessione: ' + error.message,
+                                'error');
+                    }
+                }
+
+                function clearDettagliMissioneForm() {
+                    document.getElementById('dettagliMissioneId').value = '';
+                    showResponse('dettagliMissioneResponse',
+                            'Effettua il login come amministratore per visualizzare i dettagli delle missioni...',
+                            'info');
+                }
+
+                // Funzione di utilità per formattare date/ore
+                function formatDateTime(dateTimeString) {
+                    if (!dateTimeString)
+                        return 'N/A';
+
+                    try {
+                        const date = new Date(dateTimeString);
+                        return date.toLocaleString('it-IT', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit'
+                        });
+                    } catch (e) {
+                        return dateTimeString; // Fallback se il parsing fallisce
+                    }
+                }
+
+                /**
+                 * Recupera e visualizza i dettagli completi di una richiesta di soccorso
+                 */
+                async function getDettagliRichiesta() {
+                    if (!authToken) {
+                        showResponse('dettagliRichiestaResponse', 'Devi prima effettuare il login come amministratore', 'error');
+                        return;
+                    }
+
+                    const richiestaId = parseInt(document.getElementById('dettagliRichiestaId').value);
+
+                    if (!richiestaId || richiestaId <= 0) {
+                        showResponse('dettagliRichiestaResponse', '❌ Inserisci un ID richiesta valido', 'error');
+                        return;
+                    }
+
+                    showResponse('dettagliRichiestaResponse', 'Caricamento dettagli richiesta...', 'info');
+
+                    try {
+                        const result = await apiCall(`/richieste/${richiestaId}`, {
+                            method: 'GET'
+                        });
+
+                        if (result.ok) {
+                            const dettagli = result.data;
+
+                            // DEBUG: Stampa i dati ricevuti per capire la struttura
+                            console.log('=== DEBUG DETTAGLI RICHIESTA ===');
+                            console.log('dettagli:', dettagli);
+                            console.log('dettagli.missioneAssociata:', dettagli.missioneAssociata);
+                            console.log('===============================');
+
+                            let response = `✅ Dettagli Richiesta di Soccorso #${dettagli.id}\n\n`;
+
+                            // === DATI DELLA SEGNALAZIONE ===
+                            response += `🚨 DATI DELLA SEGNALAZIONE:\n`;
+                            response += `• Nome: ${dettagli.nome}\n`;
+                            response += `• Descrizione: ${dettagli.descrizione}\n`;
+                            response += `• Indirizzo: ${dettagli.indirizzo}\n`;
+
+                            if (dettagli.coordinate) {
+                                response += `• Coordinate GPS: ${dettagli.coordinate}\n`;
+                            }
+
+                            if (dettagli.foto) {
+                                response += `• Foto allegata: Sì\n`;
+                            }
+
+                            // === DATI DEL SEGNALANTE ===
+                            response += `\n👤 DATI DEL SEGNALANTE:\n`;
+                            response += `• Nome segnalante: ${dettagli.nomeSegnalante}\n`;
+                            response += `• Email: ${dettagli.emailSegnalante}\n`;
+
+                            // === STATO E GESTIONE ===
+                            response += `\n📊 STATO E GESTIONE:\n`;
+                            response += `• Stato: ${dettagli.stato}\n`;
+
+                            if (dettagli.idAmministratore) {
+                                response += `• Admin responsabile: ${dettagli.nomeAmministratore || `ID ${dettagli.idAmministratore}`}\n`;
+                            }
+
+                            // === DATI TECNICI ===
+                            response += `\n🔧 DATI TECNICI:\n`;
+                            response += `• IP segnalazione: ${dettagli.ip || 'N/A'}\n`;
+
+                            if (dettagli.stringaValidazione) {
+                                response += `• Token validazione: ${dettagli.stringaValidazione.substring(0, 10)}...\n`;
+                            }
+
+                            if (dettagli.dataCreazione) {
+                                response += `• Data creazione: ${formatDateTime(dettagli.dataCreazione)}\n`;
+                            }
+
+                            // === MISSIONE COLLEGATA ===
+                            if (dettagli.missioneAssociata) {
+                                const missione = dettagli.missioneAssociata;
+                                response += `\n🚀 MISSIONE COLLEGATA #${missione.id}:\n`;
+                                response += `• Nome missione: ${missione.nome}\n`;
+                                response += `• Posizione: ${missione.posizione}\n`;
+                                response += `• Obiettivo: ${missione.obiettivo}\n`;
+                                response += `• Stato missione: ${missione.stato}\n`;
+                                response += `• Numero operatori: ${missione.numeroOperatori || 'N/A'}\n`;
+
+                                if (missione.amministratoreNome) {
+                                    response += `• Admin missione: ${missione.amministratoreNome}\n`;
+                                }
+
+                                if (missione.dataInizio) {
+                                    response += `• Inizio missione: ${formatDateTime(missione.dataInizio)}\n`;
+                                }
+
+                                if (missione.dataFine) {
+                                    response += `• Fine missione: ${formatDateTime(missione.dataFine)}\n`;
+                                }
+
+                                // Valutazione missione
+                                if (missione.livelloSuccesso !== null && missione.livelloSuccesso !== undefined && missione.livelloSuccesso > 0) {
+                                    response += `• Livello successo: ${missione.livelloSuccesso}/5 ⭐\n`;
+                                }
+
+                                if (missione.commenti) {
+                                    response += `• Commenti finali: ${missione.commenti}\n`;
+                                }
+                            } else {
+                                response += `\n🚀 MISSIONE:\n`;
+                                response += `• Nessuna missione collegata\n`;
+                            }
+
+                            showResponse('dettagliRichiestaResponse', response, 'success');
+
+                        } else {
+                            let errorMessage = '❌ Errore nel recupero dettagli richiesta.\n\n';
+
+                            if (result.status === 404) {
+                                errorMessage += 'La richiesta con questo ID non esiste.';
+                            } else if (result.status === 403) {
+                                errorMessage += 'Accesso negato. Solo gli amministratori possono visualizzare i dettagli delle richieste.';
+                            } else if (result.status === 401) {
+                                errorMessage += 'Non sei autenticato. Effettua prima il login come amministratore.';
+                            } else {
+                                errorMessage += `Errore del server (${result.status}): ${result.error || 'Errore sconosciuto'}`;
+                            }
+
+                            showResponse('dettagliRichiestaResponse', errorMessage, 'error');
+                        }
+
+                    } catch (error) {
+                        console.error('Errore dettagli richiesta:', error);
+                        showResponse('dettagliRichiestaResponse',
+                                '❌ Errore di connessione: ' + error.message,
+                                'error');
+                    }
+                }
+
+                /**
+                 * Pulisce il form dettagli richiesta
+                 */
+                function clearDettagliRichiestaForm() {
+                    document.getElementById('dettagliRichiestaId').value = '';
+                    showResponse('dettagliRichiestaResponse',
+                            'Effettua il login come amministratore per visualizzare i dettagli delle richieste...',
+                            'info');
+                }
 
             </script>
         </body>
