@@ -1892,6 +1892,13 @@
                         return;
                     }
 
+                    // DEBUG: Controlliamo i dati dell'utente corrente
+                    console.log('=== DEBUG UTENTE CORRENTE ===');
+                    console.log('authToken presente:', !!authToken);
+                    console.log('currentUser:', currentUser);
+                    console.log('currentUser.role:', currentUser?.role);
+                    console.log('============================');
+
                     const missioneId = parseInt(document.getElementById('dettagliMissioneId').value);
 
                     if (!missioneId || missioneId <= 0) {

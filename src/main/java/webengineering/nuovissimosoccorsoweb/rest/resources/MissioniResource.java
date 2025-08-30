@@ -449,48 +449,80 @@ public class MissioniResource {
         try {
             logger.info("=== DETTAGLI MISSIONE " + id + " ===");
 
-            // Verifica ruolo admin (dal token JWT)
+            // DEBUG: Stampa tutte le proprietà del context
             String userRole = (String) requestContext.getProperty("userRole");
-            if (!"ADMIN".equals(userRole)) {
+            String username = (String) requestContext.getProperty("username");
+            Integer userId = (Integer) requestContext.getProperty("userId");
+            String token = (String) requestContext.getProperty("token");
+
+            logger.info("DEBUG - Proprietà token per dettagli missione:");
+            logger.info("  userRole: '" + userRole + "'");
+            logger.info("  username: '" + username + "'");
+            logger.info("  userId: " + userId);
+            logger.info("  token presente: " + (token != null ? "SÌ" : "NO"));
+
+            // ✅ CORREZIONE: Verifica ruolo admin con controllo case-insensitive (come nell'annullamento)
+            boolean isAdmin = "ADMIN".equalsIgnoreCase(userRole) || "admin".equals(userRole) || "amministratore".equalsIgnoreCase(userRole);
+
+            if (!isAdmin) {
+                logger.warning("DEBUG - Accesso NEGATO per dettagli missione!");
+                logger.warning("  Ruolo richiesto: ADMIN/admin/amministratore");
+                logger.warning("  Ruolo trovato: '" + userRole + "'");
+                logger.warning("  Username: " + username);
+                logger.warning("  User ID: " + userId);
+
                 return Response.status(Response.Status.FORBIDDEN)
-                        .entity(new ErrorResponse("Accesso negato. Solo gli admin possono visualizzare i dettagli delle missioni.", "ACCESS_DENIED"))
+                        .entity(new ErrorResponse("Accesso negato. Solo gli admin possono visualizzare i dettagli delle missioni. Ruolo trovato: " + userRole, "ACCESS_DENIED"))
                         .build();
             }
 
-            // Ottieni il DataLayer
+            logger.info("DEBUG - Controllo ruolo SUPERATO per dettagli missione!");
+
+            // Validazione parametri
+            if (id <= 0) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(new ErrorResponse("ID missione non valido", "INVALID_ID"))
+                        .build();
+            }
+
+            // Crea DataLayer
             dataLayer = createDataLayer();
 
-            // Cerca la missione per ID
+            // Trova la missione
             Missione missione = dataLayer.getMissioneDAO().getMissioneByCodice(id);
-
             if (missione == null) {
+                logger.warning("Missione " + id + " non trovata");
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity(new ErrorResponse("Missione non trovata", "MISSION_NOT_FOUND"))
+                        .entity(new ErrorResponse("Missione non trovata", "NOT_FOUND"))
                         .build();
             }
 
-            // Crea DTO con dettagli completi
+            // Crea dettagli completi della missione
             DettagliMissioneDTO dettagli = creaDettagliMissioneCompleti(dataLayer, missione);
 
             logger.info("Dettagli missione " + id + " recuperati con successo");
 
             return Response.ok(dettagli).build();
 
-        } catch (DataException ex) {
-            logger.log(Level.SEVERE, "Errore database dettagli missione " + id, ex);
+        } catch (DataException e) {
+            logger.log(Level.SEVERE, "Errore database nel recupero dettagli missione " + id, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(new ErrorResponse("Errore nel database", "DATABASE_ERROR"))
                     .build();
 
-        } catch (Exception ex) {
-            logger.log(Level.SEVERE, "Errore generico dettagli missione " + id, ex);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Errore generico nel recupero dettagli missione " + id, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ErrorResponse("Errore interno del server", "INTERNAL_ERROR"))
+                    .entity(new ErrorResponse("Errore di sistema", "INTERNAL_ERROR"))
                     .build();
 
         } finally {
             if (dataLayer != null) {
-                dataLayer.destroy();
+                try {
+                    dataLayer.destroy();
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, "Errore chiusura DataLayer", e);
+                }
             }
         }
     }
@@ -508,12 +540,16 @@ public class MissioniResource {
         dettagli.setPosizione(missione.getPosizione());
         dettagli.setObiettivo(missione.getObiettivo());
         dettagli.setNote(missione.getNota());
-        dettagli.setDataOraInizio(missione.getDataOraInizio());
+        if (missione.getDataOraInizio() != null) {
+            dettagli.setDataOraInizio(missione.getDataOraInizio().toString());
+        }
         // Data fine - ottienila dalle InfoMissione
         try {
             InfoMissione infoMissione = dataLayer.getInfoMissioneDAO().getInfoByCodiceMissione(missione.getCodiceRichiesta());
             if (infoMissione != null) {
-                dettagli.setDataOraFine(infoMissione.getDataOraFine());
+                if (infoMissione.getDataOraFine() != null) {
+                    dettagli.setDataOraFine(infoMissione.getDataOraFine().toString());
+                }
             } else {
                 dettagli.setDataOraFine(null); // Missione ancora attiva
             }
@@ -609,7 +645,7 @@ public class MissioniResource {
                 ValutazioneMissioneDTO valutazione = new ValutazioneMissioneDTO();
                 valutazione.setSuccesso(infoMissione.getSuccesso());
                 valutazione.setCommento(infoMissione.getCommento());
-                valutazione.setDataOraFine(infoMissione.getDataOraFine());
+                valutazione.setDataOraFine(infoMissione.getDataOraFine().toString());
                 dettagli.setValutazione(valutazione);
             }
         } catch (Exception e) {
