@@ -678,12 +678,13 @@
                 </div>
 
                 <div class="button-row">
-                    <button onclick="chiudiMissione()" id="chiusuraMissioneBtn" style="background-color: #dc3545; display: none;">
-                        🔚 Chiudi Missione
-                    </button>
-                    <button onclick="clearChiusuraMissioneForm()" id="clearChiusuraMissioneFormBtn" style="display: none;">🧹 Pulisci Form</button>
-                </div>
-
+    <button onclick="chiudiMissione()" id="chiusuraMissioneBtn" style="background-color: #dc3545; display: none;">
+        🔚 Chiudi Missione
+    </button>
+    <button onclick="clearChiusuraMissioneForm()" id="clearChiusuraMissioneFormBtn" style="display: none;">
+        🧹 Pulisci Form
+    </button>
+</div>
                 <div class="response-area" id="chiusuraMissioneResponse">
                     Effettua il login come amministratore per chiudere le missioni...
                 </div>
@@ -1030,17 +1031,17 @@
 
     // Lista dei pulsanti che richiedono autenticazione ADMIN
     const adminOnlyButtons = [
-        'listaBtn',                     // ✅ Pulsante "Carica Lista" 
-        'richiesteNonPositiveBtn',      // ✅ Pulsante richieste non positive
-        'operatoriBtn',                 // ✅ Pulsante operatori 
-        'dettagliRichiestaBtn',         // ✅ Pulsante dettagli richiesta 
-        'dettagliOperatoreBtn',         // ✅ Pulsante dettagli operatore 
-        'missioni13Btn',                // ✅ Pulsante missioni operatore
-        'annullaBtn',                   // ✅ Pulsante annulla
-        'dettagliMissioneBtn',          // ✅ Pulsante dettagli missione
-        'chiusuraMissioneBtn',          // ✅ Pulsante chiusura missione
-        'clearChiusuraMissioneFormBtn'  // ✅ NUOVO: Pulsante pulisci form chiusura missione
-    ];
+    'listaBtn',                     // ✅ Pulsante "Carica Lista" 
+    'richiesteNonPositiveBtn',      // ✅ Pulsante richieste non positive
+    'operatoriBtn',                 // ✅ Pulsante operatori 
+    'dettagliRichiestaBtn',         // ✅ Pulsante dettagli richiesta 
+    'dettagliOperatoreBtn',         // ✅ Pulsante dettagli operatore 
+    'missioni13Btn',                // ✅ Pulsante missioni operatore
+    'annullaBtn',                   // ✅ Pulsante annulla
+    'dettagliMissioneBtn',          // ✅ Pulsante dettagli missione
+    'chiusuraMissioneBtn',          // ✅ Pulsante chiusura missione
+    'clearChiusuraMissioneFormBtn'  // ✅ NUOVO: Pulsante pulisci form chiusura missione
+];
 
     // Pulsanti che possono essere visibili per tutti gli utenti autenticati
     const userButtons = [
