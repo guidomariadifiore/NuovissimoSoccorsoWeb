@@ -681,8 +681,7 @@
                     <button onclick="chiudiMissione()" id="chiusuraMissioneBtn" style="background-color: #dc3545; display: none;">
                         🔚 Chiudi Missione
                     </button>
-                    <button onclick="clearChiusuraMissioneForm()">🧹 Pulisci Form</button>
-                    <button onclick="fillChiusuraMissioneExample()">📋 Esempio</button>
+                    <button onclick="clearChiusuraMissioneForm()" id="clearChiusuraMissioneFormBtn" style="display: none;">🧹 Pulisci Form</button>
                 </div>
 
                 <div class="response-area" id="chiusuraMissioneResponse">
@@ -1027,116 +1026,93 @@
 // Aggiorna la lista dei pulsanti che devono essere mostrati/nascosti
                 // in base allo stato di autenticazione
                 function updateAuthUI(isAuthenticated, currentUser) {
-                    const statusElement = document.getElementById('authStatus');
+    const statusElement = document.getElementById('authStatus');
 
-                    // Lista dei pulsanti che richiedono autenticazione ADMIN
-                    const adminOnlyButtons = [
-                        'listaBtn',                   // ✅ Pulsante "Carica Lista" 
-                        'richiesteNonPositiveBtn',    // ✅ Pulsante richieste non positive
-                        'operatoriBtn',               // ✅ Pulsante operatori 
-                        'dettagliRichiestaBtn',       // ✅ Pulsante dettagli richiesta 
-                        'dettagliOperatoreBtn',       // ✅ Pulsante dettagli operatore 
-                        'missioni13Btn',              // ✅ Pulsante missioni operatore
-                        'annullaBtn',                 // ✅ Pulsante annulla
-                        'dettagliMissioneBtn',        // ✅ Pulsante dettagli missione
-                        'chiusuraMissioneBtn'         // ✅ NUOVO: Pulsante chiusura missione
-                    ];
+    // Lista dei pulsanti che richiedono autenticazione ADMIN
+    const adminOnlyButtons = [
+        'listaBtn',                     // ✅ Pulsante "Carica Lista" 
+        'richiesteNonPositiveBtn',      // ✅ Pulsante richieste non positive
+        'operatoriBtn',                 // ✅ Pulsante operatori 
+        'dettagliRichiestaBtn',         // ✅ Pulsante dettagli richiesta 
+        'dettagliOperatoreBtn',         // ✅ Pulsante dettagli operatore 
+        'missioni13Btn',                // ✅ Pulsante missioni operatore
+        'annullaBtn',                   // ✅ Pulsante annulla
+        'dettagliMissioneBtn',          // ✅ Pulsante dettagli missione
+        'chiusuraMissioneBtn',          // ✅ Pulsante chiusura missione
+        'clearChiusuraMissioneFormBtn'  // ✅ NUOVO: Pulsante pulisci form chiusura missione
+    ];
 
-                    // Pulsanti che possono essere visibili per tutti gli utenti autenticati
-                    const userButtons = [
-                        'verifyBtn', // ✅ Pulsante verifica token
-                        'logoutBtn'                   // ✅ Pulsante logout
-                    ];
+    // Pulsanti che possono essere visibili per tutti gli utenti autenticati
+    const userButtons = [
+        'verifyBtn',                    // ✅ Pulsante verifica token
+        'logoutBtn'                     // ✅ Pulsante logout
+    ];
 
-                    if (isAuthenticated && currentUser) {
-                        const isAdmin = currentUser.role === 'ADMIN' || currentUser.role === 'admin';
+    if (isAuthenticated && currentUser) {
+        const isAdmin = currentUser.role === 'ADMIN' || currentUser.ruolo === 'ADMIN';
 
-                        statusElement.textContent = `✅ Autenticato come ${currentUser.email || 'Utente'} (${currentUser.role || 'N/A'})`;
-                        statusElement.className = 'auth-status logged-in';
+        statusElement.textContent = `✅ Autenticato come: ${currentUser.email || currentUser.nome} (${isAdmin ? 'ADMIN' : 'USER'})`;
+        statusElement.className = isAdmin ? 'auth-status admin' : 'auth-status user';
 
-                        if (isAdmin) {
-                            // ADMIN: Mostra tutti i pulsanti
-                            adminOnlyButtons.forEach(id => {
-                                const btn = document.getElementById(id);
-                                if (btn) {
-                                    btn.style.display = 'inline-block';  // Mostra il pulsante
-                                    btn.disabled = false;                 // E abilitalo
-                                    console.log(`✅ ADMIN - Mostrato pulsante: ${id}`);
-                                } else {
-                                    console.log(`⚠️ Pulsante non trovato: ${id}`);
-                                }
-                            });
+        // Mostra tutti i pulsanti utente
+        userButtons.forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) {
+                btn.style.display = 'inline-block';
+                console.log(`✅ AUTENTICATO - Mostrato pulsante utente: ${id}`);
+            }
+        });
 
-                            // Mostra anche i pulsanti utente
-                            userButtons.forEach(id => {
-                                const btn = document.getElementById(id);
-                                if (btn) {
-                                    btn.style.display = 'inline-block';
-                                    btn.disabled = false;
-                                    console.log(`✅ ADMIN - Mostrato pulsante utente: ${id}`);
-                                }
-                            });
-
-                            // Gestisci form missione per admin
-                            const sezionFormMissione = document.getElementById('sezionFormMissione');
-                            const messaggioNonAdmin = document.getElementById('messaggioNonAdmin');
-                            if (sezionFormMissione)
-                                sezionFormMissione.style.display = 'block';
-                            if (messaggioNonAdmin)
-                                messaggioNonAdmin.style.display = 'none';
-
-                        } else {
-                            // UTENTE NON ADMIN: Nascondi i pulsanti admin
-                            adminOnlyButtons.forEach(id => {
-                                const btn = document.getElementById(id);
-                                if (btn) {
-                                    btn.style.display = 'none';  // Nascondi il pulsante
-                                    console.log(`❌ UTENTE - Nascosto pulsante admin-only: ${id}`);
-                                }
-                            });
-
-                            // Mostra solo i pulsanti utente
-                            userButtons.forEach(id => {
-                                const btn = document.getElementById(id);
-                                if (btn) {
-                                    btn.style.display = 'inline-block';
-                                    btn.disabled = false;
-                                    console.log(`✅ UTENTE - Mostrato pulsante utente: ${id}`);
-                                }
-                            });
-
-                            // Nascondi form missione per utenti normali
-                            const sezionFormMissione = document.getElementById('sezionFormMissione');
-                            const messaggioNonAdmin = document.getElementById('messaggioNonAdmin');
-                            if (sezionFormMissione)
-                                sezionFormMissione.style.display = 'none';
-                            if (messaggioNonAdmin)
-                                messaggioNonAdmin.style.display = 'block';
-                            showResponse('missioneResponse', '⚠️ Solo gli admin possono creare missioni.', 'warning');
-                        }
-                    } else {
-                        // NON AUTENTICATO: Nascondi tutti i pulsanti admin
-                        statusElement.textContent = '❌ Non autenticato';
-                        statusElement.className = 'auth-status logged-out';
-
-                        // Nascondi tutti i pulsanti che richiedono autenticazione
-                        [...adminOnlyButtons, ...userButtons].forEach(id => {
-                            const btn = document.getElementById(id);
-                            if (btn) {
-                                btn.style.display = 'none';  // Nascondi il pulsante
-                                console.log(`❌ NON AUTENTICATO - Nascosto pulsante: ${id}`);
-                            }
-                        });
-
-                        // Nascondi tutto quando non autenticato
-                        const sezionFormMissione = document.getElementById('sezionFormMissione');
-                        const messaggioNonAdmin = document.getElementById('messaggioNonAdmin');
-                        if (sezionFormMissione)
-                            sezionFormMissione.style.display = 'none';
-                        if (messaggioNonAdmin)
-                            messaggioNonAdmin.style.display = 'none';
-                    }
+        if (isAdmin) {
+            // ADMIN: Mostra tutti i pulsanti admin
+            adminOnlyButtons.forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.style.display = 'inline-block';  // Mostra il pulsante
+                    console.log(`✅ ADMIN - Mostrato pulsante: ${id}`);
                 }
+            });
+
+            showResponse('authResponse', 
+                `✅ Login amministratore completato!\nAccesso completo a tutte le funzionalità.`, 
+                'success');
+        } else {
+            // USER: Nascondi i pulsanti riservati agli admin
+            adminOnlyButtons.forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.style.display = 'none';
+                    console.log(`⚠️ USER - Nascosto pulsante admin: ${id}`);
+                }
+            });
+
+            showResponse('authResponse', 
+                `✅ Login utente completato!\nAlcune funzionalità sono riservate agli amministratori.`, 
+                'warning');
+        }
+    } else {
+        // NON AUTENTICATO: Nascondi tutti i pulsanti admin
+        statusElement.textContent = '❌ Non autenticato';
+        statusElement.className = 'auth-status logged-out';
+
+        // Nascondi tutti i pulsanti che richiedono autenticazione
+        [...adminOnlyButtons, ...userButtons].forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) {
+                btn.style.display = 'none';  // Nascondi il pulsante
+                console.log(`❌ NON AUTENTICATO - Nascosto pulsante: ${id}`);
+            }
+        });
+
+        // Nascondi tutto quando non autenticato
+        const sezionFormMissione = document.getElementById('sezionFormMissione');
+        const messaggioNonAdmin = document.getElementById('messaggioNonAdmin');
+        if (sezionFormMissione)
+            sezionFormMissione.style.display = 'none';
+        if (messaggioNonAdmin)
+            messaggioNonAdmin.style.display = 'none';
+    }
+}
 
                 // === FUNZIONI MISSIONE ===
 
@@ -1711,14 +1687,19 @@
                 }
                 // === INIZIALIZZAZIONE ===
                 document.addEventListener('DOMContentLoaded', function () {
-                    updateAuthUI(false, null);
-                    showResponse('authResponse', 'Pronto per il test di autenticazione...');
-                    showResponse('richiestaResponse', 'Pronto per il test di inserimento richiesta...');
-                    showResponse('convalidaResponse', 'Pronto per il test di convalida richiesta...');
-                    showResponse('listaResponse', 'Pronto per il test di lista richieste...');
-                    showResponse('operatoriResponse', 'Pronto per il test di lista operatori...');
-                    showResponse('missioneResponse', 'Effettua il login come amministratore per creare missioni...');
-                    showResponse('testResponse', 'Pronto per i test di connettività...');
+                    document.addEventListener('DOMContentLoaded', function () {
+    updateAuthUI(false, null);
+    showResponse('authResponse', 'Pronto per il test di autenticazione...');
+    showResponse('richiestaResponse', 'Pronto per il test di inserimento richiesta...');
+    showResponse('convalidaResponse', 'Pronto per il test di convalida richiesta...');
+    showResponse('listaResponse', 'Pronto per il test di lista richieste...');
+    showResponse('operatoriResponse', 'Pronto per il test di lista operatori...');
+    showResponse('missioneResponse', 'Effettua il login come amministratore per creare missioni...');
+    
+    // MANTENERE VISIBILE IL MESSAGGIO DI INFO CHIUSURA MISSIONE
+    showResponse('chiusuraMissioneResponse', 'Effettua il login come amministratore per chiudere le missioni...', 'info');
+    
+    showResponse('testResponse', 'Pronto per i test di connettività...');
                 });
                 // === FUNZIONI ANNULLAMENTO RICHIESTA ===
 
@@ -2100,141 +2081,129 @@
                  * Chiude una missione attiva con valutazione finale
                  */
                 async function chiudiMissione() {
-                    if (!authToken) {
-                        showResponse('chiusuraMissioneResponse', 'Devi prima effettuare il login come amministratore', 'error');
-                        return;
-                    }
+    if (!authToken) {
+        showResponse('chiusuraMissioneResponse', 'Devi prima effettuare il login come amministratore', 'error');
+        return;
+    }
 
-                    const missioneId = parseInt(document.getElementById('chiusuraMissioneId').value);
-                    const livelloSuccesso = parseInt(document.getElementById('livelloSuccesso').value);
-                    const commento = document.getElementById('commentoFinale').value.trim();
+    const missioneId = parseInt(document.getElementById('chiusuraMissioneId').value);
+    const livelloSuccesso = parseInt(document.getElementById('livelloSuccesso').value);
+    const commento = document.getElementById('commentoFinale').value;
 
-                    // Validazione input
-                    if (!missioneId || missioneId <= 0) {
-                        showResponse('chiusuraMissioneResponse', '❌ Inserisci un ID missione valido', 'error');
-                        return;
-                    }
+    // Validazione input
+    if (!missioneId || missioneId <= 0) {
+        showResponse('chiusuraMissioneResponse', '❌ Inserisci un ID missione valido', 'error');
+        return;
+    }
 
-                    if (!livelloSuccesso || livelloSuccesso < 1 || livelloSuccesso > 5) {
-                        showResponse('chiusuraMissioneResponse', '❌ Seleziona un livello di successo da 1 a 5', 'error');
-                        return;
-                    }
+    if (!livelloSuccesso || livelloSuccesso < 1 || livelloSuccesso > 5) {
+        showResponse('chiusuraMissioneResponse', '❌ Seleziona un livello di successo valido (1-5)', 'error');
+        return;
+    }
 
-                    if (!commento || commento.length < 10) {
-                        showResponse('chiusuraMissioneResponse', '❌ Il commento finale deve essere di almeno 10 caratteri', 'error');
-                        return;
-                    }
+    if (!commento.trim()) {
+        showResponse('chiusuraMissioneResponse', '❌ Inserisci un commento finale', 'error');
+        return;
+    }
 
-                    // Conferma dall'utente
-                    const conferma = confirm(`⚠️ ATTENZIONE - CHIUSURA MISSIONE!\n\nStai per chiudere definitivamente la missione ${missioneId}.\n\nDettagli chiusura:\n• Livello successo: ${livelloSuccesso}/5\n• Commento: ${commento.substring(0, 50)}${commento.length > 50 ? '...' : ''}\n\nQuesta operazione:\n• NON può essere annullata\n• Segnerà la missione come CONCLUSA\n• Creerà il resoconto finale\n\nConfermi la chiusura?`);
-                    
-                    if (!conferma) {
-                        showResponse('chiusuraMissioneResponse', '🚫 Chiusura missione annullata dall\'utente', 'info');
-                        return;
-                    }
+    
+    // Procedi direttamente con la chiusura (senza popup)
+    showResponse('chiusuraMissioneResponse', '🔄 Chiusura missione in corso...', 'info');
 
-                    showResponse('chiusuraMissioneResponse', '🔄 Chiusura missione in corso...', 'info');
+    try {
+        const richiestaChiusura = {
+            livelloSuccesso: livelloSuccesso,
+            commento: commento
+        };
 
-                    try {
-                        const richiestaChiusura = {
-                            livelloSuccesso: livelloSuccesso,
-                            commento: commento
-                        };
+        const result = await apiCall(`/missioni/${missioneId}/chiudi`, {
+            method: 'PUT',
+            body: JSON.stringify(richiestaChiusura)
+        });
 
-                        const result = await apiCall(`/missioni/${missioneId}/chiudi`, {
-                            method: 'PUT',
-                            body: JSON.stringify(richiestaChiusura)
-                        });
+        if (result.ok) {
+            const response = result.data;
+            
+            let message = `✅ ${response.message}\n\n`;
+            message += `📊 RESOCONTO FINALE:\n`;
+            message += `• ID Missione: ${response.missioneId || missioneId}\n`;
+            message += `• Livello successo: ${livelloSuccesso}/5 `;
+            
+            // Emoji in base al livello
+            if (livelloSuccesso >= 4) message += '🌟';
+            else if (livelloSuccesso >= 3) message += '👍';
+            else if (livelloSuccesso >= 2) message += '⚠️';
+            else message += '❌';
+            
+            message += `\n`;
+            message += `• Timestamp chiusura: ${formatDateTime(response.timestampChiusura)}\n`;
+            message += `• Stato missione: CONCLUSA\n`;
+            message += `• Stato richiesta: CHIUSA\n`;
+            message += `\n💬 Commento finale:\n"${commento}"\n`;
 
-                        if (result.ok) {
-                            const response = result.data;
-                            
-                            let message = `✅ ${response.message}\n\n`;
-                            message += `📊 RESOCONTO FINALE:\n`;
-                            message += `• ID Missione: ${response.missioneId || missioneId}\n`;
-                            message += `• Livello successo: ${livelloSuccesso}/5 `;
-                            
-                            // Emoji in base al livello
-                            if (livelloSuccesso >= 4) message += '🌟';
-                            else if (livelloSuccesso >= 3) message += '👍';
-                            else if (livelloSuccesso >= 2) message += '⚠️';
-                            else message += '❌';
-                            
-                            message += `\n`;
-                            message += `• Timestamp chiusura: ${formatDateTime(response.timestampChiusura)}\n`;
-                            message += `• Stato missione: CONCLUSA\n`;
-                            message += `• Stato richiesta: CHIUSA\n`;
-                            message += `\n💬 Commento finale:\n"${commento}"\n`;
+            // MANTENERE VISIBILE IL MESSAGGIO (non aggiungere timeout)
+            showResponse('chiusuraMissioneResponse', message, 'success');
+            
+            // Pulisci il form dopo il successo (ma senza timeout che nasconde il messaggio)
+            setTimeout(() => {
+                clearChiusuraMissioneForm();
+            }, 3000);
 
-                            showResponse('chiusuraMissioneResponse', message, 'success');
-                            
-                            // Pulisci il form dopo il successo
-                            setTimeout(() => {
-                                clearChiusuraMissioneForm();
-                            }, 3000);
+        } else {
+            let errorMessage = '❌ Errore nella chiusura missione.\n\n';
 
-                        } else {
-                            let errorMessage = '❌ Errore nella chiusura missione.\n\n';
-
-                            if (result.status === 404) {
-                                errorMessage += 'La missione con questo ID non esiste.';
-                            } else if (result.status === 403) {
-                                errorMessage += 'Accesso negato. Solo gli amministratori possono chiudere le missioni.';
-                            } else if (result.status === 401) {
-                                errorMessage += 'Non sei autenticato. Effettua prima il login come amministratore.';
-                            } else if (result.status === 400) {
-                                if (result.data.message && result.data.message.includes('Attiva')) {
-                                    errorMessage += 'La missione deve essere in stato "Attiva" per essere chiusa.\nControlla che l\'ID sia corretto e che la missione non sia già conclusa.';
-                                } else if (result.data.message && result.data.message.includes('già stata chiusa')) {
-                                    errorMessage += 'La missione è già stata chiusa in precedenza.';
-                                } else {
-                                    errorMessage += result.data.message || 'Dati di chiusura non validi.';
-                                }
-                            } else {
-                                errorMessage += `Errore del server (${result.status}): ${result.data.message || result.data.error || 'Errore sconosciuto'}`;
-                            }
-
-                            showResponse('chiusuraMissioneResponse', errorMessage, 'error');
-                        }
-
-                    } catch (error) {
-                        console.error('Errore chiusura missione:', error);
-                        showResponse('chiusuraMissioneResponse', 
-                            '❌ Errore di connessione: ' + error.message, 
-                            'error');
-                    }
+            if (result.status === 404) {
+                errorMessage += 'La missione con questo ID non esiste.';
+            } else if (result.status === 403) {
+                errorMessage += 'Accesso negato. Solo gli amministratori possono chiudere le missioni.';
+            } else if (result.status === 401) {
+                errorMessage += 'Non sei autenticato. Effettua prima il login come amministratore.';
+            } else if (result.status === 400) {
+                if (result.data.message && result.data.message.includes('Attiva')) {
+                    errorMessage += 'La missione deve essere in stato "Attiva" per essere chiusa.\nControlla che l\'ID sia corretto e che la missione non sia già conclusa.';
+                } else if (result.data.message && result.data.message.includes('già stata chiusa')) {
+                    errorMessage += 'La missione è già stata chiusa in precedenza.';
+                } else {
+                    errorMessage += result.data.message || 'Dati di chiusura non validi.';
                 }
+            } else {
+                errorMessage += `Errore del server (${result.status}): ${result.data.message || result.data.error || 'Errore sconosciuto'}`;
+            }
+
+            // MANTENERE VISIBILE IL MESSAGGIO DI ERRORE (non aggiungere timeout)
+            showResponse('chiusuraMissioneResponse', errorMessage, 'error');
+        }
+
+    } catch (error) {
+        console.error('Errore chiusura missione:', error);
+        // MANTENERE VISIBILE IL MESSAGGIO DI ERRORE (non aggiungere timeout)
+        showResponse('chiusuraMissioneResponse', 
+            '❌ Errore di connessione: ' + error.message, 
+            'error');
+    }
+}
 
                 /**
                  * Pulisce il form di chiusura missione
                  */
                 function clearChiusuraMissioneForm() {
-                    document.getElementById('chiusuraMissioneId').value = '';
-                    document.getElementById('livelloSuccesso').value = '';
-                    document.getElementById('commentoFinale').value = 'Missione completata con successo. Tutti gli obiettivi sono stati raggiunti e la situazione è stata gestita in modo efficace.';
-                    showResponse('chiusuraMissioneResponse', 
-                        'Effettua il login come amministratore per chiudere le missioni...', 
-                        'info');
-                }
-
+   
+        document.getElementById('chiusuraMissioneId').value = '';
+        document.getElementById('livelloSuccesso').value = '';
+        document.getElementById('commentoFinale').value = 'Missione completata con successo. Tutti gli obiettivi sono stati raggiunti e la situazione è stata gestita in modo efficace.';
+    
+    // RIMUOVERE IL POPUP - Mantenere visibile il messaggio di info missione
+    showResponse('chiusuraMissioneResponse', 
+        'Effettua il login come amministratore per chiudere le missioni...', 
+        'info');
+    
+    // NON aggiungere timeout che nasconde il messaggio
+    // setTimeout(() => { document.getElementById('chiusuraMissioneResponse').style.display = 'none'; }, 3000);
+}
                 /**
                  * Riempie il form con dati di esempio
                  */
-                function fillChiusuraMissioneExample() {
-                    document.getElementById('chiusuraMissioneId').value = '1';
-                    document.getElementById('livelloSuccesso').value = '4';
-                    document.getElementById('commentoFinale').value = 'Missione completata con successo. L\'emergenza è stata risolta efficacemente, tutti gli obiettivi sono stati raggiunti. Il team ha lavorato in modo coordinato e professionale. Nessun incidente da segnalare.';
-                    
-                    showResponse('chiusuraMissioneResponse', 
-                        '📋 Esempio caricato con successo!\n\n' +
-                        '💡 SUGGERIMENTI PER LA CHIUSURA:\n' +
-                        '• Verifica che la missione sia effettivamente in stato "Attiva"\n' +
-                        '• Scegli il livello di successo in base ai risultati ottenuti\n' +
-                        '• Scrivi un commento dettagliato per future consultazioni\n' +
-                        '• L\'operazione non può essere annullata una volta confermata\n' +
-                        '• Solo gli amministratori possono chiudere le missioni', 
-                        'info');
-                }
+                
                 
                 // Funzione di utilità per formattare date/ore
                 function formatDateTime(dateTimeString) {
