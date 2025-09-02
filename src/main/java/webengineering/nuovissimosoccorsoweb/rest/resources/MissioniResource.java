@@ -38,6 +38,10 @@ import webengineering.nuovissimosoccorsoweb.rest.dto.MissioneOperatoreDTO;
 import webengineering.nuovissimosoccorsoweb.rest.dto.MissioniOperatoreResponse;
 import webengineering.nuovissimosoccorsoweb.rest.dto.OperatoreAssegnatoDTO;
 import webengineering.nuovissimosoccorsoweb.rest.dto.ValutazioneMissioneDTO;
+import webengineering.nuovissimosoccorsoweb.rest.dto.ChiusuraMissioneRequest;
+import webengineering.nuovissimosoccorsoweb.rest.dto.ChiusuraMissioneResponse;
+import webengineering.nuovissimosoccorsoweb.model.impl.InfoMissioneImpl;
+import java.sql.Connection;
 
 /**
  * Resource REST per la gestione delle missioni. AGGIORNATO per gestire i nuovi
@@ -740,7 +744,142 @@ public class MissioniResource {
             }
         }
     }
+@PUT
+    @Path("{id}/chiudi")
+    @Secured
+    public Response chiudiMissione(@PathParam("id") int id, ChiusuraMissioneRequest richiestaChiusura) {
+        SoccorsoDataLayer dataLayer = null;
 
+        try {
+            logger.info("=== CHIUSURA MISSIONE " + id + " ===");
+            
+            // DEBUG: Stampa le proprietà del context
+            String userRole = (String) requestContext.getProperty("userRole");
+            String username = (String) requestContext.getProperty("username");
+            Integer userId = (Integer) requestContext.getProperty("userId");
+
+            logger.info("DEBUG - Proprietà token per chiusura missione:");
+            logger.info("  userRole: '" + userRole + "'");
+            logger.info("  username: '" + username + "'");
+            logger.info("  userId: " + userId);
+
+            // Verifica ruolo admin (stesso controllo degli altri endpoint)
+            boolean isAdmin = "ADMIN".equalsIgnoreCase(userRole) || "admin".equals(userRole) || "amministratore".equalsIgnoreCase(userRole);
+
+            if (!isAdmin) {
+                logger.warning("DEBUG - Accesso NEGATO per chiusura missione!");
+                return Response.status(Response.Status.FORBIDDEN)
+                        .entity(new ErrorResponse("Solo gli amministratori possono chiudere le missioni. Ruolo trovato: " + userRole, "ACCESS_DENIED"))
+                        .build();
+            }
+
+            // Validazione input
+            if (id <= 0) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(new ErrorResponse("ID missione non valido", "INVALID_ID"))
+                        .build();
+            }
+            
+            if (richiestaChiusura == null || !richiestaChiusura.isValid()) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(new ErrorResponse("Dati di chiusura non validi. Livello successo deve essere 1-5 e commento obbligatorio", "VALIDATION_ERROR"))
+                        .build();
+            }
+
+            // Inizializza DataLayer
+            dataLayer = createDataLayer();
+
+            // 1. Verifica che la missione esista
+            Missione missione = dataLayer.getMissioneDAO().getMissioneByCodice(id);
+            if (missione == null) {
+                logger.warning("Missione " + id + " non trovata");
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(new ErrorResponse("Missione non trovata", "NOT_FOUND"))
+                        .build();
+            }
+
+            // 2. Verifica che la missione sia in stato "Attiva"
+            RichiestaSoccorso richiesta = dataLayer.getRichiestaSoccorsoDAO().getRichiestaByCodice(id);
+            if (richiesta == null || !"Attiva".equals(richiesta.getStato())) {
+                String statoAttuale = richiesta != null ? richiesta.getStato() : "Sconosciuto";
+                logger.warning("Tentativo di chiudere missione " + id + " con stato non attivo: " + statoAttuale);
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(new ErrorResponse("La missione deve essere in stato 'Attiva' per essere chiusa. Stato attuale: " + statoAttuale, "INVALID_STATE"))
+                        .build();
+            }
+
+            // 3. Verifica che non esista già un resoconto
+            InfoMissione infoEsistente = dataLayer.getInfoMissioneDAO().getInfoByCodiceMissione(id);
+            if (infoEsistente != null) {
+                logger.warning("Tentativo di chiudere missione " + id + " già chiusa");
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(new ErrorResponse("La missione è già stata chiusa", "ALREADY_CLOSED"))
+                        .build();
+            }
+
+            // 4. Transazione per chiusura completa
+            Connection conn = dataLayer.getConnection();
+            boolean autoCommit = conn.getAutoCommit();
+            conn.setAutoCommit(false);
+
+            try {
+                LocalDateTime timestampChiusura = LocalDateTime.now();
+                
+                // 5. Crea resoconto finale (InfoMissione)
+                InfoMissione infoMissione = new InfoMissioneImpl();
+                infoMissione.setCodiceMissione(id);
+                infoMissione.setSuccesso(richiestaChiusura.getLivelloSuccesso());
+                infoMissione.setCommento(richiestaChiusura.getCommento());
+                infoMissione.setDataOraFine(timestampChiusura);
+                
+                dataLayer.getInfoMissioneDAO().storeInfoMissione(infoMissione);
+                
+                // 6. Aggiorna stato richiesta a "Chiusa"
+                dataLayer.getRichiestaSoccorsoDAO().updateStato(id, "Chiusa");
+
+                // 7. Commit transazione
+                conn.commit();
+                logger.info("Missione " + id + " chiusa con successo. Livello successo: " + richiestaChiusura.getLivelloSuccesso());
+
+                // 8. Risposta di successo
+                ChiusuraMissioneResponse response = ChiusuraMissioneResponse.success(
+                    "Missione chiusa con successo! Livello di successo: " + richiestaChiusura.getLivelloSuccesso() + "/5",
+                    timestampChiusura.toString(),
+                    id
+                );
+
+                return Response.ok(response).build();
+
+            } catch (Exception e) {
+                // Rollback in caso di errore
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(autoCommit);
+            }
+
+        } catch (DataException e) {
+            logger.log(Level.SEVERE, "Errore database nella chiusura missione " + id, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorResponse("Errore nel database durante la chiusura", "DATABASE_ERROR"))
+                    .build();
+
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Errore generico nella chiusura missione " + id, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorResponse("Errore di sistema durante la chiusura", "INTERNAL_ERROR"))
+                    .build();
+
+        } finally {
+            if (dataLayer != null) {
+                try {
+                    dataLayer.destroy();
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, "Errore chiusura DataLayer", e);
+                }
+            }
+        }
+    }
     /**
      * Crea un DTO con le informazioni di una missione per un operatore
      * specifico.

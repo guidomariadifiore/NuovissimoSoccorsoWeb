@@ -638,6 +638,57 @@
                     Effettua il login come amministratore per creare missioni...
                 </div>
             </div>
+            <!-- Sezione 8: Chiusura di una Missione -->
+            <div class="section">
+                <h2>🔚 8. Chiusura di una Missione (Solo Admin)</h2>
+
+                <div class="form-group">
+                    <label for="chiusuraMissioneId">ID Missione:</label>
+                    <input type="number" id="chiusuraMissioneId" min="1" placeholder="Inserisci l'ID della missione da chiudere">
+                    <small style="color: #666;">Solo le missioni in stato "Attiva" possono essere chiuse</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="livelloSuccesso">Livello di Successo:</label>
+                    <select id="livelloSuccesso">
+                        <option value="">Seleziona il livello di successo...</option>
+                        <option value="1">1 - Molto Scarso (fallimento totale)</option>
+                        <option value="2">2 - Scarso (obiettivi non raggiunti)</option>
+                        <option value="3">3 - Sufficiente (obiettivi parzialmente raggiunti)</option>
+                        <option value="4">4 - Buono (obiettivi raggiunti)</option>
+                        <option value="5">5 - Eccellente (superati tutti gli obiettivi)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="commentoFinale">Commento Finale:</label>
+                    <textarea id="commentoFinale" rows="4" placeholder="Inserisci un resoconto dettagliato della missione...">Missione completata con successo. Tutti gli obiettivi sono stati raggiunti e la situazione è stata gestita in modo efficace.</textarea>
+                    <small style="color: #666;">Descrivi l'esito della missione, problemi riscontrati, risultati ottenuti, ecc.</small>
+                </div>
+
+                <div class="info-box">
+                    <h5>⚠️ Operazioni che verranno eseguite:</h5>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #0c5460;">
+                        <li><strong>Controllo prerequisiti:</strong> Verifica che la missione sia in stato "Attiva"</li>
+                        <li><strong>Aggiornamento missione:</strong> Cambio stato da "Attiva" a "Conclusa"</li>
+                        <li><strong>Timestamp fine:</strong> Registrazione data/ora di chiusura</li>
+                        <li><strong>Creazione resoconto:</strong> Salvataggio di livello successo e commenti</li>
+                        <li><strong>Aggiornamento richiesta:</strong> Possibile cambio stato della richiesta associata</li>
+                    </ul>
+                </div>
+
+                <div class="button-row">
+                    <button onclick="chiudiMissione()" id="chiusuraMissioneBtn" style="background-color: #dc3545; display: none;">
+                        🔚 Chiudi Missione
+                    </button>
+                    <button onclick="clearChiusuraMissioneForm()">🧹 Pulisci Form</button>
+                    <button onclick="fillChiusuraMissioneExample()">📋 Esempio</button>
+                </div>
+
+                <div class="response-area" id="chiusuraMissioneResponse">
+                    Effettua il login come amministratore per chiudere le missioni...
+                </div>
+            </div>
             <!-- Sezione 9: Annullamento Richiesta di Soccorso (NUOVO) -->
             <div class="section">
                 <h2>❌ 9. Annullamento Richiesta di Soccorso (Solo Admin)</h2>
@@ -980,14 +1031,15 @@
 
                     // Lista dei pulsanti che richiedono autenticazione ADMIN
                     const adminOnlyButtons = [
-                        'listaBtn', // ✅ Pulsante "Carica Lista" 
-                        'richiesteNonPositiveBtn', // ✅ Pulsante richieste non positive
-                        'operatoriBtn', // ✅ Pulsante operatori 
-                        'dettagliRichiestaBtn', // ✅ NUOVO: Pulsante dettagli richiesta 
-                        'dettagliOperatoreBtn', // ✅ NUOVO: Pulsante dettagli operatore 
-                        'missioni13Btn', // ✅ Pulsante missioni operatore
-                        'annullaBtn', // ✅ Pulsante annulla
-                        'dettagliMissioneBtn'         // ✅ Pulsante dettagli missione
+                        'listaBtn',                   // ✅ Pulsante "Carica Lista" 
+                        'richiesteNonPositiveBtn',    // ✅ Pulsante richieste non positive
+                        'operatoriBtn',               // ✅ Pulsante operatori 
+                        'dettagliRichiestaBtn',       // ✅ Pulsante dettagli richiesta 
+                        'dettagliOperatoreBtn',       // ✅ Pulsante dettagli operatore 
+                        'missioni13Btn',              // ✅ Pulsante missioni operatore
+                        'annullaBtn',                 // ✅ Pulsante annulla
+                        'dettagliMissioneBtn',        // ✅ Pulsante dettagli missione
+                        'chiusuraMissioneBtn'         // ✅ NUOVO: Pulsante chiusura missione
                     ];
 
                     // Pulsanti che possono essere visibili per tutti gli utenti autenticati
@@ -2042,7 +2094,148 @@
                             'Effettua il login come amministratore per visualizzare i dettagli delle missioni...',
                             'info');
                 }
+// === FUNZIONI CHIUSURA MISSIONE ===
 
+                /**
+                 * Chiude una missione attiva con valutazione finale
+                 */
+                async function chiudiMissione() {
+                    if (!authToken) {
+                        showResponse('chiusuraMissioneResponse', 'Devi prima effettuare il login come amministratore', 'error');
+                        return;
+                    }
+
+                    const missioneId = parseInt(document.getElementById('chiusuraMissioneId').value);
+                    const livelloSuccesso = parseInt(document.getElementById('livelloSuccesso').value);
+                    const commento = document.getElementById('commentoFinale').value.trim();
+
+                    // Validazione input
+                    if (!missioneId || missioneId <= 0) {
+                        showResponse('chiusuraMissioneResponse', '❌ Inserisci un ID missione valido', 'error');
+                        return;
+                    }
+
+                    if (!livelloSuccesso || livelloSuccesso < 1 || livelloSuccesso > 5) {
+                        showResponse('chiusuraMissioneResponse', '❌ Seleziona un livello di successo da 1 a 5', 'error');
+                        return;
+                    }
+
+                    if (!commento || commento.length < 10) {
+                        showResponse('chiusuraMissioneResponse', '❌ Il commento finale deve essere di almeno 10 caratteri', 'error');
+                        return;
+                    }
+
+                    // Conferma dall'utente
+                    const conferma = confirm(`⚠️ ATTENZIONE - CHIUSURA MISSIONE!\n\nStai per chiudere definitivamente la missione ${missioneId}.\n\nDettagli chiusura:\n• Livello successo: ${livelloSuccesso}/5\n• Commento: ${commento.substring(0, 50)}${commento.length > 50 ? '...' : ''}\n\nQuesta operazione:\n• NON può essere annullata\n• Segnerà la missione come CONCLUSA\n• Creerà il resoconto finale\n\nConfermi la chiusura?`);
+                    
+                    if (!conferma) {
+                        showResponse('chiusuraMissioneResponse', '🚫 Chiusura missione annullata dall\'utente', 'info');
+                        return;
+                    }
+
+                    showResponse('chiusuraMissioneResponse', '🔄 Chiusura missione in corso...', 'info');
+
+                    try {
+                        const richiestaChiusura = {
+                            livelloSuccesso: livelloSuccesso,
+                            commento: commento
+                        };
+
+                        const result = await apiCall(`/missioni/${missioneId}/chiudi`, {
+                            method: 'PUT',
+                            body: JSON.stringify(richiestaChiusura)
+                        });
+
+                        if (result.ok) {
+                            const response = result.data;
+                            
+                            let message = `✅ ${response.message}\n\n`;
+                            message += `📊 RESOCONTO FINALE:\n`;
+                            message += `• ID Missione: ${response.missioneId || missioneId}\n`;
+                            message += `• Livello successo: ${livelloSuccesso}/5 `;
+                            
+                            // Emoji in base al livello
+                            if (livelloSuccesso >= 4) message += '🌟';
+                            else if (livelloSuccesso >= 3) message += '👍';
+                            else if (livelloSuccesso >= 2) message += '⚠️';
+                            else message += '❌';
+                            
+                            message += `\n`;
+                            message += `• Timestamp chiusura: ${formatDateTime(response.timestampChiusura)}\n`;
+                            message += `• Stato missione: CONCLUSA\n`;
+                            message += `• Stato richiesta: CHIUSA\n`;
+                            message += `\n💬 Commento finale:\n"${commento}"\n`;
+
+                            showResponse('chiusuraMissioneResponse', message, 'success');
+                            
+                            // Pulisci il form dopo il successo
+                            setTimeout(() => {
+                                clearChiusuraMissioneForm();
+                            }, 3000);
+
+                        } else {
+                            let errorMessage = '❌ Errore nella chiusura missione.\n\n';
+
+                            if (result.status === 404) {
+                                errorMessage += 'La missione con questo ID non esiste.';
+                            } else if (result.status === 403) {
+                                errorMessage += 'Accesso negato. Solo gli amministratori possono chiudere le missioni.';
+                            } else if (result.status === 401) {
+                                errorMessage += 'Non sei autenticato. Effettua prima il login come amministratore.';
+                            } else if (result.status === 400) {
+                                if (result.data.message && result.data.message.includes('Attiva')) {
+                                    errorMessage += 'La missione deve essere in stato "Attiva" per essere chiusa.\nControlla che l\'ID sia corretto e che la missione non sia già conclusa.';
+                                } else if (result.data.message && result.data.message.includes('già stata chiusa')) {
+                                    errorMessage += 'La missione è già stata chiusa in precedenza.';
+                                } else {
+                                    errorMessage += result.data.message || 'Dati di chiusura non validi.';
+                                }
+                            } else {
+                                errorMessage += `Errore del server (${result.status}): ${result.data.message || result.data.error || 'Errore sconosciuto'}`;
+                            }
+
+                            showResponse('chiusuraMissioneResponse', errorMessage, 'error');
+                        }
+
+                    } catch (error) {
+                        console.error('Errore chiusura missione:', error);
+                        showResponse('chiusuraMissioneResponse', 
+                            '❌ Errore di connessione: ' + error.message, 
+                            'error');
+                    }
+                }
+
+                /**
+                 * Pulisce il form di chiusura missione
+                 */
+                function clearChiusuraMissioneForm() {
+                    document.getElementById('chiusuraMissioneId').value = '';
+                    document.getElementById('livelloSuccesso').value = '';
+                    document.getElementById('commentoFinale').value = 'Missione completata con successo. Tutti gli obiettivi sono stati raggiunti e la situazione è stata gestita in modo efficace.';
+                    showResponse('chiusuraMissioneResponse', 
+                        'Effettua il login come amministratore per chiudere le missioni...', 
+                        'info');
+                }
+
+                /**
+                 * Riempie il form con dati di esempio
+                 */
+                function fillChiusuraMissioneExample() {
+                    document.getElementById('chiusuraMissioneId').value = '1';
+                    document.getElementById('livelloSuccesso').value = '4';
+                    document.getElementById('commentoFinale').value = 'Missione completata con successo. L\'emergenza è stata risolta efficacemente, tutti gli obiettivi sono stati raggiunti. Il team ha lavorato in modo coordinato e professionale. Nessun incidente da segnalare.';
+                    
+                    showResponse('chiusuraMissioneResponse', 
+                        '📋 Esempio caricato con successo!\n\n' +
+                        '💡 SUGGERIMENTI PER LA CHIUSURA:\n' +
+                        '• Verifica che la missione sia effettivamente in stato "Attiva"\n' +
+                        '• Scegli il livello di successo in base ai risultati ottenuti\n' +
+                        '• Scrivi un commento dettagliato per future consultazioni\n' +
+                        '• L\'operazione non può essere annullata una volta confermata\n' +
+                        '• Solo gli amministratori possono chiudere le missioni', 
+                        'info');
+                }
+                
                 // Funzione di utilità per formattare date/ore
                 function formatDateTime(dateTimeString) {
                     if (!dateTimeString)
