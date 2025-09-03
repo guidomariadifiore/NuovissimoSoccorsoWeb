@@ -1,0 +1,923 @@
+openapi: 3.0.3
+info:
+  title: SoccorsoWeb REST API
+  description: API RESTful per il sistema di gestione delle richieste di soccorso
+  version: 1.0.0
+  contact:
+    name: NuovissimoSoccorsoWeb
+    email: support@soccorsoweb.it
+
+servers:
+  - url: http://localhost:8080/nuovissimo-soccorso-web-1.0-SNAPSHOT/api/
+    description: Server di sviluppo locale
+    
+tags:
+  - name: Autenticazione
+    description: Gestione dell'autenticazione degli utenti (login/logout)
+  - name: Test
+    description: Endpoint di test e verifica sistema
+  - name: Missioni
+    description: Gestione delle missioni di soccorso
+
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT ottenuto tramite login
+
+  schemas:
+    # === AUTENTICAZIONE ===
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email dell'utente (amministratore o operatore)
+          example: "admin@soccorso.it"
+        password:
+          type: string
+          format: password
+          description: Password dell'utente
+          example: "password123"
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Indica se il login è stato effettuato con successo
+        message:
+          type: string
+          description: Messaggio di stato
+        token:
+          type: string
+          description: Token JWT per le richieste autenticate
+        user:
+          $ref: '#/components/schemas/UserInfo'
+      example:
+        success: true
+        message: "Login effettuato con successo"
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        user:
+          id: 1
+          email: "admin@soccorso.it"
+          role: "ADMIN"
+
+    LogoutResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Indica se il logout è stato effettuato con successo
+        message:
+          type: string
+          description: Messaggio di conferma
+      example:
+        success: true
+        message: "Logout effettuato con successo"
+
+    VerifyResponse:
+      type: object
+      properties:
+        valid:
+          type: boolean
+          description: Indica se il token è valido
+        message:
+          type: string
+          description: Messaggio di stato
+        user:
+          $ref: '#/components/schemas/UserInfo'
+      example:
+        valid: true
+        message: "Token valido"
+        user:
+          id: 1
+          email: "admin@soccorso.it"
+          role: "ADMIN"
+
+    UserInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID univoco dell'utente
+        email:
+          type: string
+          format: email
+          description: Email dell'utente
+        role:
+          type: string
+          enum: ["ADMIN", "OPERATORE"]
+          description: Ruolo dell'utente nel sistema
+      example:
+        id: 1
+        email: "admin@soccorso.it"
+        role: "ADMIN"
+
+    # === ERRORI ===
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          description: Messaggio di errore
+        error:
+          type: string
+          description: Dettagli tecnici dell'errore
+          
+    # === MISSIONI ===
+    MissioneRequest:
+      type: object
+      required:
+        - richiestaId
+        - nome
+        - posizione
+        - obiettivo
+      properties:
+        richiestaId:
+          type: integer
+          description: ID della richiesta di soccorso per cui creare la missione
+        nome:
+          type: string
+          description: Nome della missione
+        posizione:
+          type: string
+          description: Posizione dell'intervento
+        obiettivo:
+          type: string
+          description: Obiettivo della missione
+        operatori:
+          type: string
+          description: IDs operatori separati da virgola (per compatibilità)
+        caposquadra:
+          type: string
+          description: IDs caposquadra separati da virgola
+        operatoriStandard:
+          type: string
+          description: IDs operatori standard separati da virgola
+        mezzi:
+          type: string
+          description: Targhe mezzi separate da virgola
+        materiali:
+          type: string
+          description: IDs materiali separati da virgola
+      example:
+        richiestaId: 123
+        nome: "Soccorso alpino Monte Bianco"
+        posizione: "Monte Bianco, quota 2500m"
+        obiettivo: "Recupero escursionista ferito"
+        caposquadra: "1,3"
+        operatoriStandard: "5,7,9"
+        mezzi: "AB123CD,EF456GH"
+        materiali: "1,2,4"
+
+    MissioneDTO:
+      type: object
+      properties:
+        codiceRichiesta:
+          type: integer
+          description: ID della richiesta associata
+        nome:
+          type: string
+          description: Nome della missione
+        posizione:
+          type: string
+          description: Posizione dell'intervento
+        obiettivo:
+          type: string
+          description: Obiettivo della missione
+        nota:
+          type: string
+          description: Note aggiuntive
+        dataOraInizio:
+          type: string
+          format: date-time
+          description: Data e ora inizio missione
+        idAmministratore:
+          type: integer
+          description: ID dell'amministratore che ha creato la missione
+      example:
+        codiceRichiesta: 123
+        nome: "Soccorso alpino Monte Bianco"
+        posizione: "Monte Bianco, quota 2500m"
+        obiettivo: "Recupero escursionista ferito"
+        nota: ""
+        dataOraInizio: "2024-01-15T14:30:00"
+        idAmministratore: 1
+
+    MissioneResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        missione:
+          $ref: '#/components/schemas/MissioneDTO'
+        emailOperatori:
+          type: array
+          items:
+            type: string
+            format: email
+          description: Email degli operatori assegnati per notifiche
+      example:
+        success: true
+        message: "Missione creata con successo"
+        missione:
+          codiceRichiesta: 123
+          nome: "Soccorso alpino Monte Bianco"
+        emailOperatori: ["mario.rossi@soccorso.it", "luigi.verdi@soccorso.it"]
+
+    DettagliMissioneDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+        nome:
+          type: string
+        posizione:
+          type: string
+        obiettivo:
+          type: string
+        note:
+          type: string
+        dataOraInizio:
+          type: string
+          format: date-time
+        dataOraFine:
+          type: string
+          format: date-time
+          nullable: true
+        idAmministratore:
+          type: integer
+        richiestaId:
+          type: integer
+        operatori:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperatoreAssegnatoDTO'
+        mezzi:
+          type: array
+          items:
+            $ref: '#/components/schemas/MezzoAssegnatoDTO'
+        materiali:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaterialeAssegnatoDTO'
+        richiesta:
+          $ref: '#/components/schemas/RichiestaDTO'
+        valutazione:
+          $ref: '#/components/schemas/ValutazioneMissioneDTO'
+          nullable: true
+
+    OperatoreAssegnatoDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+        nome:
+          type: string
+        cognome:
+          type: string
+        email:
+          type: string
+          format: email
+        codiceFiscale:
+          type: string
+        ruolo:
+          type: string
+          enum: ["Caposquadra", "Standard"]
+      example:
+        id: 1
+        nome: "Mario"
+        cognome: "Rossi"
+        email: "mario.rossi@soccorso.it"
+        ruolo: "Caposquadra"
+
+    MaterialeAssegnatoDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+        nome:
+          type: string
+        quantita:
+          type: integer
+      example:
+        id: 1
+        nome: "Barella"
+        quantita: 2
+
+    MezzoAssegnatoDTO:
+      type: object
+      properties:
+        targa:
+          type: string
+        tipo:
+          type: string
+        modello:
+          type: string
+      example:
+        targa: "AB123CD"
+        tipo: "Ambulanza"
+        modello: "Fiat Ducato"
+
+    ValutazioneMissioneDTO:
+      type: object
+      properties:
+        successo:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Livello di successo della missione (1-5)
+        commento:
+          type: string
+          description: Commento sulla missione
+        dataOraFine:
+          type: string
+          format: date-time
+      example:
+        successo: 4
+        commento: "Missione completata con successo, paziente salvato"
+        dataOraFine: "2024-01-15T18:45:00"
+
+    ChiusuraMissioneRequest:
+      type: object
+      required:
+        - livelloSuccesso
+        - commento
+      properties:
+        livelloSuccesso:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Livello di successo (1=molto scarso, 5=eccellente)
+        commento:
+          type: string
+          minLength: 1
+          description: Commento obbligatorio sulla missione
+      example:
+        livelloSuccesso: 4
+        commento: "Missione completata con successo, paziente trasportato in ospedale"
+
+    ChiusuraMissioneResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        timestampChiusura:
+          type: string
+          format: date-time
+        missioneId:
+          type: integer
+      example:
+        success: true
+        message: "Missione chiusa con successo! Livello di successo: 4/5"
+        timestampChiusura: "2024-01-15T18:45:00"
+        missioneId: 123
+
+    MissioneOperatoreDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+        nome:
+          type: string
+        posizione:
+          type: string
+        obiettivo:
+          type: string
+        stato:
+          type: string
+          enum: ["ATTIVA", "CONCLUSA"]
+        dataOraInizio:
+          type: string
+          format: date-time
+        dataOraFine:
+          type: string
+          format: date-time
+          nullable: true
+        ruoloOperatore:
+          type: string
+          enum: ["Caposquadra", "Standard"]
+        livelloSuccesso:
+          type: integer
+          minimum: 0
+          maximum: 5
+        descrizioneRichiesta:
+          type: string
+        indirizzoIntervento:
+          type: string
+      example:
+        id: 123
+        nome: "Soccorso alpino Monte Bianco"
+        stato: "CONCLUSA"
+        ruoloOperatore: "Caposquadra"
+        livelloSuccesso: 4
+
+    MissioniOperatoreResponse:
+      type: object
+      properties:
+        operatoreId:
+          type: integer
+        nomeOperatore:
+          type: string
+        emailOperatore:
+          type: string
+          format: email
+        missioni:
+          type: array
+          items:
+            $ref: '#/components/schemas/MissioneOperatoreDTO'
+        totaleMissioni:
+          type: integer
+      example:
+        operatoreId: 5
+        nomeOperatore: "Mario Rossi"
+        emailOperatore: "mario.rossi@soccorso.it"
+        totaleMissioni: 12
+
+    RichiestaDTO:
+      type: object
+      properties:
+        codice:
+          type: integer
+          description: Codice identificativo della richiesta
+        stato:
+          type: string
+          enum: ["In Attesa", "Convalidata", "Attiva", "Chiusa", "Ignorata"]
+        indirizzo:
+          type: string
+        descrizione:
+          type: string
+        nome:
+          type: string
+        emailSegnalante:
+          type: string
+          format: email
+        nomeSegnalante:
+          type: string
+        coordinate:
+          type: string
+        foto:
+          type: string
+          description: Base64 encoded image
+        stringaValidazione:
+          type: string
+        idAmministratore:
+          type: integer
+          nullable: true
+
+          # === OPERATORI ===
+    OperatoreDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID univoco dell'operatore
+        nome:
+          type: string
+          description: Nome dell'operatore
+        cognome:
+          type: string
+          description: Cognome dell'operatore
+        email:
+          type: string
+          format: email
+          description: Email dell'operatore
+        codiceFiscale:
+          type: string
+          description: Codice fiscale dell'operatore
+        disponibile:
+          type: boolean
+          description: Indica se l'operatore è attualmente disponibile
+        patenti:
+          type: array
+          items:
+            type: string
+          description: Lista delle patenti possedute dall'operatore
+          example: ["Patente B", "Patente C", "Patente Nautica"]
+        abilita:
+          type: array
+          items:
+            type: string
+          description: Lista delle abilità specialistiche dell'operatore
+          example: ["Soccorso Alpino", "Primo Soccorso Avanzato", "Rescue Diver"]
+        missioniInCorso:
+          type: integer
+          nullable: true
+          description: Numero di missioni attualmente in corso
+        missioniCompletate:
+          type: integer
+          nullable: true
+          description: Numero totale di missioni completate
+      example:
+        id: 5
+        nome: "Mario"
+        cognome: "Rossi"
+        email: "mario.rossi@soccorso.it"
+        codiceFiscale: "RSSMRA80A01H501Z"
+        disponibile: true
+        patenti: ["Patente B", "Patente C"]
+        abilita: ["Soccorso Alpino", "Primo Soccorso Avanzato"]
+        missioniInCorso: 0
+        missioniCompletate: 23
+
+paths:
+  # === AUTENTICAZIONE ===
+  /auth/login:
+    post:
+      tags:
+        - Autenticazione
+      summary: Login utente
+      description: |
+        Effettua l'autenticazione di un amministratore o operatore nel sistema.
+        Restituisce un token JWT da utilizzare per le richieste successive.
+      security: [] # Endpoint pubblico
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login effettuato con successo
+          headers:
+            Authorization:
+              description: Token JWT nel formato "Bearer <token>"
+              schema:
+                type: string
+                example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: Dati di input non validi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              example:
+                success: false
+                message: "Email e password sono richiesti"
+                token: null
+                user: null
+        '401':
+          description: Credenziali non valide
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              example:
+                success: false
+                message: "Credenziali non valide"
+                token: null
+                user: null
+        '500':
+          description: Errore interno del server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+
+  /auth/logout:
+    delete:
+      tags:
+        - Autenticazione
+      summary: Logout utente
+      description: |
+        Effettua il logout dell'utente corrente.
+        Con JWT stateless, il token viene invalidato lato client.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Logout effettuato con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutResponse'
+        '401':
+          description: Token non valido o mancante
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/verify:
+    get:
+      tags:
+        - Autenticazione
+      summary: Verifica validità token
+      description: |
+        Verifica se il token JWT fornito è valido e restituisce
+        le informazioni dell'utente autenticato.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Token valido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyResponse'
+        '401':
+          description: Token non valido o scaduto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/test:
+    get:
+      tags:
+        - Test
+      summary: Test endpoint
+      description: Endpoint di test per verificare che l'API REST funzioni correttamente
+      security: [] # Endpoint pubblico
+      responses:
+        '200':
+          description: API funzionante
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "REST API funziona!"
+                  timestamp:
+                    type: integer
+                    format: int64
+                    example: 1672531200000
+                    
+  # === MISSIONI ===
+  /missioni:
+    post:
+      tags:
+        - Missioni
+      summary: Crea una nuova missione
+      description: |
+        Crea una nuova missione per una richiesta di soccorso in stato "Convalidata".
+        La richiesta passerà automaticamente da "Convalidata" ad "Attiva".
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MissioneRequest'
+      responses:
+        '201':
+          description: Missione creata con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MissioneResponse'
+        '400':
+          description: Dati non validi o richiesta non in stato "Convalidata"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Solo gli amministratori possono creare missioni
+        '401':
+          description: Token non valido o mancante
+
+  /missioni/richieste-attive:
+    get:
+      tags:
+        - Missioni
+      summary: Lista richieste disponibili per missioni
+      description: Restituisce le richieste in stato "Convalidata" per cui è possibile creare missioni
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Lista richieste disponibili
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RichiestaDTO'
+        '401':
+          description: Token non valido o mancante
+
+  /missioni/{id}:
+    get:
+      tags:
+        - Missioni
+      summary: Dettagli di una missione
+      description: Restituisce i dettagli completi di una missione specifica
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID della missione
+      responses:
+        '200':
+          description: Dettagli della missione
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DettagliMissioneDTO'
+        '404':
+          description: Missione non trovata
+        '403':
+          description: Solo gli amministratori possono vedere i dettagli
+        '401':
+          description: Token non valido o mancante
+
+  /missioni/{id}/chiudi:
+    put:
+      tags:
+        - Missioni
+      summary: Chiude una missione in corso
+      description: |
+        Chiude una missione attiva con valutazione finale.
+        La richiesta associata passerà da "Attiva" a "Chiusa".
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID della missione da chiudere
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChiusuraMissioneRequest'
+      responses:
+        '200':
+          description: Missione chiusa con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChiusuraMissioneResponse'
+        '400':
+          description: Dati non validi o missione non in stato attivo
+        '404':
+          description: Missione non trovata
+        '403':
+          description: Solo gli amministratori possono chiudere missioni
+        '401':
+          description: Token non valido o mancante
+
+  /missioni/operatore/{idOperatore}:
+    get:
+      tags:
+        - Missioni
+      summary: Missioni di un operatore
+      description: Lista delle missioni in cui un operatore è stato coinvolto
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: idOperatore
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID dell'operatore
+      responses:
+        '200':
+          description: Lista missioni dell'operatore
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MissioniOperatoreResponse'
+        '404':
+          description: Operatore non trovato
+        '403':
+          description: Solo gli amministratori possono vedere le missioni degli operatori
+        '401':
+          description: Token non valido o mancante
+
+          # === OPERATORI ===
+  /operatori/liberi:
+    get:
+      tags:
+        - Operatori
+      summary: Lista operatori attualmente liberi
+      description: |
+        Restituisce la lista degli operatori attualmente disponibili 
+        (non impegnati in missioni attive). Include patenti e abilità.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Lista operatori disponibili
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OperatoreDTO'
+        '401':
+          description: Token non valido o mancante
+        '500':
+          description: Errore interno del server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /operatori:
+    get:
+      tags:
+        - Operatori
+      summary: Lista operatori con filtri opzionali
+      description: |
+        Restituisce la lista di operatori con informazioni opzionali su stato e missioni.
+        Se includeStato=false, restituisce solo operatori liberi.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: includeStato
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+          description: |
+            Se true, include informazioni dettagliate su disponibilità e missioni.
+            Se false, restituisce solo operatori attualmente liberi.
+      responses:
+        '200':
+          description: Lista operatori
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OperatoreDTO'
+        '401':
+          description: Token non valido o mancante
+        '500':
+          description: Errore interno del server
+
+  /operatori/{id}:
+    get:
+      tags:
+        - Operatori
+      summary: Dettagli di un operatore specifico
+      description: |
+        Restituisce i dettagli completi di un operatore, inclusi patenti, 
+        abilità, stato di disponibilità e statistiche missioni.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID dell'operatore
+      responses:
+        '200':
+          description: Dettagli dell'operatore
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperatoreDTO'
+        '400':
+          description: ID operatore non valido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Operatore non trovato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Token non valido o mancante
+        '500':
+          description: Errore interno del server
+
