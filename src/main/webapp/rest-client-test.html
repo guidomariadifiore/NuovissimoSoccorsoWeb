@@ -638,6 +638,7 @@
                     Effettua il login come amministratore per creare missioni...
                 </div>
             </div>
+
             <!-- Sezione 8: Chiusura di una Missione -->
             <div class="section">
                 <h2>🔚 8. Chiusura di una Missione (Solo Admin)</h2>
@@ -668,7 +669,10 @@
 
                 <div class="info-box">
                     <h5>⚠️ Operazioni che verranno eseguite:</h5>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #0c5460;">
+                    <ul style="margin: 0;
+                        padding-left: 20px;
+                        font-size: 14px;
+                        color: #0c5460;">
                         <li><strong>Controllo prerequisiti:</strong> Verifica che la missione sia in stato "Attiva"</li>
                         <li><strong>Aggiornamento missione:</strong> Cambio stato da "Attiva" a "Conclusa"</li>
                         <li><strong>Timestamp fine:</strong> Registrazione data/ora di chiusura</li>
@@ -678,17 +682,19 @@
                 </div>
 
                 <div class="button-row">
-    <button onclick="chiudiMissione()" id="chiusuraMissioneBtn" style="background-color: #dc3545; display: none;">
-        🔚 Chiudi Missione
-    </button>
-    <button onclick="clearChiusuraMissioneForm()" id="clearChiusuraMissioneFormBtn" style="display: none;">
-        🧹 Pulisci Form
-    </button>
-</div>
+                    <button onclick="chiudiMissione()" id="chiusuraMissioneBtn" style="background-color: #dc3545;
+                            display: none;">
+                        🔚 Chiudi Missione
+                    </button>
+                    <button onclick="clearChiusuraMissioneForm()" id="clearChiusuraMissioneFormBtn" style="display: none;">
+                        🧹 Pulisci Form
+                    </button>
+                </div>
                 <div class="response-area" id="chiusuraMissioneResponse">
                     Effettua il login come amministratore per chiudere le missioni...
                 </div>
             </div>
+
             <!-- Sezione 9: Annullamento Richiesta di Soccorso (NUOVO) -->
             <div class="section">
                 <h2>❌ 9. Annullamento Richiesta di Soccorso (Solo Admin)</h2>
@@ -856,339 +862,309 @@
                 const API_BASE_URL = 'http://localhost:8080/nuovissimo-soccorso-web-1.0-SNAPSHOT/api';
                 let authToken = null;
                 let currentUser = null;
-
                 // === FUNZIONI HELPER ===
 
                 // Utility function per le chiamate API
                 async function apiCall(endpoint, options = {}) {
-                    const url = `${API_BASE_URL}${endpoint}`;
+                const url = `${API_BASE_URL}${endpoint}`;
+                const defaultOptions = {
+                headers: {
+                'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                }
+                };
+                // Aggiungi token se disponibile
+                if (authToken) {
+                defaultOptions.headers['Authorization'] = `Bearer ${authToken}`;
+                }
 
-                    const defaultOptions = {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        }
-                    };
-
-                    // Aggiungi token se disponibile
-                    if (authToken) {
-                        defaultOptions.headers['Authorization'] = `Bearer ${authToken}`;
-                    }
-
-                    const finalOptions = {
-                        ...defaultOptions,
+                const finalOptions = {
+                ...defaultOptions,
                         ...options,
                         headers: {
-                            ...defaultOptions.headers,
-                            ...options.headers
+                        ...defaultOptions.headers,
+                                ...options.headers
                         }
-                    };
-
-                    try {
-                        const response = await fetch(url, finalOptions);
-                        const data = await response.json();
-
-                        return {
-                            ok: response.ok,
-                            status: response.status,
-                            data: data,
-                            headers: response.headers
-                        };
-                    } catch (error) {
-                        return {
-                            ok: false,
-                            status: 0,
-                            data: {error: 'NETWORK_ERROR', message: error.message},
-                            headers: null
-                        };
+                };
+                try {
+                const response = await fetch(url, finalOptions);
+                const data = await response.json();
+                return {
+                ok: response.ok,
+                        status: response.status,
+                        data: data,
+                        headers: response.headers
+                };
+                } catch (error) {
+                return {
+                ok: false,
+                        status: 0,
+                        data: {error: 'NETWORK_ERROR', message: error.message},
+                        headers: null
+                };
                 }
                 }
 
                 function showResponse(elementId, message, type = 'info') {
-                    const element = document.getElementById(elementId);
-                    element.textContent = message;
-                    element.className = `response-area ${type}`;
+                const element = document.getElementById(elementId);
+                element.textContent = message;
+                element.className = `response-area ${type}`;
                 }
 
                 // === FUNZIONI DI AUTENTICAZIONE ===
 
                 async function doLogin() {
-                    const email = document.getElementById('email').value;
-                    const password = document.getElementById('password').value;
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                if (!email || !password) {
+                showResponse('authResponse', 'Inserisci email e password', 'error');
+                return;
+                }
 
-                    if (!email || !password) {
-                        showResponse('authResponse', 'Inserisci email e password', 'error');
-                        return;
-                    }
+                showResponse('authResponse', 'Login in corso...', 'info');
+                try {
+                const result = await apiCall('/auth/login', {
+                method: 'POST',
+                        body: JSON.stringify({email, password})
+                });
+                // DEBUG: Stampa tutta la risposta per vedere cosa arriva
+                console.log('=== DEBUG LOGIN RESPONSE ===');
+                console.log('result.ok:', result.ok);
+                console.log('result.status:', result.status);
+                console.log('result.data:', result.data);
+                console.log('============================');
+                if (result.ok) {
+                authToken = result.data.token;
+                // ✅ FIX: Normalizza il ruolo da 'admin' a 'ADMIN' per il backend
+                let userRole = result.data.role || 'ADMIN';
+                if (userRole.toLowerCase() === 'admin') {
+                userRole = 'ADMIN'; // Converti a maiuscolo per il backend
+                }
 
-                    showResponse('authResponse', 'Login in corso...', 'info');
-
-                    try {
-                        const result = await apiCall('/auth/login', {
-                            method: 'POST',
-                            body: JSON.stringify({email, password})
-                        });
-
-                        // DEBUG: Stampa tutta la risposta per vedere cosa arriva
-                        console.log('=== DEBUG LOGIN RESPONSE ===');
-                        console.log('result.ok:', result.ok);
-                        console.log('result.status:', result.status);
-                        console.log('result.data:', result.data);
-                        console.log('============================');
-
-                        if (result.ok) {
-                            authToken = result.data.token;
-
-                            // ✅ FIX: Normalizza il ruolo da 'admin' a 'ADMIN' per il backend
-                            let userRole = result.data.role || 'ADMIN';
-                            if (userRole.toLowerCase() === 'admin') {
-                                userRole = 'ADMIN';  // Converti a maiuscolo per il backend
-                            }
-
-                            // ✅ Assegna currentUser con ruolo normalizzato
-                            currentUser = result.data.user || {
-                                id: result.data.userId || result.data.id,
-                                email: email,
-                                role: userRole  // Usa il ruolo normalizzato
-                            };
-
-                            // DEBUG: Verifica che currentUser sia impostato correttamente
-                            console.log('=== DEBUG LOGIN FIX ===');
-                            console.log('Ruolo originale dal server:', result.data.role);
-                            console.log('Ruolo normalizzato:', userRole);
-                            console.log('currentUser finale:', currentUser);
-                            console.log('========================');
-
-                            // ✅ CHIAMA updateAuthUI con i dati corretti
-                            updateAuthUI(true, currentUser);
-
-                            // DEBUG: Info per controllare il ruolo
-                            const isAdmin = currentUser.role === 'ADMIN' || currentUser.role === 'admin';
-                            console.log('isAdmin?', isAdmin);
-
-                            let message = `✅ Login riuscito!\n`;
-                            message += `Email: ${currentUser.email}\n`;
-                            message += `Ruolo: ${currentUser.role}\n`;
-                            message += `Admin: ${isAdmin ? 'SÌ' : 'NO'}\n`;
-                            message += `Token: ${authToken.substring(0, 30)}...\n`;
-
-                            showResponse('authResponse', message, 'success');
-
-                            // Se è admin, mostra automaticamente il form missione
-                            if (isAdmin) {
-                                mostraFormMissioneAutomatic();
-                            } else {
-                                showResponse('missioneResponse', '⚠️ Utente non amministratore. Solo gli admin possono creare missioni.', 'warning');
-                            }
-                        } else {
-                            showResponse('authResponse', `❌ Login fallito: ${result.data.error || result.data.message}`, 'error');
-                        }
-                    } catch (error) {
-                        console.error('Errore durante login:', error);
-                        showResponse('authResponse', `❌ Errore di rete: ${error.message}`, 'error');
-                    }
+                // ✅ Assegna currentUser con ruolo normalizzato
+                currentUser = result.data.user || {
+                id: result.data.userId || result.data.id,
+                        email: email,
+                        role: userRole  // Usa il ruolo normalizzato
+                };
+                // DEBUG: Verifica che currentUser sia impostato correttamente
+                console.log('=== DEBUG LOGIN FIX ===');
+                console.log('Ruolo originale dal server:', result.data.role);
+                console.log('Ruolo normalizzato:', userRole);
+                console.log('currentUser finale:', currentUser);
+                console.log('========================');
+                // ✅ CHIAMA updateAuthUI con i dati corretti
+                updateAuthUI(true, currentUser);
+                // DEBUG: Info per controllare il ruolo
+                const isAdmin = currentUser.role === 'ADMIN' || currentUser.role === 'admin';
+                console.log('isAdmin?', isAdmin);
+                let message = `✅ Login riuscito!\n`;
+                message += `Email: ${currentUser.email}\n`;
+                message += `Ruolo: ${currentUser.role}\n`;
+                message += `Admin: ${isAdmin ? 'SÌ' : 'NO'}\n`;
+                message += `Token: ${authToken.substring(0, 30)}...\n`;
+                showResponse('authResponse', message, 'success');
+                // Se è admin, mostra automaticamente il form missione
+                if (isAdmin) {
+                mostraFormMissioneAutomatic();
+                } else {
+                showResponse('missioneResponse', '⚠️ Utente non amministratore. Solo gli admin possono creare missioni.', 'warning');
+                }
+                } else {
+                showResponse('authResponse', `❌ Login fallito: ${result.data.error || result.data.message}`, 'error');
+                }
+                } catch (error) {
+                console.error('Errore durante login:', error);
+                showResponse('authResponse', `❌ Errore di rete: ${error.message}`, 'error');
+                }
                 }
 
                 function doLogout() {
-                    authToken = null;
-                    currentUser = null;
-                    updateAuthUI(false, null);
-
-                    // Nascondi il form missione
-                    document.getElementById('sezionFormMissione').style.display = 'none';
-                    document.getElementById('messaggioNonAdmin').style.display = 'none';
-                    showResponse('missioneResponse', 'Effettua il login come amministratore per creare missioni...', 'info');
-
-                    showResponse('authResponse', '👋 Logout effettuato', 'info');
+                authToken = null;
+                currentUser = null;
+                updateAuthUI(false, null);
+                // Nascondi il form missione
+                document.getElementById('sezionFormMissione').style.display = 'none';
+                document.getElementById('messaggioNonAdmin').style.display = 'none';
+                showResponse('missioneResponse', 'Effettua il login come amministratore per creare missioni...', 'info');
+                showResponse('authResponse', '👋 Logout effettuato', 'info');
                 }
 
                 async function verifyToken() {
-                    if (!authToken) {
-                        showResponse('authResponse', 'Nessun token da verificare', 'error');
-                        return;
-                    }
+                if (!authToken) {
+                showResponse('authResponse', 'Nessun token da verificare', 'error');
+                return;
+                }
 
-                    const result = await apiCall('/auth/verify');
-
-                    if (result.ok && result.data.valid) {
-                        showResponse('authResponse',
-                                `✅ Token valido!\nUtente: ${result.data.user.email}\nRuolo: ${result.data.user.role}`,
-                                'success');
-                    } else {
-                        showResponse('authResponse',
-                                `❌ Token non valido: ${result.data.message || 'Token scaduto o malformato'}`,
-                                'error');
-                        authToken = null;
-                        currentUser = null;
-                        updateAuthUI(false, null);
-                    }
+                const result = await apiCall('/auth/verify');
+                if (result.ok && result.data.valid) {
+                showResponse('authResponse',
+                        `✅ Token valido!\nUtente: ${result.data.user.email}\nRuolo: ${result.data.user.role}`,
+                        'success');
+                } else {
+                showResponse('authResponse',
+                        `❌ Token non valido: ${result.data.message || 'Token scaduto o malformato'}`,
+                        'error');
+                authToken = null;
+                currentUser = null;
+                updateAuthUI(false, null);
+                }
                 }
 
 // Aggiorna la lista dei pulsanti che devono essere mostrati/nascosti
                 // in base allo stato di autenticazione
                 function updateAuthUI(isAuthenticated, currentUser) {
-    const statusElement = document.getElementById('authStatus');
-
-    // Lista dei pulsanti che richiedono autenticazione ADMIN
-    const adminOnlyButtons = [
-    'listaBtn',                     // ✅ Pulsante "Carica Lista" 
-    'richiesteNonPositiveBtn',      // ✅ Pulsante richieste non positive
-    'operatoriBtn',                 // ✅ Pulsante operatori 
-    'dettagliRichiestaBtn',         // ✅ Pulsante dettagli richiesta 
-    'dettagliOperatoreBtn',         // ✅ Pulsante dettagli operatore 
-    'missioni13Btn',                // ✅ Pulsante missioni operatore
-    'annullaBtn',                   // ✅ Pulsante annulla
-    'dettagliMissioneBtn',          // ✅ Pulsante dettagli missione
-    'chiusuraMissioneBtn',          // ✅ Pulsante chiusura missione
-    'clearChiusuraMissioneFormBtn'  // ✅ NUOVO: Pulsante pulisci form chiusura missione
-];
-
-    // Pulsanti che possono essere visibili per tutti gli utenti autenticati
-    const userButtons = [
-        'verifyBtn',                    // ✅ Pulsante verifica token
-        'logoutBtn'                     // ✅ Pulsante logout
-    ];
-
-    if (isAuthenticated && currentUser) {
-        const isAdmin = currentUser.role === 'ADMIN' || currentUser.ruolo === 'ADMIN';
-
-        statusElement.textContent = `✅ Autenticato come: ${currentUser.email || currentUser.nome} (${isAdmin ? 'ADMIN' : 'USER'})`;
-        statusElement.className = isAdmin ? 'auth-status admin' : 'auth-status user';
-
-        // Mostra tutti i pulsanti utente
-        userButtons.forEach(id => {
-            const btn = document.getElementById(id);
-            if (btn) {
+                const statusElement = document.getElementById('authStatus');
+                // Lista dei pulsanti che richiedono autenticazione ADMIN
+                const adminOnlyButtons = [
+                        'listaBtn', // ✅ Pulsante "Carica Lista" 
+                        'richiesteNonPositiveBtn', // ✅ Pulsante richieste non positive
+                        'operatoriBtn', // ✅ Pulsante operatori 
+                        'dettagliRichiestaBtn', // ✅ Pulsante dettagli richiesta 
+                        'dettagliOperatoreBtn', // ✅ Pulsante dettagli operatore 
+                        'missioni13Btn', // ✅ Pulsante missioni operatore
+                        'annullaBtn', // ✅ Pulsante annulla
+                        'dettagliMissioneBtn', // ✅ Pulsante dettagli missione
+                        'chiusuraMissioneBtn', // ✅ Pulsante chiusura missione
+                        'clearChiusuraMissioneFormBtn'  // ✅ NUOVO: Pulsante pulisci form chiusura missione
+                ];
+                // Pulsanti che possono essere visibili per tutti gli utenti autenticati
+                const userButtons = [
+                        'verifyBtn', // ✅ Pulsante verifica token
+                        'logoutBtn'                     // ✅ Pulsante logout
+                ];
+                if (isAuthenticated && currentUser) {
+                const isAdmin = currentUser.role === 'ADMIN' || currentUser.ruolo === 'ADMIN';
+                statusElement.textContent = `✅ Autenticato come: ${currentUser.email || currentUser.nome} (${isAdmin ? 'ADMIN' : 'USER'})`;
+                statusElement.className = isAdmin ? 'auth-status admin' : 'auth-status user';
+                // Mostra tutti i pulsanti utente
+                userButtons.forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
                 btn.style.display = 'inline-block';
                 console.log(`✅ AUTENTICATO - Mostrato pulsante utente: ${id}`);
-            }
-        });
-
-        if (isAdmin) {
-            // ADMIN: Mostra tutti i pulsanti admin
-            adminOnlyButtons.forEach(id => {
+                }
+                });
+                if (isAdmin) {
+                // ADMIN: Mostra tutti i pulsanti admin
+                adminOnlyButtons.forEach(id => {
                 const btn = document.getElementById(id);
                 if (btn) {
-                    btn.style.display = 'inline-block';  // Mostra il pulsante
-                    console.log(`✅ ADMIN - Mostrato pulsante: ${id}`);
+                btn.style.display = 'inline-block'; // Mostra il pulsante
+                console.log(`✅ ADMIN - Mostrato pulsante: ${id}`);
                 }
-            });
-
-            showResponse('authResponse', 
-                `✅ Login amministratore completato!\nAccesso completo a tutte le funzionalità.`, 
-                'success');
-        } else {
-            // USER: Nascondi i pulsanti riservati agli admin
-            adminOnlyButtons.forEach(id => {
+                });
+                showResponse('authResponse',
+                        `✅ Login amministratore completato!\nAccesso completo a tutte le funzionalità.`,
+                        'success');
+                } else {
+                // USER: Nascondi i pulsanti riservati agli admin
+                adminOnlyButtons.forEach(id => {
                 const btn = document.getElementById(id);
                 if (btn) {
-                    btn.style.display = 'none';
-                    console.log(`⚠️ USER - Nascosto pulsante admin: ${id}`);
+                btn.style.display = 'none';
+                console.log(`⚠️ USER - Nascosto pulsante admin: ${id}`);
                 }
-            });
-
-            showResponse('authResponse', 
-                `✅ Login utente completato!\nAlcune funzionalità sono riservate agli amministratori.`, 
-                'warning');
-        }
-    } else {
-        // NON AUTENTICATO: Nascondi tutti i pulsanti admin
-        statusElement.textContent = '❌ Non autenticato';
-        statusElement.className = 'auth-status logged-out';
-
-        // Nascondi tutti i pulsanti che richiedono autenticazione
-        [...adminOnlyButtons, ...userButtons].forEach(id => {
-            const btn = document.getElementById(id);
-            if (btn) {
-                btn.style.display = 'none';  // Nascondi il pulsante
+                });
+                showResponse('authResponse',
+                        `✅ Login utente completato!\nAlcune funzionalità sono riservate agli amministratori.`,
+                        'warning');
+                }
+                } else {
+                // NON AUTENTICATO: Nascondi tutti i pulsanti admin
+                statusElement.textContent = '❌ Non autenticato';
+                statusElement.className = 'auth-status logged-out';
+                // Nascondi tutti i pulsanti che richiedono autenticazione
+                [...adminOnlyButtons, ...userButtons].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                btn.style.display = 'none'; // Nascondi il pulsante
                 console.log(`❌ NON AUTENTICATO - Nascosto pulsante: ${id}`);
-            }
-        });
-
-        // Nascondi tutto quando non autenticato
-        const sezionFormMissione = document.getElementById('sezionFormMissione');
-        const messaggioNonAdmin = document.getElementById('messaggioNonAdmin');
-        if (sezionFormMissione)
-            sezionFormMissione.style.display = 'none';
-        if (messaggioNonAdmin)
-            messaggioNonAdmin.style.display = 'none';
-    }
-}
+                }
+                });
+                // Nascondi tutto quando non autenticato
+                const sezionFormMissione = document.getElementById('sezionFormMissione');
+                const messaggioNonAdmin = document.getElementById('messaggioNonAdmin');
+                if (sezionFormMissione)
+                        sezionFormMissione.style.display = 'none';
+                if (messaggioNonAdmin)
+                        messaggioNonAdmin.style.display = 'none';
+                }
+                }
 
                 // === FUNZIONI MISSIONE ===
 
                 function mostraFormMissioneAutomatic() {
-                    document.getElementById('sezionFormMissione').style.display = 'block';
-                    document.getElementById('messaggioNonAdmin').style.display = 'none';
-                    updateOrarioCreazione();
-                    showResponse('missioneResponse', '✅ Accesso autorizzato! Compila i campi per creare una nuova missione.', 'success');
+                document.getElementById('sezionFormMissione').style.display = 'block';
+                document.getElementById('messaggioNonAdmin').style.display = 'none';
+                updateOrarioCreazione();
+                showResponse('missioneResponse', '✅ Accesso autorizzato! Compila i campi per creare una nuova missione.', 'success');
                 }
 
                 function updateOrarioCreazione() {
-                    const now = new Date();
-                    const orarioFormattato = now.toLocaleString('it-IT', {
-                        weekday: 'long',
+                const now = new Date();
+                const orarioFormattato = now.toLocaleString('it-IT', {
+                weekday: 'long',
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
                         hour: '2-digit',
                         minute: '2-digit',
                         second: '2-digit'
-                    });
-                    document.getElementById('orarioCreazione').textContent = orarioFormattato;
+                });
+                document.getElementById('orarioCreazione').textContent = orarioFormattato;
                 }
 
                 async function creaMissione() {
-                    if (!authToken) {
-                        showResponse('missioneResponse', 'Devi prima effettuare il login', 'error');
-                        return;
-                    }
+                if (!authToken) {
+                showResponse('missioneResponse', 'Devi prima effettuare il login', 'error');
+                return;
+                }
 
-                    // Raccogli dati dal form
-                    const richiestaId = parseInt(document.getElementById('richiestaIdMissione').value);
-                    const nome = document.getElementById('nomeMissione').value.trim();
-                    const posizione = document.getElementById('posizioneMissione').value.trim();
-                    const obiettivo = document.getElementById('obiettivoMissione').value.trim();
-                    const caposquadra = document.getElementById('caposquadraMissione').value.trim();
-                    const operatoriStandard = document.getElementById('operatoriStandardMissione').value.trim();
-                    const mezzi = document.getElementById('mezziMissione').value.trim();
-                    const materiali = document.getElementById('materialiMissione').value.trim();
+                // Raccogli dati dal form
+                const richiestaId = parseInt(document.getElementById('richiestaIdMissione').value);
+                const nome = document.getElementById('nomeMissione').value.trim();
+                const posizione = document.getElementById('posizioneMissione').value.trim();
+                const obiettivo = document.getElementById('obiettivoMissione').value.trim();
+                const caposquadra = document.getElementById('caposquadraMissione').value.trim();
+                const operatoriStandard = document.getElementById('operatoriStandardMissione').value.trim();
+                const mezzi = document.getElementById('mezziMissione').value.trim();
+                const materiali = document.getElementById('materialiMissione').value.trim();
+                // Validazioni client-side
+                if (!richiestaId || richiestaId <= 0) {
+                showResponse('missioneResponse', '❌ Inserisci un ID richiesta valido', 'error');
+                return;
+                }
 
-                    // Validazioni client-side
-                    if (!richiestaId || richiestaId <= 0) {
-                        showResponse('missioneResponse', '❌ Inserisci un ID richiesta valido', 'error');
-                        return;
-                    }
+                if (!nome) {
+                showResponse('missioneResponse', '❌ Il nome della missione è obbligatorio', 'error');
+                return;
+                }
 
-                    if (!nome) {
-                        showResponse('missioneResponse', '❌ Il nome della missione è obbligatorio', 'error');
-                        return;
-                    }
+                if (!posizione) {
+                showResponse('missioneResponse', '❌ La posizione è obbligatoria', 'error');
+                return;
+                }
 
-                    if (!posizione) {
-                        showResponse('missioneResponse', '❌ La posizione è obbligatoria', 'error');
-                        return;
-                    }
+                if (!obiettivo) {
+                showResponse('missioneResponse', '❌ L\'obiettivo è obbligatorio', 'error');
+                return;
+                }
 
-                    if (!obiettivo) {
-                        showResponse('missioneResponse', '❌ L\'obiettivo è obbligatorio', 'error');
-                        return;
-                    }
+                if (!caposquadra) {
+                showResponse('missioneResponse', '❌ Almeno un caposquadra è obbligatorio', 'error');
+                return;
+                }
 
-                    if (!caposquadra) {
-                        showResponse('missioneResponse', '❌ Almeno un caposquadra è obbligatorio', 'error');
-                        return;
-                    }
+                // Combina caposquadra e operatori standard
+                let tuttiOperatori = caposquadra;
+                if (operatoriStandard) {
+                tuttiOperatori += ',' + operatoriStandard;
+                }
 
-                    // Combina caposquadra e operatori standard
-                    let tuttiOperatori = caposquadra;
-                    if (operatoriStandard) {
-                        tuttiOperatori += ',' + operatoriStandard;
-                    }
-
-                    // Prepara i dati della richiesta
-                    const missioneData = {
-                        richiestaId: richiestaId,
+                // Prepara i dati della richiesta
+                const missioneData = {
+                richiestaId: richiestaId,
                         nome: nome,
                         posizione: posizione,
                         obiettivo: obiettivo,
@@ -1197,474 +1173,438 @@
                         materiali: materiali || null,
                         caposquadra: caposquadra,
                         operatoriStandard: operatoriStandard || null
-                    };
+                };
+                showResponse('missioneResponse', 'Creazione missione in corso...', 'info');
+                try {
+                const result = await apiCall('/missioni', {
+                method: 'POST',
+                        body: JSON.stringify(missioneData)
+                });
+                if (result.ok) {
+                const response = result.data;
+                let message = `✅ ${response.message}\n\n`;
+                message += `🎯 Dettagli missione creata:\n`;
+                message += `• Nome: ${response.missione.nome}\n`;
+                message += `• Posizione: ${response.missione.posizione}\n`;
+                message += `• Obiettivo: ${response.missione.obiettivo}\n`;
+                message += `• ID Richiesta: ${response.missione.codiceRichiesta}\n`;
+                message += `• Data/Ora Inizio: ${new Date(response.missione.dataOraInizio).toLocaleString('it-IT')}\n`;
+                if (response.emailOperatori && response.emailOperatori.length > 0) {
+                message += `\n📧 Email notifiche inviate a:\n`;
+                response.emailOperatori.forEach(email => {
+                message += `• ${email}\n`;
+                });
+                }
 
-                    showResponse('missioneResponse', 'Creazione missione in corso...', 'info');
+                showResponse('missioneResponse', message, 'success');
+                clearMissioneFormSilent();
+                } else {
+                let errorMessage = `❌ Errore nella creazione: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
+                if (result.status === 400) {
+                errorMessage = `❌ Dati non validi: ${result.data.error || 'Controlla i campi inseriti'}`;
+                } else if (result.status === 401) {
+                errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
+                } else if (result.status === 403) {
+                errorMessage = '❌ Accesso negato. Solo gli amministratori possono creare missioni.';
+                }
 
-                    try {
-                        const result = await apiCall('/missioni', {
-                            method: 'POST',
-                            body: JSON.stringify(missioneData)
-                        });
-
-                        if (result.ok) {
-                            const response = result.data;
-                            let message = `✅ ${response.message}\n\n`;
-                            message += `🎯 Dettagli missione creata:\n`;
-                            message += `• Nome: ${response.missione.nome}\n`;
-                            message += `• Posizione: ${response.missione.posizione}\n`;
-                            message += `• Obiettivo: ${response.missione.obiettivo}\n`;
-                            message += `• ID Richiesta: ${response.missione.codiceRichiesta}\n`;
-                            message += `• Data/Ora Inizio: ${new Date(response.missione.dataOraInizio).toLocaleString('it-IT')}\n`;
-
-                            if (response.emailOperatori && response.emailOperatori.length > 0) {
-                                message += `\n📧 Email notifiche inviate a:\n`;
-                                response.emailOperatori.forEach(email => {
-                                    message += `• ${email}\n`;
-                                });
-                            }
-
-                            showResponse('missioneResponse', message, 'success');
-                            clearMissioneFormSilent();
-                        } else {
-                            let errorMessage = `❌ Errore nella creazione: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
-
-                            if (result.status === 400) {
-                                errorMessage = `❌ Dati non validi: ${result.data.error || 'Controlla i campi inseriti'}`;
-                            } else if (result.status === 401) {
-                                errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
-                            } else if (result.status === 403) {
-                                errorMessage = '❌ Accesso negato. Solo gli amministratori possono creare missioni.';
-                            }
-
-                            showResponse('missioneResponse', errorMessage, 'error');
-                        }
-                    } catch (error) {
-                        showResponse('missioneResponse', `❌ Errore di rete: ${error.message}`, 'error');
-                    }
+                showResponse('missioneResponse', errorMessage, 'error');
+                }
+                } catch (error) {
+                showResponse('missioneResponse', `❌ Errore di rete: ${error.message}`, 'error');
+                }
                 }
 
                 function pulisciFormMissione() {
-                    clearMissioneFormSilent();
-                    showResponse('missioneResponse', '🧹 Form pulito! Compila i campi per creare una nuova missione.', 'info');
+                clearMissioneFormSilent();
+                showResponse('missioneResponse', '🧹 Form pulito! Compila i campi per creare una nuova missione.', 'info');
                 }
                 function clearMissioneFormSilent() {
-                    document.getElementById('richiestaIdMissione').value = '';
-                    document.getElementById('nomeMissione').value = '';
-                    document.getElementById('posizioneMissione').value = '';
-                    document.getElementById('obiettivoMissione').value = '';
-                    document.getElementById('caposquadraMissione').value = '';
-                    document.getElementById('operatoriStandardMissione').value = '';
-                    document.getElementById('mezziMissione').value = '';
-                    document.getElementById('materialiMissione').value = '';
-                    updateOrarioCreazione();
+                document.getElementById('richiestaIdMissione').value = '';
+                document.getElementById('nomeMissione').value = '';
+                document.getElementById('posizioneMissione').value = '';
+                document.getElementById('obiettivoMissione').value = '';
+                document.getElementById('caposquadraMissione').value = '';
+                document.getElementById('operatoriStandardMissione').value = '';
+                document.getElementById('mezziMissione').value = '';
+                document.getElementById('materialiMissione').value = '';
+                updateOrarioCreazione();
                 }
 
                 // === FUNZIONI RICHIESTE ===
 
                 async function inserisciRichiesta() {
-                    const descrizione = document.getElementById('descrizione').value;
-                    const indirizzo = document.getElementById('indirizzo').value;
-                    const nome = document.getElementById('nome').value;
-                    const emailSegnalante = document.getElementById('emailSegnalante').value;
-                    const nomeSegnalante = document.getElementById('nomeSegnalante').value;
-                    const coordinate = document.getElementById('coordinate').value;
-                    const foto = document.getElementById('foto').value;
+                const descrizione = document.getElementById('descrizione').value;
+                const indirizzo = document.getElementById('indirizzo').value;
+                const nome = document.getElementById('nome').value;
+                const emailSegnalante = document.getElementById('emailSegnalante').value;
+                const nomeSegnalante = document.getElementById('nomeSegnalante').value;
+                const coordinate = document.getElementById('coordinate').value;
+                const foto = document.getElementById('foto').value;
+                if (!descrizione || descrizione.trim().length < 10) {
+                showResponse('richiestaResponse', '❌ La descrizione deve essere di almeno 10 caratteri', 'error');
+                return;
+                }
 
-                    if (!descrizione || descrizione.trim().length < 10) {
-                        showResponse('richiestaResponse', '❌ La descrizione deve essere di almeno 10 caratteri', 'error');
-                        return;
-                    }
+                if (!indirizzo || indirizzo.trim().length < 5) {
+                showResponse('richiestaResponse', '❌ L\'indirizzo è obbligatorio e deve essere valido', 'error');
+                return;
+                }
 
-                    if (!indirizzo || indirizzo.trim().length < 5) {
-                        showResponse('richiestaResponse', '❌ L\'indirizzo è obbligatorio e deve essere valido', 'error');
-                        return;
-                    }
+                if (!nome || nome.trim().length < 2) {
+                showResponse('richiestaResponse', '❌ Il nome è obbligatorio', 'error');
+                return;
+                }
 
-                    if (!nome || nome.trim().length < 2) {
-                        showResponse('richiestaResponse', '❌ Il nome è obbligatorio', 'error');
-                        return;
-                    }
+                if (!emailSegnalante || !emailSegnalante.includes('@')) {
+                showResponse('richiestaResponse', '❌ L\'email del segnalante è obbligatoria e deve essere valida', 'error');
+                return;
+                }
 
-                    if (!emailSegnalante || !emailSegnalante.includes('@')) {
-                        showResponse('richiestaResponse', '❌ L\'email del segnalante è obbligatoria e deve essere valida', 'error');
-                        return;
-                    }
+                if (!nomeSegnalante || nomeSegnalante.trim().length < 2) {
+                showResponse('richiestaResponse', '❌ Il nome del segnalante è obbligatorio', 'error');
+                return;
+                }
 
-                    if (!nomeSegnalante || nomeSegnalante.trim().length < 2) {
-                        showResponse('richiestaResponse', '❌ Il nome del segnalante è obbligatorio', 'error');
-                        return;
-                    }
-
-                    const richiestaData = {
-                        descrizione: descrizione.trim(),
+                const richiestaData = {
+                descrizione: descrizione.trim(),
                         indirizzo: indirizzo.trim(),
                         nome: nome.trim(),
                         emailSegnalante: emailSegnalante.trim(),
                         nomeSegnalante: nomeSegnalante.trim(),
                         coordinate: coordinate.trim() || null,
                         foto: foto.trim() || null
-                    };
+                };
+                try {
+                showResponse('richiestaResponse', '🔄 Invio richiesta di soccorso...', 'info');
+                const response = await fetch(`${API_BASE_URL}/richieste`, {
+                method: 'POST',
+                        headers: {
+                        'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(richiestaData)
+                });
+                const result = await response.json();
+                if (response.ok && result.success) {
+                showResponse('richiestaResponse',
+                        `✅ ${result.message}\n\n` +
+                        `📋 Codice Richiesta: ${result.richiesta.codice}\n` +
+                        `📍 Stato: ${result.richiesta.stato}\n` +
+                        `👤 Nome: ${result.richiesta.nome}\n` +
+                        `📧 Email: ${result.richiesta.emailSegnalante}\n` +
+                        `🏠 Indirizzo: ${result.richiesta.indirizzo}\n` +
+                        `🔗 Codice Validazione: ${result.richiesta.stringaValidazione}\n` +
+                        `${result.richiesta.coordinate ? `🌍 Coordinate: ${result.richiesta.coordinate}\n` : ''}` +
+                        `${result.richiesta.foto ? `📷 Foto: ${result.richiesta.foto}\n` : ''}`,
+                        'success');
+                } else {
+                showResponse('richiestaResponse',
+                        `❌ Errore: ${result.message || 'Errore sconosciuto'}`,
+                        'error');
+                }
 
-                    try {
-                        showResponse('richiestaResponse', '🔄 Invio richiesta di soccorso...', 'info');
-
-                        const response = await fetch(`${API_BASE_URL}/richieste`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(richiestaData)
-                        });
-
-                        const result = await response.json();
-
-                        if (response.ok && result.success) {
-                            showResponse('richiestaResponse',
-                                    `✅ ${result.message}\n\n` +
-                                    `📋 Codice Richiesta: ${result.richiesta.codice}\n` +
-                                    `📍 Stato: ${result.richiesta.stato}\n` +
-                                    `👤 Nome: ${result.richiesta.nome}\n` +
-                                    `📧 Email: ${result.richiesta.emailSegnalante}\n` +
-                                    `🏠 Indirizzo: ${result.richiesta.indirizzo}\n` +
-                                    `🔗 Codice Validazione: ${result.richiesta.stringaValidazione}\n` +
-                                    `${result.richiesta.coordinate ? `🌍 Coordinate: ${result.richiesta.coordinate}\n` : ''}` +
-                                    `${result.richiesta.foto ? `📷 Foto: ${result.richiesta.foto}\n` : ''}`,
-                                    'success');
-                        } else {
-                            showResponse('richiestaResponse',
-                                    `❌ Errore: ${result.message || 'Errore sconosciuto'}`,
-                                    'error');
-                        }
-
-                    } catch (error) {
-                        showResponse('richiestaResponse',
-                                `❌ Errore di rete: ${error.message}`,
-                                'error');
-                    }
+                } catch (error) {
+                showResponse('richiestaResponse',
+                        `❌ Errore di rete: ${error.message}`,
+                        'error');
+                }
                 }
 
                 function fillTestData() {
-                    document.getElementById('descrizione').value = "Incendio in appartamento al secondo piano, presenza di feriti. Fumo denso dalle finestre. Necessario intervento immediato di VVF e ambulanza.";
-                    document.getElementById('indirizzo').value = "Via Roma 123, L'Aquila (AQ)";
-                    document.getElementById('nome').value = "Mario Rossi";
-                    document.getElementById('emailSegnalante').value = "mario.rossi@email.com";
-                    document.getElementById('nomeSegnalante').value = "Mario Rossi";
-                    document.getElementById('coordinate').value = "42.3598, 13.3986";
-                    document.getElementById('foto').value = "";
+                document.getElementById('descrizione').value = "Incendio in appartamento al secondo piano, presenza di feriti. Fumo denso dalle finestre. Necessario intervento immediato di VVF e ambulanza.";
+                document.getElementById('indirizzo').value = "Via Roma 123, L'Aquila (AQ)";
+                document.getElementById('nome').value = "Mario Rossi";
+                document.getElementById('emailSegnalante').value = "mario.rossi@email.com";
+                document.getElementById('nomeSegnalante').value = "Mario Rossi";
+                document.getElementById('coordinate').value = "42.3598, 13.3986";
+                document.getElementById('foto').value = "";
                 }
 
                 function clearForm() {
-                    document.getElementById('descrizione').value = "";
-                    document.getElementById('indirizzo').value = "";
-                    document.getElementById('nome').value = "";
-                    document.getElementById('emailSegnalante').value = "";
-                    document.getElementById('nomeSegnalante').value = "";
-                    document.getElementById('coordinate').value = "";
-                    document.getElementById('foto').value = "";
-                    showResponse('richiestaResponse', 'Form pulito. Pronto per nuovi dati...', 'info');
+                document.getElementById('descrizione').value = "";
+                document.getElementById('indirizzo').value = "";
+                document.getElementById('nome').value = "";
+                document.getElementById('emailSegnalante').value = "";
+                document.getElementById('nomeSegnalante').value = "";
+                document.getElementById('coordinate').value = "";
+                document.getElementById('foto').value = "";
+                showResponse('richiestaResponse', 'Form pulito. Pronto per nuovi dati...', 'info');
                 }
 
                 // === FUNZIONI CONVALIDA ===
 
                 async function doConvalida() {
-                    const id = document.getElementById('convalidaId').value;
-                    const token = document.getElementById('convalidaToken').value;
+                const id = document.getElementById('convalidaId').value;
+                const token = document.getElementById('convalidaToken').value;
+                if (!id || !token) {
+                showResponse('convalidaResponse', 'Inserisci sia ID che token di convalida', 'error');
+                return;
+                }
 
-                    if (!id || !token) {
-                        showResponse('convalidaResponse', 'Inserisci sia ID che token di convalida', 'error');
-                        return;
-                    }
+                if (id <= 0) {
+                showResponse('convalidaResponse', 'ID richiesta deve essere maggiore di 0', 'error');
+                return;
+                }
 
-                    if (id <= 0) {
-                        showResponse('convalidaResponse', 'ID richiesta deve essere maggiore di 0', 'error');
-                        return;
-                    }
+                if (token.trim().length < 10) {
+                showResponse('convalidaResponse', 'Token troppo corto. Verifica di aver inserito il token completo.', 'error');
+                return;
+                }
 
-                    if (token.trim().length < 10) {
-                        showResponse('convalidaResponse', 'Token troppo corto. Verifica di aver inserito il token completo.', 'error');
-                        return;
-                    }
-
-                    showResponse('convalidaResponse', 'Convalida in corso...', 'info');
-
-                    try {
-                        const url = `${API_BASE_URL}/richieste/${id}/convalida?token=${encodeURIComponent(token)}`;
-
-                        const response = await fetch(url, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
+                showResponse('convalidaResponse', 'Convalida in corso...', 'info');
+                try {
+                const url = `${API_BASE_URL}/richieste/${id}/convalida?token=${encodeURIComponent(token)}`;
+                const response = await fetch(url, {
+                method: 'POST',
+                        headers: {
+                        'Content-Type': 'application/json',
                                 'Accept': 'application/json'
-                            }
-                        });
-
-                        const data = await response.json();
-
-                        if (response.ok && data.success) {
-                            const richiesta = data.richiesta;
-                            const message = `✅ ${data.message}\n\n` +
-                                    `Dettagli richiesta convalidata:\n` +
-                                    `• ID: ${richiesta.codice}\n` +
-                                    `• Stato: ${richiesta.stato}\n` +
-                                    `• Indirizzo: ${richiesta.indirizzo}\n` +
-                                    `• Segnalante: ${richiesta.nomeSegnalante}\n` +
-                                    `• Email: ${richiesta.emailSegnalante}\n` +
-                                    `• Descrizione: ${richiesta.descrizione.substring(0, 100)}${richiesta.descrizione.length > 100 ? '...' : ''}`;
-
-                            showResponse('convalidaResponse', message, 'success');
-                        } else {
-                            let errorMessage = data.message || 'Errore sconosciuto durante la convalida';
-
-                            if (response.status === 400) {
-                                if (data.message && data.message.includes('già')) {
-                                    errorMessage = `⚠️ ${data.message}`;
-                                    showResponse('convalidaResponse', errorMessage, 'warning');
-                                    return;
-                                }
-                            } else if (response.status === 404) {
-                                errorMessage = '❌ Richiesta non trovata. Verifica l\'ID inserito.';
-                            } else if (response.status === 500) {
-                                errorMessage = '❌ Errore interno del server. Riprova più tardi.';
-                            }
-
-                            showResponse('convalidaResponse', errorMessage, 'error');
                         }
-                    } catch (error) {
-                        showResponse('convalidaResponse', `❌ Errore di rete: ${error.message}`, 'error');
-                    }
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                const richiesta = data.richiesta;
+                const message = `✅ ${data.message}\n\n` +
+                        `Dettagli richiesta convalidata:\n` +
+                        `• ID: ${richiesta.codice}\n` +
+                        `• Stato: ${richiesta.stato}\n` +
+                        `• Indirizzo: ${richiesta.indirizzo}\n` +
+                        `• Segnalante: ${richiesta.nomeSegnalante}\n` +
+                        `• Email: ${richiesta.emailSegnalante}\n` +
+                        `• Descrizione: ${richiesta.descrizione.substring(0, 100)}${richiesta.descrizione.length > 100 ? '...' : ''}`;
+                showResponse('convalidaResponse', message, 'success');
+                } else {
+                let errorMessage = data.message || 'Errore sconosciuto durante la convalida';
+                if (response.status === 400) {
+                if (data.message && data.message.includes('già')) {
+                errorMessage = `⚠️ ${data.message}`;
+                showResponse('convalidaResponse', errorMessage, 'warning');
+                return;
+                }
+                } else if (response.status === 404) {
+                errorMessage = '❌ Richiesta non trovata. Verifica l\'ID inserito.';
+                } else if (response.status === 500) {
+                errorMessage = '❌ Errore interno del server. Riprova più tardi.';
+                }
+
+                showResponse('convalidaResponse', errorMessage, 'error');
+                }
+                } catch (error) {
+                showResponse('convalidaResponse', `❌ Errore di rete: ${error.message}`, 'error');
+                }
                 }
 
                 function fillConvalidaExample() {
-                    document.getElementById('convalidaId').value = "1";
-                    document.getElementById('convalidaToken').value = "exemplo-token-123456789abcdef";
-                    showResponse('convalidaResponse',
-                            '📋 Form riempito con dati di esempio.\n\n' +
-                            '⚠️ IMPORTANTE: Questi sono dati di esempio!\n' +
-                            '• L\'ID e il token devono corrispondere a una richiesta reale\n' +
-                            '• Il token viene inviato via email al segnalante\n' +
-                            '• La richiesta deve essere in stato PENDING_VALIDATION',
-                            'info');
+                document.getElementById('convalidaId').value = "1";
+                document.getElementById('convalidaToken').value = "exemplo-token-123456789abcdef";
+                showResponse('convalidaResponse',
+                        '📋 Form riempito con dati di esempio.\n\n' +
+                        '⚠️ IMPORTANTE: Questi sono dati di esempio!\n' +
+                        '• L\'ID e il token devono corrispondere a una richiesta reale\n' +
+                        '• Il token viene inviato via email al segnalante\n' +
+                        '• La richiesta deve essere in stato PENDING_VALIDATION',
+                        'info');
                 }
 
                 function clearConvalidaForm() {
-                    document.getElementById('convalidaId').value = "";
-                    document.getElementById('convalidaToken').value = "";
-                    showResponse('convalidaResponse', 'Form di convalida pulito. Pronto per nuovi dati...', 'info');
+                document.getElementById('convalidaId').value = "";
+                document.getElementById('convalidaToken').value = "";
+                showResponse('convalidaResponse', 'Form di convalida pulito. Pronto per nuovi dati...', 'info');
                 }
 
                 async function getListaRichieste() {
-                    if (!authToken) {
-                        showResponse('listaResponse', 'Devi prima effettuare il login per vedere le richieste', 'error');
-                        return;
-                    }
+                if (!authToken) {
+                showResponse('listaResponse', 'Devi prima effettuare il login per vedere le richieste', 'error');
+                return;
+                }
 
-                    const stato = document.getElementById('filtroStato').value;
-                    const pagina = parseInt(document.getElementById('pagina').value) || 1;
+                const stato = document.getElementById('filtroStato').value;
+                const pagina = parseInt(document.getElementById('pagina').value) || 1;
+                if (pagina < 1) {
+                showResponse('listaResponse', 'Il numero di pagina deve essere >= 1', 'error');
+                return;
+                }
 
-                    if (pagina < 1) {
-                        showResponse('listaResponse', 'Il numero di pagina deve essere >= 1', 'error');
-                        return;
-                    }
+                showResponse('listaResponse', 'Caricamento lista richieste...', 'info');
+                try {
+                let url = '/richieste';
+                const params = new URLSearchParams();
+                if (stato && stato.trim() !== '') {
+                params.append('stato', stato);
+                }
+                params.append('page', pagina.toString());
+                params.append('size', '5');
+                if (params.toString()) {
+                url += '?' + params.toString();
+                }
 
-                    showResponse('listaResponse', 'Caricamento lista richieste...', 'info');
+                const result = await apiCall(url);
+                if (result.ok) {
+                const response = result.data;
+                let message = `✅ Lista richieste caricata con successo!\n\n`;
+                message += `📊 Statistiche:\n`;
+                message += `• Totale richieste: ${response.totalElements}\n`;
+                message += `• Pagine totali: ${response.totalPages}\n`;
+                message += `• Pagina corrente: ${response.number + 1}/${response.totalPages}\n`;
+                message += `• Richieste in questa pagina: ${response.content.length}\n`;
+                if (response.content.length > 0) {
+                message += `\n🔍 Richieste in questa pagina:\n`;
+                response.content.forEach((richiesta, index) => {
+                message += `\n${index + 1}. ID: ${richiesta.codice}\n`;
+                message += `   • Stato: ${richiesta.stato}\n`;
+                message += `   • Segnalante: ${richiesta.nomeSegnalante}\n`;
+                message += `   • Indirizzo: ${richiesta.indirizzo}\n`;
+                });
+                } else {
+                message += `\n📭 Nessuna richiesta trovata con i filtri specificati.`;
+                }
 
-                    try {
-                        let url = '/richieste';
-                        const params = new URLSearchParams();
-
-                        if (stato && stato.trim() !== '') {
-                            params.append('stato', stato);
-                        }
-                        params.append('page', pagina.toString());
-                        params.append('size', '5');
-
-                        if (params.toString()) {
-                            url += '?' + params.toString();
-                        }
-
-                        const result = await apiCall(url);
-
-                        if (result.ok) {
-                            const response = result.data;
-
-                            let message = `✅ Lista richieste caricata con successo!\n\n`;
-                            message += `📊 Statistiche:\n`;
-                            message += `• Totale richieste: ${response.totalElements}\n`;
-                            message += `• Pagine totali: ${response.totalPages}\n`;
-                            message += `• Pagina corrente: ${response.number + 1}/${response.totalPages}\n`;
-                            message += `• Richieste in questa pagina: ${response.content.length}\n`;
-
-                            if (response.content.length > 0) {
-                                message += `\n🔍 Richieste in questa pagina:\n`;
-                                response.content.forEach((richiesta, index) => {
-                                    message += `\n${index + 1}. ID: ${richiesta.codice}\n`;
-                                    message += `   • Stato: ${richiesta.stato}\n`;
-                                    message += `   • Segnalante: ${richiesta.nomeSegnalante}\n`;
-                                    message += `   • Indirizzo: ${richiesta.indirizzo}\n`;
-                                });
-                            } else {
-                                message += `\n📭 Nessuna richiesta trovata con i filtri specificati.`;
-                            }
-
-                            showResponse('listaResponse', message, 'success');
-                        } else {
-                            let errorMessage = `❌ Errore nel caricamento: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
-                            if (result.status === 401) {
-                                errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
-                            } else if (result.status === 403) {
-                                errorMessage = '❌ Accesso negato. Solo gli amministratori possono vedere tutte le richieste.';
-                            }
-                            showResponse('listaResponse', errorMessage, 'error');
-                        }
-                    } catch (error) {
-                        showResponse('listaResponse', `❌ Errore di rete: ${error.message}`, 'error');
-                    }
+                showResponse('listaResponse', message, 'success');
+                } else {
+                let errorMessage = `❌ Errore nel caricamento: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
+                if (result.status === 401) {
+                errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
+                } else if (result.status === 403) {
+                errorMessage = '❌ Accesso negato. Solo gli amministratori possono vedere tutte le richieste.';
+                }
+                showResponse('listaResponse', errorMessage, 'error');
+                }
+                } catch (error) {
+                showResponse('listaResponse', `❌ Errore di rete: ${error.message}`, 'error');
+                }
                 }
 
                 async function getRichiesteNonPositive() {
-                    if (!authToken) {
-                        showResponse('listaResponse', 'Devi prima effettuare il login per vedere le richieste', 'error');
-                        return;
-                    }
+                if (!authToken) {
+                showResponse('listaResponse', 'Devi prima effettuare il login per vedere le richieste', 'error');
+                return;
+                }
 
-                    const pagina = parseInt(document.getElementById('pagina').value) || 1;
+                const pagina = parseInt(document.getElementById('pagina').value) || 1;
+                showResponse('listaResponse', 'Caricamento richieste non positive...', 'info');
+                try {
+                const url = `/richieste/non-positive?page=${pagina}&size=10`;
+                const result = await apiCall(url);
+                if (result.ok) {
+                const response = result.data;
+                let message = `✅ Richieste non positive caricate!\n\n`;
+                message += `📊 Totale richieste non positive: ${response.totalElements}\n`;
+                if (response.content.length > 0) {
+                message += `\n🔍 Richieste con livello di successo < 5:\n`;
+                response.content.forEach((richiesta, index) => {
+                message += `\n${index + 1}. ID: ${richiesta.codice}\n`;
+                message += `   • Segnalante: ${richiesta.nomeSegnalante}\n`;
+                });
+                } else {
+                message += `\n🎉 Ottime notizie! Non ci sono richieste con esito non positivo.`;
+                }
 
-                    showResponse('listaResponse', 'Caricamento richieste non positive...', 'info');
-
-                    try {
-                        const url = `/richieste/non-positive?page=${pagina}&size=10`;
-                        const result = await apiCall(url);
-
-                        if (result.ok) {
-                            const response = result.data;
-                            let message = `✅ Richieste non positive caricate!\n\n`;
-                            message += `📊 Totale richieste non positive: ${response.totalElements}\n`;
-
-                            if (response.content.length > 0) {
-                                message += `\n🔍 Richieste con livello di successo < 5:\n`;
-                                response.content.forEach((richiesta, index) => {
-                                    message += `\n${index + 1}. ID: ${richiesta.codice}\n`;
-                                    message += `   • Segnalante: ${richiesta.nomeSegnalante}\n`;
-                                });
-                            } else {
-                                message += `\n🎉 Ottime notizie! Non ci sono richieste con esito non positivo.`;
-                            }
-
-                            showResponse('listaResponse', message, 'success');
-                        } else {
-                            showResponse('listaResponse', `❌ Errore: ${result.data.error || 'Errore sconosciuto'}`, 'error');
-                        }
-                    } catch (error) {
-                        showResponse('listaResponse', `❌ Errore di rete: ${error.message}`, 'error');
-                    }
+                showResponse('listaResponse', message, 'success');
+                } else {
+                showResponse('listaResponse', `❌ Errore: ${result.data.error || 'Errore sconosciuto'}`, 'error');
+                }
+                } catch (error) {
+                showResponse('listaResponse', `❌ Errore di rete: ${error.message}`, 'error');
+                }
                 }
 
                 function clearListaForm() {
-                    document.getElementById('filtroStato').value = '';
-                    document.getElementById('pagina').value = '1';
-                    showResponse('listaResponse', 'Filtri resettati. Pronto per una nuova ricerca...', 'info');
+                document.getElementById('filtroStato').value = '';
+                document.getElementById('pagina').value = '1';
+                showResponse('listaResponse', 'Filtri resettati. Pronto per una nuova ricerca...', 'info');
                 }
 
                 async function getOperatoriLiberiConDettagli() {
-                    if (!authToken) {
-                        showResponse('operatoriResponse', 'Devi prima effettuare il login per vedere gli operatori', 'error');
-                        return;
-                    }
+                if (!authToken) {
+                showResponse('operatoriResponse', 'Devi prima effettuare il login per vedere gli operatori', 'error');
+                return;
+                }
 
-                    showResponse('operatoriResponse', 'Caricamento operatori liberi...', 'info');
+                showResponse('operatoriResponse', 'Caricamento operatori liberi...', 'info');
+                try {
+                const result = await apiCall('/operatori/liberi');
+                if (result.ok) {
+                const operatori = result.data;
+                let message = `✅ Operatori liberi caricati!\n\n`;
+                message += `👥 Trovati ${operatori.length} operatori attualmente disponibili:\n\n`;
+                if (operatori.length > 0) {
+                operatori.forEach((operatore, index) => {
+                message += `${index + 1}. 🆔 ID: ${operatore.id}\n`;
+                message += `   👤 Nome: ${operatore.nome} ${operatore.cognome}\n`;
+                message += `   📧 Email: ${operatore.email || 'N/A'}\n`;
+                message += `   🆔 Codice Fiscale: ${operatore.codiceFiscale || 'N/A'}\n`;
+                if (operatore.patenti && operatore.patenti.length > 0) {
+                const patentiFormatted = operatore.patenti.map(p => p.replace('_', ' ')).join(', ');
+                message += `   🚗 Patenti: ${patentiFormatted}\n`;
+                } else {
+                message += `   🚗 Patenti: Nessuna registrata\n`;
+                }
 
-                    try {
-                        const result = await apiCall('/operatori/liberi');
+                if (operatore.abilita && operatore.abilita.length > 0) {
+                const abilitaFormatted = operatore.abilita.map(a => a.replace(/_/g, ' ').replace(/-/g, ' ')).join(', ');
+                message += `   🛠️ Abilità: ${abilitaFormatted}\n`;
+                } else {
+                message += `   🛠️ Abilità: Nessuna registrata\n`;
+                }
 
-                        if (result.ok) {
-                            const operatori = result.data;
-                            let message = `✅ Operatori liberi caricati!\n\n`;
-                            message += `👥 Trovati ${operatori.length} operatori attualmente disponibili:\n\n`;
+                message += `   🟢 Stato: Libero\n`;
+                if (index < operatori.length - 1) {
+                message += `\n${'-'.repeat(30)}\n\n`;
+                }
+                });
+                } else {
+                message += `📭 Nessun operatore libero al momento.`;
+                }
 
-                            if (operatori.length > 0) {
-                                operatori.forEach((operatore, index) => {
-                                    message += `${index + 1}. 🆔 ID: ${operatore.id}\n`;
-                                    message += `   👤 Nome: ${operatore.nome} ${operatore.cognome}\n`;
-                                    message += `   📧 Email: ${operatore.email || 'N/A'}\n`;
-                                    message += `   🆔 Codice Fiscale: ${operatore.codiceFiscale || 'N/A'}\n`;
-
-                                    if (operatore.patenti && operatore.patenti.length > 0) {
-                                        const patentiFormatted = operatore.patenti.map(p => p.replace('_', ' ')).join(', ');
-                                        message += `   🚗 Patenti: ${patentiFormatted}\n`;
-                                    } else {
-                                        message += `   🚗 Patenti: Nessuna registrata\n`;
-                                    }
-
-                                    if (operatore.abilita && operatore.abilita.length > 0) {
-                                        const abilitaFormatted = operatore.abilita.map(a => a.replace(/_/g, ' ').replace(/-/g, ' ')).join(', ');
-                                        message += `   🛠️ Abilità: ${abilitaFormatted}\n`;
-                                    } else {
-                                        message += `   🛠️ Abilità: Nessuna registrata\n`;
-                                    }
-
-                                    message += `   🟢 Stato: Libero\n`;
-
-                                    if (index < operatori.length - 1) {
-                                        message += `\n${'-'.repeat(30)}\n\n`;
-                                    }
-                                });
-                            } else {
-                                message += `📭 Nessun operatore libero al momento.`;
-                            }
-
-                            showResponse('operatoriResponse', message, 'success');
-                        } else {
-                            let errorMessage = `❌ Errore nel caricamento: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
-                            if (result.status === 401) {
-                                errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
-                            } else if (result.status === 403) {
-                                errorMessage = '❌ Accesso negato. Solo gli amministratori possono vedere gli operatori.';
-                            }
-                            showResponse('operatoriResponse', errorMessage, 'error');
-                        }
-                    } catch (error) {
-                        showResponse('operatoriResponse', `❌ Errore di rete: ${error.message}`, 'error');
-                    }
+                showResponse('operatoriResponse', message, 'success');
+                } else {
+                let errorMessage = `❌ Errore nel caricamento: ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
+                if (result.status === 401) {
+                errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
+                } else if (result.status === 403) {
+                errorMessage = '❌ Accesso negato. Solo gli amministratori possono vedere gli operatori.';
+                }
+                showResponse('operatoriResponse', errorMessage, 'error');
+                }
+                } catch (error) {
+                showResponse('operatoriResponse', `❌ Errore di rete: ${error.message}`, 'error');
+                }
                 }
 
                 // === FUNZIONI TEST ===
 
                 async function testHealth() {
-                    showResponse('testResponse', 'Testing basic connectivity...', 'info');
-
-                    const result = await fetch(`${API_BASE_URL}/auth/login`, {
-                        method: 'OPTIONS'
-                    });
-
-                    if (result.ok) {
-                        showResponse('testResponse', '✅ API raggiungibile, CORS configurato correttamente', 'success');
-                    } else {
-                        showResponse('testResponse', `❌ Problema di connettività: ${result.status}`, 'error');
-                    }
+                showResponse('testResponse', 'Testing basic connectivity...', 'info');
+                const result = await fetch(`${API_BASE_URL}/auth/login`, {
+                method: 'OPTIONS'
+                });
+                if (result.ok) {
+                showResponse('testResponse', '✅ API raggiungibile, CORS configurato correttamente', 'success');
+                } else {
+                showResponse('testResponse', `❌ Problema di connettività: ${result.status}`, 'error');
+                }
                 }
 
                 async function testCORS() {
-                    try {
-                        const response = await fetch(`${API_BASE_URL}/auth/login`, {
-                            method: 'OPTIONS',
-                            headers: {
-                                'Origin': window.location.origin,
+                try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                method: 'OPTIONS',
+                        headers: {
+                        'Origin': window.location.origin,
                                 'Access-Control-Request-Method': 'POST',
                                 'Access-Control-Request-Headers': 'Content-Type'
-                            }
-                        });
-
-                        showResponse('testResponse',
-                                `✅ Test CORS completato\nStatus: ${response.status}\nHeaders CORS: ${response.headers.get('Access-Control-Allow-Origin')}`,
-                                'success');
-                    } catch (error) {
-                        showResponse('testResponse', `❌ Errore CORS: ${error.message}`, 'error');
-                    }
+                        }
+                });
+                showResponse('testResponse',
+                        `✅ Test CORS completato\nStatus: ${response.status}\nHeaders CORS: ${response.headers.get('Access-Control-Allow-Origin')}`,
+                        'success');
+                } catch (error) {
+                showResponse('testResponse', `❌ Errore CORS: ${error.message}`, 'error');
+                }
                 }
 
                 function clearAllResponses() {
-                    const responseAreas = [
+                const responseAreas = [
                         'authResponse',
                         'richiestaResponse',
                         'convalidaResponse',
@@ -1674,700 +1614,632 @@
                         'annullaResponse',
                         'dettagliMissioneResponse',
                         'testResponse'
-                    ];
-
-                    responseAreas.forEach(id => {
-                        const element = document.getElementById(id);
-                        if (element) {
-                            element.textContent = 'Sezione pulita...';
-                            element.className = 'response-area';
-                        }
-                    });
-
-                    showResponse('testResponse', '🧹 Tutte le sezioni sono state pulite!', 'success');
+                ];
+                responseAreas.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                element.textContent = 'Sezione pulita...';
+                element.className = 'response-area';
+                }
+                });
+                showResponse('testResponse', '🧹 Tutte le sezioni sono state pulite!', 'success');
                 }
                 // === INIZIALIZZAZIONE ===
                 document.addEventListener('DOMContentLoaded', function () {
-                    document.addEventListener('DOMContentLoaded', function () {
-    updateAuthUI(false, null);
-    showResponse('authResponse', 'Pronto per il test di autenticazione...');
-    showResponse('richiestaResponse', 'Pronto per il test di inserimento richiesta...');
-    showResponse('convalidaResponse', 'Pronto per il test di convalida richiesta...');
-    showResponse('listaResponse', 'Pronto per il test di lista richieste...');
-    showResponse('operatoriResponse', 'Pronto per il test di lista operatori...');
-    showResponse('missioneResponse', 'Effettua il login come amministratore per creare missioni...');
-    
-    // MANTENERE VISIBILE IL MESSAGGIO DI INFO CHIUSURA MISSIONE
-    showResponse('chiusuraMissioneResponse', 'Effettua il login come amministratore per chiudere le missioni...', 'info');
-    
-    showResponse('testResponse', 'Pronto per i test di connettività...');
+                document.addEventListener('DOMContentLoaded', function () {
+                updateAuthUI(false, null);
+                showResponse('authResponse', 'Pronto per il test di autenticazione...');
+                showResponse('richiestaResponse', 'Pronto per il test di inserimento richiesta...');
+                showResponse('convalidaResponse', 'Pronto per il test di convalida richiesta...');
+                showResponse('listaResponse', 'Pronto per il test di lista richieste...');
+                showResponse('operatoriResponse', 'Pronto per il test di lista operatori...');
+                showResponse('missioneResponse', 'Effettua il login come amministratore per creare missioni...');
+                // MANTENERE VISIBILE IL MESSAGGIO DI INFO CHIUSURA MISSIONE
+                showResponse('chiusuraMissioneResponse', 'Effettua il login come amministratore per chiudere le missioni...', 'info');
+                showResponse('testResponse', 'Pronto per i test di connettività...');
                 });
                 // === FUNZIONI ANNULLAMENTO RICHIESTA ===
 
                 async function annullaRichiesta() {
-                    if (!authToken) {
-                        showResponse('annullaResponse', 'Devi prima effettuare il login come amministratore', 'error');
-                        return;
-                    }
+                if (!authToken) {
+                showResponse('annullaResponse', 'Devi prima effettuare il login come amministratore', 'error');
+                return;
+                }
 
-                    const richiestaId = parseInt(document.getElementById('annullaRichiestaId').value);
+                const richiestaId = parseInt(document.getElementById('annullaRichiestaId').value);
+                // Validazione input
+                if (!richiestaId || richiestaId <= 0) {
+                showResponse('annullaResponse', '❌ Inserisci un ID richiesta valido', 'error');
+                return;
+                }
 
-                    // Validazione input
-                    if (!richiestaId || richiestaId <= 0) {
-                        showResponse('annullaResponse', '❌ Inserisci un ID richiesta valido', 'error');
-                        return;
-                    }
-
-                    // ✅ SOSTITUISCI IL CONFIRM CON UNA CONFERMA PERSONALIZZATA
-                    showResponse('annullaResponse',
-                            `⚠️ CONFERMA ANNULLAMENTO\n\n` +
-                            `Sei sicuro di voler ANNULLARE la richiesta ${richiestaId}?\n\n` +
-                            `• Questa azione cambierà lo stato in "Annullata"\n` +
-                            `• L'operazione NON può essere annullata\n` +
-                            `• La richiesta non sarà più gestibile\n\n` +
-                            `Clicca nuovamente "Annulla Richiesta" per confermare, o "Pulisci Form" per annullare.`,
-                            'warning');
-
-                    // Cambia il pulsante per la conferma
-                    const btnAnnulla = document.getElementById('annullaBtn');
-                    const testoOriginale = btnAnnulla.innerHTML;
-                    btnAnnulla.innerHTML = '⚠️ CONFERMA ANNULLAMENTO';
-                    btnAnnulla.style.backgroundColor = '#ff6b35';
-
-                    // Sostituisci temporaneamente la funzione del pulsante
-                    btnAnnulla.onclick = async function () {
-                        // Ripristina il pulsante
-                        btnAnnulla.innerHTML = testoOriginale;
-                        btnAnnulla.style.backgroundColor = '#dc3545';
-                        btnAnnulla.onclick = annullaRichiesta;
-
-                        // Procedi con l'annullamento
-                        await eseguiAnnullamento(richiestaId);
-                    };
+                // ✅ SOSTITUISCI IL CONFIRM CON UNA CONFERMA PERSONALIZZATA
+                showResponse('annullaResponse',
+                        `⚠️ CONFERMA ANNULLAMENTO\n\n` +
+                        `Sei sicuro di voler ANNULLARE la richiesta ${richiestaId}?\n\n` +
+                        `• Questa azione cambierà lo stato in "Annullata"\n` +
+                        `• L'operazione NON può essere annullata\n` +
+                        `• La richiesta non sarà più gestibile\n\n` +
+                        `Clicca nuovamente "Annulla Richiesta" per confermare, o "Pulisci Form" per annullare.`,
+                        'warning');
+                // Cambia il pulsante per la conferma
+                const btnAnnulla = document.getElementById('annullaBtn');
+                const testoOriginale = btnAnnulla.innerHTML;
+                btnAnnulla.innerHTML = '⚠️ CONFERMA ANNULLAMENTO';
+                btnAnnulla.style.backgroundColor = '#ff6b35';
+                // Sostituisci temporaneamente la funzione del pulsante
+                btnAnnulla.onclick = async function () {
+                // Ripristina il pulsante
+                btnAnnulla.innerHTML = testoOriginale;
+                btnAnnulla.style.backgroundColor = '#dc3545';
+                btnAnnulla.onclick = annullaRichiesta;
+                // Procedi con l'annullamento
+                await eseguiAnnullamento(richiestaId);
+                };
                 }
 
                 // Esegue effettivamente l'annullamento
                 async function eseguiAnnullamento(richiestaId) {
-                    showResponse('annullaResponse', 'Annullamento richiesta in corso...', 'info');
+                showResponse('annullaResponse', 'Annullamento richiesta in corso...', 'info');
+                try {
+                const result = await apiCall(`/richieste/${richiestaId}/annulla`, {
+                method: 'PUT'
+                });
+                if (result.ok) {
+                const response = result.data;
+                let message = `✅ ${response.message}\n\n`;
+                if (response.richiesta) {
+                message += `📋 Dettagli richiesta annullata:\n`;
+                message += `• ID: ${response.richiesta.codice}\n`;
+                message += `• Descrizione: ${response.richiesta.descrizione || 'N/A'}\n`;
+                message += `• Stato precedente: ${response.statoOriginale}\n`;
+                message += `• Nuovo stato: ${response.richiesta.stato}\n`;
+                if (response.richiesta.nomeSegnalante) {
+                message += `• Segnalante: ${response.richiesta.nomeSegnalante}\n`;
+                }
+                }
 
-                    try {
-                        const result = await apiCall(`/richieste/${richiestaId}/annulla`, {
-                            method: 'PUT'
-                        });
+                showResponse('annullaResponse', message, 'success');
+                // Pulisci il form dopo successo
+                document.getElementById('annullaRichiestaId').value = '';
+                } else {
+                // Messaggi di errore
+                let errorMessage;
+                if (result.status === 400) {
+                errorMessage = `❌ ${result.data.message || result.data.error || 'Richiesta non valida'}`;
+                } else if (result.status === 401) {
+                errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
+                } else if (result.status === 403) {
+                errorMessage = '❌ Accesso negato. Solo gli amministratori possono annullare richieste.';
+                } else if (result.status === 404) {
+                errorMessage = '❌ Richiesta non trovata. Verifica l\'ID inserito.';
+                } else {
+                errorMessage = `❌ Errore del server: ${result.data.message || result.data.error || 'Errore sconosciuto'}`;
+                }
 
-                        if (result.ok) {
-                            const response = result.data;
-                            let message = `✅ ${response.message}\n\n`;
-
-                            if (response.richiesta) {
-                                message += `📋 Dettagli richiesta annullata:\n`;
-                                message += `• ID: ${response.richiesta.codice}\n`;
-                                message += `• Descrizione: ${response.richiesta.descrizione || 'N/A'}\n`;
-                                message += `• Stato precedente: ${response.statoOriginale}\n`;
-                                message += `• Nuovo stato: ${response.richiesta.stato}\n`;
-
-                                if (response.richiesta.nomeSegnalante) {
-                                    message += `• Segnalante: ${response.richiesta.nomeSegnalante}\n`;
-                                }
-                            }
-
-                            showResponse('annullaResponse', message, 'success');
-
-                            // Pulisci il form dopo successo
-                            document.getElementById('annullaRichiestaId').value = '';
-
-                        } else {
-                            // Messaggi di errore
-                            let errorMessage;
-
-                            if (result.status === 400) {
-                                errorMessage = `❌ ${result.data.message || result.data.error || 'Richiesta non valida'}`;
-                            } else if (result.status === 401) {
-                                errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
-                            } else if (result.status === 403) {
-                                errorMessage = '❌ Accesso negato. Solo gli amministratori possono annullare richieste.';
-                            } else if (result.status === 404) {
-                                errorMessage = '❌ Richiesta non trovata. Verifica l\'ID inserito.';
-                            } else {
-                                errorMessage = `❌ Errore del server: ${result.data.message || result.data.error || 'Errore sconosciuto'}`;
-                            }
-
-                            showResponse('annullaResponse', errorMessage, 'error');
-                        }
-                    } catch (error) {
-                        showResponse('annullaResponse', `❌ Errore di rete: ${error.message}`, 'error');
-                    }
+                showResponse('annullaResponse', errorMessage, 'error');
+                }
+                } catch (error) {
+                showResponse('annullaResponse', `❌ Errore di rete: ${error.message}`, 'error');
+                }
                 }
 
 
                 function clearAnnullaForm() {
-                    document.getElementById('annullaRichiestaId').value = '';
-
-                    // Ripristina il pulsante se era in stato di conferma
-                    const btnAnnulla = document.getElementById('annullaBtn');
-                    btnAnnulla.innerHTML = '❌ Annulla Richiesta';
-                    btnAnnulla.style.backgroundColor = '#dc3545';
-                    btnAnnulla.onclick = annullaRichiesta;
-
-                    showResponse('annullaResponse', 'Form pulito. Inserisci l\'ID della richiesta da annullare.', 'info');
+                document.getElementById('annullaRichiestaId').value = '';
+                // Ripristina il pulsante se era in stato di conferma
+                const btnAnnulla = document.getElementById('annullaBtn');
+                btnAnnulla.innerHTML = '❌ Annulla Richiesta';
+                btnAnnulla.style.backgroundColor = '#dc3545';
+                btnAnnulla.onclick = annullaRichiesta;
+                showResponse('annullaResponse', 'Form pulito. Inserisci l\'ID della richiesta da annullare.', 'info');
                 }
 
                 async function getMissioniOperatore() {
-                    if (!authToken) {
-                        showResponse('missioniOperatoreResponse', 'Devi prima effettuare il login come amministratore', 'error');
-                        return;
-                    }
+                if (!authToken) {
+                showResponse('missioniOperatoreResponse', 'Devi prima effettuare il login come amministratore', 'error');
+                return;
+                }
 
-                    const operatoreId = parseInt(document.getElementById('missioniOperatoreId').value);
+                const operatoreId = parseInt(document.getElementById('missioniOperatoreId').value);
+                // Validazione input
+                if (!operatoreId || operatoreId <= 0) {
+                showResponse('missioniOperatoreResponse', '❌ Inserisci un ID operatore valido', 'error');
+                return;
+                }
 
-                    // Validazione input
-                    if (!operatoreId || operatoreId <= 0) {
-                        showResponse('missioniOperatoreResponse', '❌ Inserisci un ID operatore valido', 'error');
-                        return;
-                    }
+                showResponse('missioniOperatoreResponse', 'Caricamento missioni operatore...', 'info');
+                try {
+                const result = await apiCall(`/missioni/operatore/${operatoreId}`, {
+                method: 'GET'
+                });
+                if (result.ok) {
+                const data = result.data;
+                if (data.missioni.length === 0) {
+                showResponse('missioniOperatoreResponse',
+                        `📭 Nessuna missione trovata\n\n` +
+                        `L'operatore ${data.nomeOperatore} (ID: ${data.operatoreId}) non ha partecipato ad alcuna missione.`,
+                        'info');
+                return;
+                }
 
-                    showResponse('missioniOperatoreResponse', 'Caricamento missioni operatore...', 'info');
+                let response = `👨‍🚒 MISSIONI DI ${data.nomeOperatore.toUpperCase()}\n\n`;
+                response += `📧 Email: ${data.emailOperatore}\n`;
+                response += `🎯 Totale missioni: ${data.totaleMissioni}\n\n`;
+                // Raggruppa per stato
+                const missioniAttive = data.missioni.filter(m => m.stato === 'ATTIVA');
+                const missioniConcluse = data.missioni.filter(m => m.stato === 'CONCLUSA');
+                if (missioniAttive.length > 0) {
+                response += `🔥 MISSIONI ATTIVE (${missioniAttive.length}):\n`;
+                missioniAttive.forEach((missione, index) => {
+                response += `\n${index + 1}. ${missione.nome}\n`;
+                response += `   • Ruolo: ${missione.ruoloOperatore}\n`;
+                response += `   • Posizione: ${missione.posizione}\n`;
+                response += `   • Obiettivo: ${missione.obiettivo}\n`;
+                response += `   • Inizio: ${formatDateTime(missione.dataOraInizio)}\n`;
+                if (missione.indirizzoIntervento) {
+                response += `   • Indirizzo: ${missione.indirizzoIntervento}\n`;
+                }
+                });
+                response += `\n`;
+                }
 
-                    try {
-                        const result = await apiCall(`/missioni/operatore/${operatoreId}`, {
-                            method: 'GET'
-                        });
+                if (missioniConcluse.length > 0) {
+                response += `✅ MISSIONI CONCLUSE (${missioniConcluse.length}):\n`;
+                missioniConcluse.forEach((missione, index) => {
+                response += `\n${index + 1}. ${missione.nome}\n`;
+                response += `   • Ruolo: ${missione.ruoloOperatore}\n`;
+                response += `   • Posizione: ${missione.posizione}\n`;
+                response += `   • Durata: ${formatDateTime(missione.dataOraInizio)} → ${formatDateTime(missione.dataOraFine)}\n`;
+                if (missione.livelloSuccesso > 0) {
+                let valutazione = '';
+                if (missione.livelloSuccesso >= 8)
+                        valutazione = '🌟 Eccellente';
+                else if (missione.livelloSuccesso >= 6)
+                        valutazione = '✅ Buono';
+                else if (missione.livelloSuccesso >= 4)
+                        valutazione = '⚠️ Sufficiente';
+                else
+                        valutazione = '❌ Insufficiente';
+                response += `   • Successo: ${missione.livelloSuccesso}/10 (${valutazione})\n`;
+                }
 
-                        if (result.ok) {
-                            const data = result.data;
+                if (missione.indirizzoIntervento) {
+                response += `   • Indirizzo: ${missione.indirizzoIntervento}\n`;
+                }
+                });
+                }
 
-                            if (data.missioni.length === 0) {
-                                showResponse('missioniOperatoreResponse',
-                                        `📭 Nessuna missione trovata\n\n` +
-                                        `L'operatore ${data.nomeOperatore} (ID: ${data.operatoreId}) non ha partecipato ad alcuna missione.`,
-                                        'info');
-                                return;
-                            }
+                showResponse('missioniOperatoreResponse', response, 'success');
+                } else {
+                let errorMessage = `❌ Errore nel caricamento: ${result.data.message || result.data.error || 'Errore sconosciuto'}`;
+                if (result.status === 404) {
+                errorMessage = '❌ Operatore non trovato. Verifica l\'ID inserito.';
+                } else if (result.status === 401) {
+                errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
+                } else if (result.status === 403) {
+                errorMessage = '❌ Accesso negato. Solo gli amministratori possono visualizzare le missioni degli operatori.';
+                }
 
-                            let response = `👨‍🚒 MISSIONI DI ${data.nomeOperatore.toUpperCase()}\n\n`;
-                            response += `📧 Email: ${data.emailOperatore}\n`;
-                            response += `🎯 Totale missioni: ${data.totaleMissioni}\n\n`;
-
-                            // Raggruppa per stato
-                            const missioniAttive = data.missioni.filter(m => m.stato === 'ATTIVA');
-                            const missioniConcluse = data.missioni.filter(m => m.stato === 'CONCLUSA');
-
-                            if (missioniAttive.length > 0) {
-                                response += `🔥 MISSIONI ATTIVE (${missioniAttive.length}):\n`;
-                                missioniAttive.forEach((missione, index) => {
-                                    response += `\n${index + 1}. ${missione.nome}\n`;
-                                    response += `   • Ruolo: ${missione.ruoloOperatore}\n`;
-                                    response += `   • Posizione: ${missione.posizione}\n`;
-                                    response += `   • Obiettivo: ${missione.obiettivo}\n`;
-                                    response += `   • Inizio: ${formatDateTime(missione.dataOraInizio)}\n`;
-                                    if (missione.indirizzoIntervento) {
-                                        response += `   • Indirizzo: ${missione.indirizzoIntervento}\n`;
-                                    }
-                                });
-                                response += `\n`;
-                            }
-
-                            if (missioniConcluse.length > 0) {
-                                response += `✅ MISSIONI CONCLUSE (${missioniConcluse.length}):\n`;
-                                missioniConcluse.forEach((missione, index) => {
-                                    response += `\n${index + 1}. ${missione.nome}\n`;
-                                    response += `   • Ruolo: ${missione.ruoloOperatore}\n`;
-                                    response += `   • Posizione: ${missione.posizione}\n`;
-                                    response += `   • Durata: ${formatDateTime(missione.dataOraInizio)} → ${formatDateTime(missione.dataOraFine)}\n`;
-
-                                    if (missione.livelloSuccesso > 0) {
-                                        let valutazione = '';
-                                        if (missione.livelloSuccesso >= 8)
-                                            valutazione = '🌟 Eccellente';
-                                        else if (missione.livelloSuccesso >= 6)
-                                            valutazione = '✅ Buono';
-                                        else if (missione.livelloSuccesso >= 4)
-                                            valutazione = '⚠️ Sufficiente';
-                                        else
-                                            valutazione = '❌ Insufficiente';
-
-                                        response += `   • Successo: ${missione.livelloSuccesso}/10 (${valutazione})\n`;
-                                    }
-
-                                    if (missione.indirizzoIntervento) {
-                                        response += `   • Indirizzo: ${missione.indirizzoIntervento}\n`;
-                                    }
-                                });
-                            }
-
-                            showResponse('missioniOperatoreResponse', response, 'success');
-
-                        } else {
-                            let errorMessage = `❌ Errore nel caricamento: ${result.data.message || result.data.error || 'Errore sconosciuto'}`;
-
-                            if (result.status === 404) {
-                                errorMessage = '❌ Operatore non trovato. Verifica l\'ID inserito.';
-                            } else if (result.status === 401) {
-                                errorMessage = '❌ Sessione scaduta. Effettua nuovamente il login.';
-                            } else if (result.status === 403) {
-                                errorMessage = '❌ Accesso negato. Solo gli amministratori possono visualizzare le missioni degli operatori.';
-                            }
-
-                            showResponse('missioniOperatoreResponse', errorMessage, 'error');
-                        }
-                    } catch (error) {
-                        showResponse('missioniOperatoreResponse', `❌ Errore di rete: ${error.message}`, 'error');
-                    }
+                showResponse('missioniOperatoreResponse', errorMessage, 'error');
+                }
+                } catch (error) {
+                showResponse('missioniOperatoreResponse', `❌ Errore di rete: ${error.message}`, 'error');
+                }
                 }
 
                 function clearMissioniOperatoreForm() {
-                    document.getElementById('missioniOperatoreId').value = '';
-                    showResponse('missioniOperatoreResponse', 'Form pulito. Inserisci l\'ID dell\'operatore.', 'info');
+                document.getElementById('missioniOperatoreId').value = '';
+                showResponse('missioniOperatoreResponse', 'Form pulito. Inserisci l\'ID dell\'operatore.', 'info');
                 }
 
                 async function getDettagliMissione() {
-                    if (!authToken) {
-                        showResponse('dettagliMissioneResponse', 'Devi prima effettuare il login come amministratore', 'error');
-                        return;
-                    }
+                if (!authToken) {
+                showResponse('dettagliMissioneResponse', 'Devi prima effettuare il login come amministratore', 'error');
+                return;
+                }
 
-                    // DEBUG: Controlliamo i dati dell'utente corrente
-                    console.log('=== DEBUG UTENTE CORRENTE ===');
-                    console.log('authToken presente:', !!authToken);
-                    console.log('currentUser:', currentUser);
-                    console.log('currentUser.role:', currentUser?.role);
-                    console.log('============================');
+                // DEBUG: Controlliamo i dati dell'utente corrente
+                console.log('=== DEBUG UTENTE CORRENTE ===');
+                console.log('authToken presente:', !!authToken);
+                console.log('currentUser:', currentUser);
+                console.log('currentUser.role:', currentUser?.role);
+                console.log('============================');
+                const missioneId = parseInt(document.getElementById('dettagliMissioneId').value);
+                if (!missioneId || missioneId <= 0) {
+                showResponse('dettagliMissioneResponse', '❌ Inserisci un ID missione valido', 'error');
+                return;
+                }
 
-                    const missioneId = parseInt(document.getElementById('dettagliMissioneId').value);
+                showResponse('dettagliMissioneResponse', 'Caricamento dettagli missione...', 'info');
+                try {
+                const result = await apiCall(`/missioni/${missioneId}`, {
+                method: 'GET'
+                });
+                if (result.ok) {
+                const dettagli = result.data;
+                // DEBUG: Stampa i dati ricevuti per capire la struttura
+                console.log('=== DEBUG DETTAGLI MISSIONE ===');
+                console.log('dettagli:', dettagli);
+                console.log('==============================');
+                let response = `✅ Dettagli Missione #${dettagli.id}\n\n`;
+                // === INFORMAZIONI GENERALI ===
+                response += `📊 INFORMAZIONI GENERALI:\n`;
+                response += `• Nome: ${dettagli.nome}\n`;
+                response += `• Posizione: ${dettagli.posizione}\n`;
+                response += `• Obiettivo: ${dettagli.obiettivo}\n`;
+                if (dettagli.note && dettagli.note.trim()) {
+                response += `• Note: ${dettagli.note}\n`;
+                }
 
-                    if (!missioneId || missioneId <= 0) {
-                        showResponse('dettagliMissioneResponse', '❌ Inserisci un ID missione valido', 'error');
-                        return;
-                    }
+                response += `• Admin ID: ${dettagli.idAmministratore}\n`;
+                response += `• Data Inizio: ${formatDateTime(dettagli.dataOraInizio)}\n`;
+                if (dettagli.dataOraFine) {
+                response += `• Data Fine: ${formatDateTime(dettagli.dataOraFine)}\n`;
+                response += `• Stato: Missione Conclusa\n`;
+                } else {
+                response += `• Stato: Missione Attiva\n`;
+                }
 
-                    showResponse('dettagliMissioneResponse', 'Caricamento dettagli missione...', 'info');
+                // === RICHIESTA ASSOCIATA ===
+                if (dettagli.richiesta) {
+                const richiesta = dettagli.richiesta;
+                response += `\n🆘 RICHIESTA DI SOCCORSO (#${richiesta.codice}):\n`;
+                response += `• Descrizione: ${richiesta.descrizione}\n`;
+                response += `• Indirizzo: ${richiesta.indirizzo}\n`;
+                response += `• Stato richiesta: ${richiesta.stato}\n`;
+                response += `• Segnalante: ${richiesta.nomeSegnalante}\n`;
+                response += `• Email: ${richiesta.emailSegnalante}\n`;
+                }
 
-                    try {
-                        const result = await apiCall(`/missioni/${missioneId}`, {
-                            method: 'GET'
-                        });
+                // === TEAM OPERATORI ===
+                if (dettagli.operatori && dettagli.operatori.length > 0) {
+                response += `\n👥 TEAM OPERATORI (${dettagli.operatori.length}):\n`;
+                dettagli.operatori.forEach((operatore, index) => {
+                response += `${index + 1}. ${operatore.nome} ${operatore.cognome}\n`;
+                response += `   • Ruolo: ${operatore.ruolo}\n`;
+                response += `   • Email: ${operatore.email}\n`;
+                });
+                }
 
-                        if (result.ok) {
-                            const dettagli = result.data;
+                // === MEZZI UTILIZZATI ===
+                if (dettagli.mezzi && dettagli.mezzi.length > 0) {
+                response += `\n🚛 MEZZI UTILIZZATI (${dettagli.mezzi.length}):\n`;
+                dettagli.mezzi.forEach((mezzo, index) => {
+                response += `${index + 1}. Targa: ${mezzo.targa}\n`;
+                response += `   • Tipo: ${mezzo.tipo || 'N/A'}\n`;
+                response += `   • Descrizione: ${mezzo.descrizione || 'N/A'}\n`;
+                });
+                }
 
-                            // DEBUG: Stampa i dati ricevuti per capire la struttura
-                            console.log('=== DEBUG DETTAGLI MISSIONE ===');
-                            console.log('dettagli:', dettagli);
-                            console.log('==============================');
+                // === MATERIALI UTILIZZATI ===
+                if (dettagli.materiali && dettagli.materiali.length > 0) {
+                response += `\n📦 MATERIALI UTILIZZATI (${dettagli.materiali.length}):\n`;
+                dettagli.materiali.forEach((materiale, index) => {
+                response += `${index + 1}. ${materiale.nome}\n`;
+                response += `   • Quantità: ${materiale.quantita || 1}\n`;
+                });
+                }
 
-                            let response = `✅ Dettagli Missione #${dettagli.id}\n\n`;
+                // === VALUTAZIONE FINALE ===
+                if (dettagli.valutazione) {
+                const val = dettagli.valutazione;
+                response += `\n⭐ VALUTAZIONE FINALE:\n`;
+                response += `• Livello successo: ${val.successo}/5 `;
+                // Aggiungi emoji in base al livello
+                if (val.successo >= 4)
+                        response += '🌟';
+                else if (val.successo >= 3)
+                        response += '👍';
+                else if (val.successo >= 2)
+                        response += '⚠️';
+                else
+                        response += '❌';
+                response += `\n`;
+                if (val.commento && val.commento.trim()) {
+                response += `• Commenti: ${val.commento}\n`;
+                }
 
-                            // === INFORMAZIONI GENERALI ===
-                            response += `📊 INFORMAZIONI GENERALI:\n`;
-                            response += `• Nome: ${dettagli.nome}\n`;
-                            response += `• Posizione: ${dettagli.posizione}\n`;
-                            response += `• Obiettivo: ${dettagli.obiettivo}\n`;
+                if (val.dataOraFine) {
+                response += `• Completata il: ${formatDateTime(val.dataOraFine)}\n`;
+                }
+                }
 
-                            if (dettagli.note && dettagli.note.trim()) {
-                                response += `• Note: ${dettagli.note}\n`;
-                            }
+                showResponse('dettagliMissioneResponse', response, 'success');
+                } else {
+                let errorMessage = '❌ Errore nel recupero dettagli missione.\n\n';
+                if (result.status === 404) {
+                errorMessage += 'La missione con questo ID non esiste.';
+                } else if (result.status === 403) {
+                errorMessage += 'Accesso negato. Solo gli amministratori possono visualizzare i dettagli delle missioni.';
+                } else if (result.status === 401) {
+                errorMessage += 'Non sei autenticato. Effettua prima il login come amministratore.';
+                } else {
+                errorMessage += `Errore del server (${result.status}): ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
+                }
 
-                            response += `• Admin ID: ${dettagli.idAmministratore}\n`;
-                            response += `• Data Inizio: ${formatDateTime(dettagli.dataOraInizio)}\n`;
+                showResponse('dettagliMissioneResponse', errorMessage, 'error');
+                }
 
-                            if (dettagli.dataOraFine) {
-                                response += `• Data Fine: ${formatDateTime(dettagli.dataOraFine)}\n`;
-                                response += `• Stato: Missione Conclusa\n`;
-                            } else {
-                                response += `• Stato: Missione Attiva\n`;
-                            }
-
-                            // === RICHIESTA ASSOCIATA ===
-                            if (dettagli.richiesta) {
-                                const richiesta = dettagli.richiesta;
-                                response += `\n🆘 RICHIESTA DI SOCCORSO (#${richiesta.codice}):\n`;
-                                response += `• Descrizione: ${richiesta.descrizione}\n`;
-                                response += `• Indirizzo: ${richiesta.indirizzo}\n`;
-                                response += `• Stato richiesta: ${richiesta.stato}\n`;
-                                response += `• Segnalante: ${richiesta.nomeSegnalante}\n`;
-                                response += `• Email: ${richiesta.emailSegnalante}\n`;
-                            }
-
-                            // === TEAM OPERATORI ===
-                            if (dettagli.operatori && dettagli.operatori.length > 0) {
-                                response += `\n👥 TEAM OPERATORI (${dettagli.operatori.length}):\n`;
-                                dettagli.operatori.forEach((operatore, index) => {
-                                    response += `${index + 1}. ${operatore.nome} ${operatore.cognome}\n`;
-                                    response += `   • Ruolo: ${operatore.ruolo}\n`;
-                                    response += `   • Email: ${operatore.email}\n`;
-                                });
-                            }
-
-                            // === MEZZI UTILIZZATI ===
-                            if (dettagli.mezzi && dettagli.mezzi.length > 0) {
-                                response += `\n🚛 MEZZI UTILIZZATI (${dettagli.mezzi.length}):\n`;
-                                dettagli.mezzi.forEach((mezzo, index) => {
-                                    response += `${index + 1}. Targa: ${mezzo.targa}\n`;
-                                    response += `   • Tipo: ${mezzo.tipo || 'N/A'}\n`;
-                                    response += `   • Descrizione: ${mezzo.descrizione || 'N/A'}\n`;
-                                });
-                            }
-
-                            // === MATERIALI UTILIZZATI ===
-                            if (dettagli.materiali && dettagli.materiali.length > 0) {
-                                response += `\n📦 MATERIALI UTILIZZATI (${dettagli.materiali.length}):\n`;
-                                dettagli.materiali.forEach((materiale, index) => {
-                                    response += `${index + 1}. ${materiale.nome}\n`;
-                                    response += `   • Quantità: ${materiale.quantita || 1}\n`;
-                                });
-                            }
-
-                            // === VALUTAZIONE FINALE ===
-                            if (dettagli.valutazione) {
-                                const val = dettagli.valutazione;
-                                response += `\n⭐ VALUTAZIONE FINALE:\n`;
-                                response += `• Livello successo: ${val.successo}/5 `;
-
-                                // Aggiungi emoji in base al livello
-                                if (val.successo >= 4)
-                                    response += '🌟';
-                                else if (val.successo >= 3)
-                                    response += '👍';
-                                else if (val.successo >= 2)
-                                    response += '⚠️';
-                                else
-                                    response += '❌';
-
-                                response += `\n`;
-
-                                if (val.commento && val.commento.trim()) {
-                                    response += `• Commenti: ${val.commento}\n`;
-                                }
-
-                                if (val.dataOraFine) {
-                                    response += `• Completata il: ${formatDateTime(val.dataOraFine)}\n`;
-                                }
-                            }
-
-                            showResponse('dettagliMissioneResponse', response, 'success');
-
-                        } else {
-                            let errorMessage = '❌ Errore nel recupero dettagli missione.\n\n';
-
-                            if (result.status === 404) {
-                                errorMessage += 'La missione con questo ID non esiste.';
-                            } else if (result.status === 403) {
-                                errorMessage += 'Accesso negato. Solo gli amministratori possono visualizzare i dettagli delle missioni.';
-                            } else if (result.status === 401) {
-                                errorMessage += 'Non sei autenticato. Effettua prima il login come amministratore.';
-                            } else {
-                                errorMessage += `Errore del server (${result.status}): ${result.data.error || result.data.message || 'Errore sconosciuto'}`;
-                            }
-
-                            showResponse('dettagliMissioneResponse', errorMessage, 'error');
-                        }
-
-                    } catch (error) {
-                        console.error('Errore dettagli missione:', error);
-                        showResponse('dettagliMissioneResponse',
-                                '❌ Errore di connessione: ' + error.message,
-                                'error');
-                    }
+                } catch (error) {
+                console.error('Errore dettagli missione:', error);
+                showResponse('dettagliMissioneResponse',
+                        '❌ Errore di connessione: ' + error.message,
+                        'error');
+                }
                 }
 
                 function clearDettagliMissioneForm() {
-                    document.getElementById('dettagliMissioneId').value = '';
-                    showResponse('dettagliMissioneResponse',
-                            'Effettua il login come amministratore per visualizzare i dettagli delle missioni...',
-                            'info');
+                document.getElementById('dettagliMissioneId').value = '';
+                showResponse('dettagliMissioneResponse',
+                        'Effettua il login come amministratore per visualizzare i dettagli delle missioni...',
+                        'info');
                 }
-// === FUNZIONI CHIUSURA MISSIONE ===
 
                 /**
-                 * Chiude una missione attiva con valutazione finale
+                 * Chiude                una missione attiva con valutazione finale
                  */
                 async function chiudiMissione() {
-    if (!authToken) {
-        showResponse('chiusuraMissioneResponse', 'Devi prima effettuare il login come amministratore', 'error');
-        return;
-    }
-
-    const missioneId = parseInt(document.getElementById('chiusuraMissioneId').value);
-    const livelloSuccesso = parseInt(document.getElementById('livelloSuccesso').value);
-    const commento = document.getElementById('commentoFinale').value;
-
-    // Validazione input
-    if (!missioneId || missioneId <= 0) {
-        showResponse('chiusuraMissioneResponse', '❌ Inserisci un ID missione valido', 'error');
-        return;
-    }
-
-    if (!livelloSuccesso || livelloSuccesso < 1 || livelloSuccesso > 5) {
-        showResponse('chiusuraMissioneResponse', '❌ Seleziona un livello di successo valido (1-5)', 'error');
-        return;
-    }
-
-    if (!commento.trim()) {
-        showResponse('chiusuraMissioneResponse', '❌ Inserisci un commento finale', 'error');
-        return;
-    }
-
-    
-    // Procedi direttamente con la chiusura (senza popup)
-    showResponse('chiusuraMissioneResponse', '🔄 Chiusura missione in corso...', 'info');
-
-    try {
-        const richiestaChiusura = {
-            livelloSuccesso: livelloSuccesso,
-            commento: commento
-        };
-
-        const result = await apiCall(`/missioni/${missioneId}/chiudi`, {
-            method: 'PUT',
-            body: JSON.stringify(richiestaChiusura)
-        });
-
-        if (result.ok) {
-            const response = result.data;
-            
-            let message = `✅ ${response.message}\n\n`;
-            message += `📊 RESOCONTO FINALE:\n`;
-            message += `• ID Missione: ${response.missioneId || missioneId}\n`;
-            message += `• Livello successo: ${livelloSuccesso}/5 `;
-            
-            // Emoji in base al livello
-            if (livelloSuccesso >= 4) message += '🌟';
-            else if (livelloSuccesso >= 3) message += '👍';
-            else if (livelloSuccesso >= 2) message += '⚠️';
-            else message += '❌';
-            
-            message += `\n`;
-            message += `• Timestamp chiusura: ${formatDateTime(response.timestampChiusura)}\n`;
-            message += `• Stato missione: CONCLUSA\n`;
-            message += `• Stato richiesta: CHIUSA\n`;
-            message += `\n💬 Commento finale:\n"${commento}"\n`;
-
-            // MANTENERE VISIBILE IL MESSAGGIO (non aggiungere timeout)
-            showResponse('chiusuraMissioneResponse', message, 'success');
-            
-            // Pulisci il form dopo il successo (ma senza timeout che nasconde il messaggio)
-            setTimeout(() => {
-                clearChiusuraMissioneForm();
-            }, 3000);
-
-        } else {
-            let errorMessage = '❌ Errore nella chiusura missione.\n\n';
-
-            if (result.status === 404) {
-                errorMessage += 'La missione con questo ID non esiste.';
-            } else if (result.status === 403) {
-                errorMessage += 'Accesso negato. Solo gli amministratori possono chiudere le missioni.';
-            } else if (result.status === 401) {
-                errorMessage += 'Non sei autenticato. Effettua prima il login come amministratore.';
-            } else if (result.status === 400) {
-                if (result.data.message && result.data.message.includes('Attiva')) {
-                    errorMessage += 'La missione deve essere in stato "Attiva" per essere chiusa.\nControlla che l\'ID sia corretto e che la missione non sia già conclusa.';
-                } else if (result.data.message && result.data.message.includes('già stata chiusa')) {
-                    errorMessage += 'La missione è già stata chiusa in precedenza.';
-                } else {
-                    errorMessage += result.data.message || 'Dati di chiusura non validi.';
+                if (!authToken) {
+                showResponse('chiusuraMissioneResponse', 'Devi prima effettuare il login come amministratore', 'error');
+                return;
                 }
-            } else {
+
+                const missioneId = parseInt(document.getElementById('chiusuraMissioneId').value);
+                const livelloSuccesso = parseInt(document.getElementById('livelloSuccesso').value);
+                const commento = document.getElementById('commentoFinale').value;
+                // Validazione input
+                if (!missioneId || missioneId <= 0) {
+                showResponse('chiusuraMissioneResponse', '❌ Inserisci un ID missione valido', 'error');
+                return;
+                }
+
+                if (!livelloSuccesso || livelloSuccesso < 1 || livelloSuccesso > 5) {
+                showResponse('chiusuraMissioneResponse', '❌ Seleziona un livello di successo valido (1-5)', 'error');
+                return;
+                }
+
+                if (!commento.trim()) {
+                showResponse('chiusuraMissioneResponse', '❌ Inserisci un commento finale', 'error');
+                return;
+                }
+
+
+                // Procedi direttamente con la chiusura (senza popup)
+                showResponse('chiusuraMissioneResponse', '🔄 Chiusura missione in corso...', 'info');
+                try {
+                const richiestaChiusura = {
+                livelloSuccesso: livelloSuccesso,
+                        commento: commento
+                };
+                const result = await apiCall(`/missioni/${missioneId}/chiudi`, {
+                method: 'PUT',
+                        body: JSON.stringify(richiestaChiusura)
+                });
+                if (result.ok) {
+                const response = result.data;
+                let message = `✅ ${response.message}\n\n`;
+                message += `📊 RESOCONTO FINALE:\n`;
+                message += `• ID Missione: ${response.missioneId || missioneId}\n`;
+                message += `• Livello successo: ${livelloSuccesso}/5 `;
+                // Emoji in base al livello
+                if (livelloSuccesso >= 4) message += '🌟';
+                else if (livelloSuccesso >= 3) message += '👍';
+                else if (livelloSuccesso >= 2) message += '⚠️';
+                else message += '❌';
+                message += `\n`;
+                message += `• Timestamp chiusura: ${formatDateTime(response.timestampChiusura)}\n`;
+                message += `• Stato missione: CONCLUSA\n`;
+                message += `• Stato richiesta: CHIUSA\n`;
+                message += `\n💬 Commento finale:\n"${commento}"\n`;
+                // MANTENERE VISIBILE IL MESSAGGIO (non aggiungere timeout)
+                showResponse('chiusuraMissioneResponse', message, 'success');
+                // Pulisci il form dopo il successo (ma senza timeout che nasconde il messaggio)
+                setTimeout(() => {
+                clearChiusuraMissioneForm();
+                }, 3000);
+                } else {
+                let errorMessage = '❌ Errore nella chiusura missione.\n\n';
+                if (result.status === 404) {
+                errorMessage += 'La missione con questo ID non esiste.';
+                } else if (result.status === 403) {
+                errorMessage += 'Accesso negato. Solo gli amministratori possono chiudere le missioni.';
+                } else if (result.status === 401) {
+                errorMessage += 'Non sei autenticato. Effettua prima il login come amministratore.';
+                } else if (result.status === 400) {
+                if (result.data.message && result.data.message.includes('Attiva')) {
+                errorMessage += 'La missione deve essere in stato "Attiva" per essere chiusa.\nControlla che l\'ID sia corretto e che la missione non sia già conclusa.';
+                } else if (result.data.message && result.data.message.includes('già stata chiusa')) {
+                errorMessage += 'La missione è già stata chiusa in precedenza.';
+                } else {
+                errorMessage += result.data.message || 'Dati di chiusura non validi.';
+                }
+                } else {
                 errorMessage += `Errore del server (${result.status}): ${result.data.message || result.data.error || 'Errore sconosciuto'}`;
-            }
+                }
 
-            // MANTENERE VISIBILE IL MESSAGGIO DI ERRORE (non aggiungere timeout)
-            showResponse('chiusuraMissioneResponse', errorMessage, 'error');
-        }
+                // MANTENERE VISIBILE IL MESSAGGIO DI ERRORE (non aggiungere timeout)
+                showResponse('chiusuraMissioneResponse', errorMessage, 'error');
+                }
 
-    } catch (error) {
-        console.error('Errore chiusura missione:', error);
-        // MANTENERE VISIBILE IL MESSAGGIO DI ERRORE (non aggiungere timeout)
-        showResponse('chiusuraMissioneResponse', 
-            '❌ Errore di connessione: ' + error.message, 
-            'error');
-    }
-}
+                } catch (error) {
+                console.error('Errore chiusura missione:', error);
+                // MANTENERE VISIBILE IL MESSAGGIO DI ERRORE (non aggiungere timeout)
+                showResponse('chiusuraMissioneResponse',
+                        '❌ Errore di connessione: ' + error.message,
+                        'error');
+                }
+                }
 
                 /**
                  * Pulisce il form di chiusura missione
                  */
                 function clearChiusuraMissioneForm() {
-   
-        document.getElementById('chiusuraMissioneId').value = '';
-        document.getElementById('livelloSuccesso').value = '';
-        document.getElementById('commentoFinale').value = 'Missione completata con successo. Tutti gli obiettivi sono stati raggiunti e la situazione è stata gestita in modo efficace.';
-    
-    // RIMUOVERE IL POPUP - Mantenere visibile il messaggio di info missione
-    showResponse('chiusuraMissioneResponse', 
-        'Effettua il login come amministratore per chiudere le missioni...', 
-        'info');
-    
-    // NON aggiungere timeout che nasconde il messaggio
-    // setTimeout(() => { document.getElementById('chiusuraMissioneResponse').style.display = 'none'; }, 3000);
-}
+
+                document.getElementById('chiusuraMissioneId').value = '';
+                document.getElementById('livelloSuccesso').value = '';
+                document.getElementById('commentoFinale').value = 'Missione completata con successo. Tutti gli obiettivi sono stati raggiunti e la situazione è stata gestita in modo efficace.';
+                // RIMUOVERE IL POPUP - Mantenere visibile il messaggio di info missione
+                showResponse('chiusuraMissioneResponse',
+                        'Effettua il login come amministratore per chiudere le missioni...',
+                        'info');
+                // NON aggiungere timeout che nasconde il messaggio
+                // setTimeout(() => { document.getElementById('chiusuraMissioneResponse').style.display = 'none'; }, 3000);
+                }
                 /**
                  * Riempie il form con dati di esempio
                  */
-                
-                
+
+
                 // Funzione di utilità per formattare date/ore
                 function formatDateTime(dateTimeString) {
-                    if (!dateTimeString)
+                if (!dateTimeString)
                         return 'N/A';
-
-                    try {
-                        const date = new Date(dateTimeString);
-                        return date.toLocaleString('it-IT', {
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            second: '2-digit'
-                        });
-                    } catch (e) {
-                        return dateTimeString; // Fallback se il parsing fallisce
-                    }
+                try {
+                const date = new Date(dateTimeString);
+                return date.toLocaleString('it-IT', {
+                year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                });
+                } catch (e) {
+                return dateTimeString; // Fallback se il parsing fallisce
+                }
                 }
 
                 /**
-                 * Recupera e visualizza i dettagli completi di una richiesta di soccorso
+                 * Recupera e visualizza i dettagli compl                                eti di una richiesta di soccorso
                  */
                 async function getDettagliRichiesta() {
-                    if (!authToken) {
-                        showResponse('dettagliRichiestaResponse', 'Devi prima effettuare il login come amministratore', 'error');
-                        return;
-                    }
+                if (!authToken) {
+                showResponse('dettagliRichiestaResponse', 'Devi prima effettuare il login come amministratore', 'error');
+                return;
+                }
 
-                    const richiestaId = parseInt(document.getElementById('dettagliRichiestaId').value);
+                const richiestaId = parseInt(document.getElementById('dettagliRichiestaId').value);
+                if (!richiestaId || richiestaId <= 0) {
+                showResponse('dettagliRichiestaResponse', '❌ Inserisci un ID richiesta valido', 'error');
+                return;
+                }
 
-                    if (!richiestaId || richiestaId <= 0) {
-                        showResponse('dettagliRichiestaResponse', '❌ Inserisci un ID richiesta valido', 'error');
-                        return;
-                    }
+                showResponse('dettagliRichiestaResponse', 'Caricamento dettagli richiesta...', 'info');
+                try {
+                const result = awaitapiCall(`/richieste/${richiestaId}`, {
+                method: 'GET'
+                });
+                if (result.ok) {
+                const dettagli = result.data;
+                // DEBUG: Stampa i dati ricevuti per capire la struttura
+                console.log('=== DEBUG DETTAGLI RICHIESTA ===');
+                console.log('dettagli:', dettagli);
+                console.log('dettagli.missioneAssociata:', dettagli.missioneAssociata);
+                console.log('===============================');
+                let response = `✅ Dettagli Richiesta di Soccorso #${dettagli.id}\n\n`;
+                // === DATI DELLA SEGNALAZIONE ===
+                response += `🚨 DATI DELLA SEGNALAZIONE:\n`;
+                response += `• Nome: ${dettagli.nome}\n`;
+                response += `• Descrizione: ${dettagli.descrizione}\n`;
+                response += `• Indirizzo: ${dettagli.indirizzo}\n`;
+                if (dettagli.coordinate) {
+                response += `• Coordinate GPS: ${dettagli.coordinate}\n`;
+                }
 
-                    showResponse('dettagliRichiestaResponse', 'Caricamento dettagli richiesta...', 'info');
+                if (dettagli.foto) {
+                response += `• Foto allegata: Sì\n`;
+                }
 
-                    try {
-                        const result = await apiCall(`/richieste/${richiestaId}`, {
-                            method: 'GET'
-                        });
+                // === DATI DEL SEGNALANTE ===
+                response += `\n👤 DATI DEL SEGNALANTE:\n`;
+                response += `• Nome segnalante: ${dettagli.nomeSegnalante}\n`;
+                response += `• Email: ${dettagli.emailSegnalante}\n`;
+                // === STATO E GESTIONE ===
+                response += `\n📊 STATO E GESTIONE:\n`;
+                response += `• Stato: ${dettagli.stato}\n`;
+                if (dettagli.idAmministratore) {
+                response += `• Admin responsabile: ${dettagli.nomeAmministratore || `ID ${dettagli.idAmministratore}`}\n`;
+                }
 
-                        if (result.ok) {
-                            const dettagli = result.data;
+                // === DATI TECNICI ===
+                response += `\n🔧 DATI TECNICI:\n`;
+                response += `• IP segnalazione: ${dettagli.ip || 'N/A'}\n`;
+                if (dettagli.stringaValidazione) {
+                response += `• Token validazione: ${dettagli.stringaValidazione.substring(0, 10)}...\n`;
+                }
 
-                            // DEBUG: Stampa i dati ricevuti per capire la struttura
-                            console.log('=== DEBUG DETTAGLI RICHIESTA ===');
-                            console.log('dettagli:', dettagli);
-                            console.log('dettagli.missioneAssociata:', dettagli.missioneAssociata);
-                            console.log('===============================');
+                if (dettagli.dataCreazione) {
+                response += `• Data creazione: ${formatDateTime(dettagli.dataCreazione)}\n`;
+                }
 
-                            let response = `✅ Dettagli Richiesta di Soccorso #${dettagli.id}\n\n`;
+                // === MISSIONE COLLEGATA ===
+                if (dettagli.missioneAssociata) {
+                const missione = dettagli.missioneAssociata;
+                response += `\n🚀 MISSIONE COLLEGATA #${missione.id}:\n`;
+                response += `• Nome missione: ${missione.nome}\n`;
+                response += `• Posizione: ${missione.posizione}\n`;
+                response += `• Obiettivo: ${missione.obiettivo}\n`;
+                response += `• Stato missione: ${missione.stato}\n`;
+                response += `• Numero operatori: ${missione.numeroOperatori || 'N/A'}\n`;
+                if (missione.amministratoreNome) {
+                response += `• Admin missione: ${missione.amministratoreNome}\n`;
+                }
 
-                            // === DATI DELLA SEGNALAZIONE ===
-                            response += `🚨 DATI DELLA SEGNALAZIONE:\n`;
-                            response += `• Nome: ${dettagli.nome}\n`;
-                            response += `• Descrizione: ${dettagli.descrizione}\n`;
-                            response += `• Indirizzo: ${dettagli.indirizzo}\n`;
+                if (missione.dataInizio) {
+                response += `• Inizio missione: ${formatDateTime(missione.dataInizio)}\n`;
+                }
 
-                            if (dettagli.coordinate) {
-                                response += `• Coordinate GPS: ${dettagli.coordinate}\n`;
-                            }
+                if (missione.dataFine) {
+                response += `• Fine missione: ${formatDateTime(missione.dataFine)}\n`;
+                }
 
-                            if (dettagli.foto) {
-                                response += `• Foto allegata: Sì\n`;
-                            }
+                // Valutazione missione
+                if (missione.livelloSuccesso !== null && missione.livelloSuccesso !== undefined && missione.livelloSuccesso > 0) {
+                response += `• Livello successo: ${missione.livelloSuccesso}/5 ⭐\n`;
+                }
 
-                            // === DATI DEL SEGNALANTE ===
-                            response += `\n👤 DATI DEL SEGNALANTE:\n`;
-                            response += `• Nome segnalante: ${dettagli.nomeSegnalante}\n`;
-                            response += `• Email: ${dettagli.emailSegnalante}\n`;
+                if (missione.commenti) {
+                response += `• Commenti finali: ${missione.commenti}\n`;
+                }
+                }
+                } else {
+                response += `\n🚀 MISSIONE:\n`;
+                response += `• Nessuna missione collegata\n`;
+                }
 
-                            // === STATO E GESTIONE ===
-                            response += `\n📊 STATO E GESTIONE:\n`;
-                            response += `• Stato: ${dettagli.stato}\n`;
+                showResponse('dettagliRichiestaResponse', response, 'success');
+                } else {
+                let errorMessage = '❌ Errore nel recupero dettagli richiesta.\n\n';
+                if (result.status === 404) {
+                errorMessage += 'La richiesta con questo ID non esiste.';
+                } else if (result.status === 403) {
+                errorMessage += 'Accesso negato. Solo gli amministratori possono visualizzare i dettagli delle richieste.';
+                } else if (result.status === 401) {
+                errorMessage += 'Non sei autenticato. Effettua prima il login come amministratore.';
+                } else {
+                errorMessage += `Errore del server (${result.status}): ${result.error || 'Errore sconosciuto'}`;
+                }
 
-                            if (dettagli.idAmministratore) {
-                                response += `• Admin responsabile: ${dettagli.nomeAmministratore || `ID ${dettagli.idAmministratore}`}\n`;
-                            }
+                showResponse('dettagliRichiestaResponse', errorMessage, 'error');
+                }
 
-                            // === DATI TECNICI ===
-                            response += `\n🔧 DATI TECNICI:\n`;
-                            response += `• IP segnalazione: ${dettagli.ip || 'N/A'}\n`;
-
-                            if (dettagli.stringaValidazione) {
-                                response += `• Token validazione: ${dettagli.stringaValidazione.substring(0, 10)}...\n`;
-                            }
-
-                            if (dettagli.dataCreazione) {
-                                response += `• Data creazione: ${formatDateTime(dettagli.dataCreazione)}\n`;
-                            }
-
-                            // === MISSIONE COLLEGATA ===
-                            if (dettagli.missioneAssociata) {
-                                const missione = dettagli.missioneAssociata;
-                                response += `\n🚀 MISSIONE COLLEGATA #${missione.id}:\n`;
-                                response += `• Nome missione: ${missione.nome}\n`;
-                                response += `• Posizione: ${missione.posizione}\n`;
-                                response += `• Obiettivo: ${missione.obiettivo}\n`;
-                                response += `• Stato missione: ${missione.stato}\n`;
-                                response += `• Numero operatori: ${missione.numeroOperatori || 'N/A'}\n`;
-
-                                if (missione.amministratoreNome) {
-                                    response += `• Admin missione: ${missione.amministratoreNome}\n`;
-                                }
-
-                                if (missione.dataInizio) {
-                                    response += `• Inizio missione: ${formatDateTime(missione.dataInizio)}\n`;
-                                }
-
-                                if (missione.dataFine) {
-                                    response += `• Fine missione: ${formatDateTime(missione.dataFine)}\n`;
-                                }
-
-                                // Valutazione missione
-                                if (missione.livelloSuccesso !== null && missione.livelloSuccesso !== undefined && missione.livelloSuccesso > 0) {
-                                    response += `• Livello successo: ${missione.livelloSuccesso}/5 ⭐\n`;
-                                }
-
-                                if (missione.commenti) {
-                                    response += `• Commenti finali: ${missione.commenti}\n`;
-                                }
-                            } else {
-                                response += `\n🚀 MISSIONE:\n`;
-                                response += `• Nessuna missione collegata\n`;
-                            }
-
-                            showResponse('dettagliRichiestaResponse', response, 'success');
-
-                        } else {
-                            let errorMessage = '❌ Errore nel recupero dettagli richiesta.\n\n';
-
-                            if (result.status === 404) {
-                                errorMessage += 'La richiesta con questo ID non esiste.';
-                            } else if (result.status === 403) {
-                                errorMessage += 'Accesso negato. Solo gli amministratori possono visualizzare i dettagli delle richieste.';
-                            } else if (result.status === 401) {
-                                errorMessage += 'Non sei autenticato. Effettua prima il login come amministratore.';
-                            } else {
-                                errorMessage += `Errore del server (${result.status}): ${result.error || 'Errore sconosciuto'}`;
-                            }
-
-                            showResponse('dettagliRichiestaResponse', errorMessage, 'error');
-                        }
-
-                    } catch (error) {
-                        console.error('Errore dettagli richiesta:', error);
-                        showResponse('dettagliRichiestaResponse',
-                                '❌ Errore di connessione: ' + error.message,
-                                'error');
-                    }
+                } catch (error) {
+                console.error('Errore dettagli richiesta:', error);
+                showResponse('dettagliRichiestaResponse',
+                        '❌ Errore di connessione: ' + error.message,
+                        'error');
+                }
                 }
 
                 /**
                  * Pulisce il form dettagli richiesta
                  */
-                function clearDettagliRichiestaForm() {
-                    document.getElementById('dettagliRichiestaId').value = '';
-                    showResponse('dettagliRichiestaResponse',
-                            'Effettua il login come amministratore per visualizzare i dettagli delle richieste...',
-                            'info');
+                function clearDettagliRichiestaForm()                {
+                document.getElementById('dettagliRichiestaId').value = '';
+                showResponse('dettagliRichiestaResponse',
+                        'Effettua il login come amministratore per visualizzare i dettagli delle richieste...',
+                        'info');
                 }
 
             </script>
