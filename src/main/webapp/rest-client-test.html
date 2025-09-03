@@ -801,6 +801,38 @@
             </div>
 
 
+<!-- Sezione 12: Dettagli di un Operatore -->
+<div class="section">
+    <h2>👤 12. Dettagli di un Operatore</h2>
+    
+    <div class="form-group">
+        <label for="dettagliOperatoreId">ID Operatore:</label>
+        <input type="number" id="dettagliOperatoreId" placeholder="Inserisci l'ID dell'operatore" min="1" required>
+        <small style="color: #666;">Inserisci l'ID numerico dell'operatore per visualizzare i suoi dettagli personali</small>
+    </div>
+
+    <div class="info-box">
+        <h5>ℹ️ Informazioni mostrate:</h5>
+        <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #0c5460;">
+            <li><strong>Dati anagrafici:</strong> Nome, cognome, email, codice fiscale</li>
+            <li><strong>Stato operativo:</strong> Disponibilità attuale</li>
+            <li><strong>Competenze:</strong> Patenti e abilità specialistiche</li>
+            <li><strong>Statistiche:</strong> Numero di missioni completate e in corso</li>
+            <li><strong>Privacy:</strong> La password non viene mai mostrata</li>
+        </ul>
+    </div>
+
+    <div class="button-row">
+        <button onclick="getDettagliOperatore()" id="dettagliOperatoreBtn" style="background-color: #28a745; display: none;">
+            🔍 Visualizza Dettagli
+        </button>
+        <button onclick="clearDettagliOperatoreForm()" id="pulisciFormDettagliOperatore" style="display: none;">🧹 Pulisci Form</button>
+    </div>
+
+    <div class="response-area" id="dettagliOperatoreResponse">
+        Effettua il login come amministratore per visualizzare i dettagli degli operatori...
+    </div>
+</div>
             <!-- Sezione 13 Lista Missioni Operatore -->
             <div class="section">
                 <h2>👨‍🚒 13. Lista delle Missioni in cui un Operatore è stato coinvolto (Solo Admin)</h2>
@@ -1028,27 +1060,31 @@
                 // in base allo stato di autenticazione
                 // MODIFICA DA APPLICARE ALLA FUNZIONE updateAuthUI ESISTENTE IN rest-client-test.html
 
+// AGGIORNAMENTO ALLA FUNZIONE updateAuthUI PER INCLUDERE LA SEZIONE 12
+
 function updateAuthUI(isAuthenticated, currentUser) {
     const statusElement = document.getElementById('authStatus');
 
     // Lista dei pulsanti che richiedono autenticazione ADMIN
     const adminOnlyButtons = [
-        'listaBtn',                   // ✅ Pulsante "Carica Lista" 
-        'richiesteNonPositiveBtn',    // ✅ Pulsante richieste non positive
-        'operatoriBtn',               // ✅ Pulsante operatori 
-        'dettagliRichiestaBtn',       // ✅ Pulsante dettagli richiesta 
-        'dettagliOperatoreBtn',       // ✅ Pulsante dettagli operatore 
-        'missioni13Btn',              // ✅ Pulsante missioni operatore
-        'annullaBtn',                 // ✅ Pulsante annulla
-        'dettagliMissioneBtn',        // ✅ Pulsante dettagli missione
-        'chiusuraMissioneBtn',        // ✅ ESISTENTE: Pulsante chiusura missione
-        'pulisciFormChiusura'         // ✅ NUOVO: Pulsante pulisci form chiusura missione
+        'listaBtn',                     // ✅ Pulsante "Carica Lista" 
+        'richiesteNonPositiveBtn',      // ✅ Pulsante richieste non positive
+        'operatoriBtn',                 // ✅ Pulsante operatori 
+        'dettagliRichiestaBtn',         // ✅ Pulsante dettagli richiesta 
+        'dettagliOperatoreBtn',         // ✅ Pulsante dettagli operatore 
+        'missioni13Btn',                // ✅ Pulsante missioni operatore
+        'annullaBtn',                   // ✅ Pulsante annulla
+        'dettagliMissioneBtn',          // ✅ Pulsante dettagli missione
+        'chiusuraMissioneBtn',          // ✅ Pulsante chiusura missione
+        'pulisciFormChiusura',          // ✅ Pulsante pulisci form chiusura missione
+        'dettagliOperatoreBtn',         // ✅ NUOVO: Pulsante dettagli operatore (sezione 12)
+        'pulisciFormDettagliOperatore'  // ✅ NUOVO: Pulsante pulisci form dettagli operatore
     ];
 
     // Pulsanti che possono essere visibili per tutti gli utenti autenticati
     const userButtons = [
-        'verifyBtn',                  // ✅ Pulsante verifica token
-        'logoutBtn'                   // ✅ Pulsante logout
+        'verifyBtn',                    // ✅ Pulsante verifica token
+        'logoutBtn'                     // ✅ Pulsante logout
     ];
 
     if (isAuthenticated && currentUser) {
@@ -1139,9 +1175,14 @@ function updateAuthUI(isAuthenticated, currentUser) {
         if (messaggioNonAdmin)
             messaggioNonAdmin.style.display = 'none';
         
-        // NUOVO: Resetta il messaggio della sezione chiusura missione
+        // Resetta i messaggi delle sezioni
         showResponse('chiusuraMissioneResponse', 
             'Effettua il login come amministratore per chiudere le missioni...', 
+            'info');
+        
+        // NUOVO: Reset messaggio sezione 12
+        showResponse('dettagliOperatoreResponse', 
+            'Effettua il login come amministratore per visualizzare i dettagli degli operatori...', 
             'info');
     }
 }
@@ -2397,7 +2438,129 @@ function updateAuthUI(isAuthenticated, currentUser) {
                             'Effettua il login come amministratore per visualizzare i dettagli delle richieste...',
                             'info');
                 }
+async function getDettagliOperatore() {
+    if (!authToken) {
+        showResponse('dettagliOperatoreResponse', '❌ Devi prima effettuare il login come amministratore', 'error');
+        return;
+    }
 
+    const operatoreId = parseInt(document.getElementById('dettagliOperatoreId').value);
+
+    // Validazione input
+    if (!operatoreId || operatoreId <= 0) {
+        showResponse('dettagliOperatoreResponse', '❌ Inserisci un ID operatore valido (numero positivo)', 'error');
+        return;
+    }
+
+    showResponse('dettagliOperatoreResponse', '🔄 Caricamento dettagli operatore...', 'info');
+
+    try {
+        const result = await apiCall(`/operatori/${operatoreId}`, {
+            method: 'GET'
+        });
+
+        if (result.ok) {
+            const operatore = result.data;
+            
+            let message = `✅ DETTAGLI OPERATORE #${operatore.id}\n\n`;
+            
+            // === DATI ANAGRAFICI ===
+            message += `👤 DATI ANAGRAFICI:\n`;
+            message += `• Nome completo: ${operatore.nome} ${operatore.cognome}\n`;
+            message += `• Email: ${operatore.email || 'Non specificata'}\n`;
+            message += `• Codice fiscale: ${operatore.codiceFiscale || 'Non specificato'}\n\n`;
+            
+            // === STATO OPERATIVO ===
+            message += `📊 STATO OPERATIVO:\n`;
+            const statoIcon = operatore.disponibile ? '🟢' : '🔴';
+            const statoText = operatore.disponibile ? 'DISPONIBILE' : 'IMPEGNATO';
+            message += `• Stato attuale: ${statoIcon} ${statoText}\n\n`;
+            
+            // === COMPETENZE - PATENTI ===
+            message += `🚗 PATENTI POSSEDUTE:\n`;
+            if (operatore.patenti && operatore.patenti.length > 0) {
+                operatore.patenti.forEach((patente, index) => {
+                    // Formattazione delle patenti (rimuove underscore e migliora la leggibilità)
+                    const patenteFormatted = patente.replace(/_/g, ' ').replace(/PATENTE/gi, '').trim();
+                    message += `   ${index + 1}. ${patenteFormatted}\n`;
+                });
+            } else {
+                message += `   📭 Nessuna patente registrata\n`;
+            }
+            message += `\n`;
+            
+            // === COMPETENZE - ABILITÀ ===
+            message += `🛠️ ABILITÀ SPECIALISTICHE:\n`;
+            if (operatore.abilita && operatore.abilita.length > 0) {
+                operatore.abilita.forEach((abilita, index) => {
+                    // Formattazione delle abilità (migliora leggibilità)
+                    const abilitaFormatted = abilita
+                        .replace(/_/g, ' ')
+                        .replace(/-/g, ' ')
+                        .toLowerCase()
+                        .replace(/\b\w/g, l => l.toUpperCase()); // Capitalizza ogni parola
+                    message += `   ${index + 1}. ${abilitaFormatted}\n`;
+                });
+            } else {
+                message += `   📭 Nessuna abilità specialistica registrata\n`;
+            }
+            message += `\n`;
+            
+            // === STATISTICHE MISSIONI ===
+            message += `📈 STATISTICHE MISSIONI:\n`;
+            message += `• Missioni in corso: ${operatore.missioniInCorso || 0}\n`;
+            message += `• Missioni completate: ${operatore.missioniCompletate || 0}\n`;
+            
+            // Calcolo totale missioni
+            const totMissioni = (operatore.missioniInCorso || 0) + (operatore.missioniCompletate || 0);
+            message += `• Totale missioni: ${totMissioni}`;
+
+            showResponse('dettagliOperatoreResponse', message, 'success');
+
+        } else {
+            let errorMessage = '❌ Errore nel caricamento dettagli operatore.\n\n';
+            
+            if (result.status === 404) {
+                errorMessage += `L'operatore con ID ${operatoreId} non esiste.\n`;
+                errorMessage += `Verifica che l'ID sia corretto e che l'operatore sia stato registrato nel sistema.`;
+            } else if (result.status === 403) {
+                errorMessage += 'Accesso negato. Solo gli amministratori possono visualizzare i dettagli degli operatori.';
+            } else if (result.status === 401) {
+                errorMessage += 'Sessione scaduta. Effettua nuovamente il login come amministratore.';
+            } else if (result.status === 400) {
+                errorMessage += `ID operatore non valido (${operatoreId}).`;
+            } else {
+                errorMessage += `Errore del server (${result.status}): ${result.data?.message || result.data?.error || 'Errore sconosciuto'}`;
+            }
+
+            showResponse('dettagliOperatoreResponse', errorMessage, 'error');
+        }
+
+    } catch (error) {
+        console.error('Errore recupero dettagli operatore:', error);
+        showResponse('dettagliOperatoreResponse', 
+            `❌ Errore di connessione: ${error.message}`, 
+            'error');
+    }
+}
+
+/**
+ * Pulisce il form dei dettagli operatore
+ */
+function clearDettagliOperatoreForm() {
+    document.getElementById('dettagliOperatoreId').value = '';
+    showResponse('dettagliOperatoreResponse', 
+        'Effettua il login come amministratore per visualizzare i dettagli degli operatori...', 
+        'info');
+}
+
+/**
+ * Formatta un numero con separatore delle migliaia (se necessario)
+ */
+function formatNumber(num) {
+    if (!num || num === 0) return '0';
+    return num.toLocaleString('it-IT');
+}
             </script>
         </body>
     </html>
