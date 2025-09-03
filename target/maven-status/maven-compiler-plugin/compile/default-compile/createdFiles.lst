@@ -136,7 +136,6 @@ webengineering\nuovissimosoccorsoweb\dao\impl\OperatoreDAO_MySQL.class
 webengineering\nuovissimosoccorsoweb\dao\MezzoDAO.class
 webengineering\framework\result\TemplateManagerException.class
 webengineering\nuovissimosoccorsoweb\model\impl\proxy\OperatoreProxy.class
-webengineering\nuovissimosoccorsoweb\rest\dto\ChiusuraMissioneResponse.class
 webengineering\nuovissimosoccorsoweb\service\MissioniService.class
 webengineering\nuovissimosoccorsoweb\controller\Home.class
 webengineering\nuovissimosoccorsoweb\controller\OperatoreMissioniController.class
@@ -165,7 +164,6 @@ webengineering\nuovissimosoccorsoweb\model\impl\OperatoreImpl.class
 webengineering\nuovissimosoccorsoweb\model\Operatore.class
 webengineering\nuovissimosoccorsoweb\model\Patenti.class
 webengineering\nuovissimosoccorsoweb\rest\dto\ConvalidaResponse.class
-webengineering\nuovissimosoccorsoweb\rest\dto\ChiusuraMissioneRequest.class
 webengineering\nuovissimosoccorsoweb\model\Missione.class
 webengineering\nuovissimosoccorsoweb\model\impl\RichiestaSoccorsoImpl.class
 webengineering\nuovissimosoccorsoweb\controller\ConfermaRichiesta.class
