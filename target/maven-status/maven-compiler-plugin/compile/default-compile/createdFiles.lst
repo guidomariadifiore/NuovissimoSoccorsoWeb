@@ -176,6 +176,7 @@ webengineering\nuovissimosoccorsoweb\dao\AbilitaDAO.class
 webengineering\nuovissimosoccorsoweb\util\RateLimiter$RateLimiterStats.class
 webengineering\nuovissimosoccorsoweb\rest\dto\MezzoAssegnatoDTO.class
 webengineering\framework\controller\AbstractBaseController.class
+webengineering\nuovissimosoccorsoweb\controller\OpenAPIServlet.class
 webengineering\nuovissimosoccorsoweb\dao\impl\AmministratoreDAO_MySQL.class
 webengineering\nuovissimosoccorsoweb\rest\dto\RichiestaResponse.class
 webengineering\nuovissimosoccorsoweb\controller\AdminMaterialiController$MissioneConDettagli.class
