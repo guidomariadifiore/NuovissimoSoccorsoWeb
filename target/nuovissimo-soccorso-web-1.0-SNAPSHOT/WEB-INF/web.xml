@@ -183,7 +183,7 @@
         <servlet-name>OperatoreStoricoController</servlet-name>
         <servlet-class>webengineering.nuovissimosoccorsoweb.controller.OperatoreStoricoController</servlet-class>
     </servlet>
-
+    
     <!-- ========== MAPPING SERVLET MVC ========== -->
     <!-- Homepage e login -->
     <servlet-mapping>
@@ -315,7 +315,7 @@
         <servlet-name>OperatoreStoricoController</servlet-name>
         <url-pattern>/operatore/storico</url-pattern>
     </servlet-mapping>
-
+    
     <!-- Root redirect - SOLO per percorsi specifici -->
     <servlet-mapping>
         <servlet-name>RedirectServlet</servlet-name>

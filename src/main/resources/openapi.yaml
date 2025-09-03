@@ -1,0 +1,597 @@
+openapi: 3.0.3
+info:
+  title: SoccorsoWeb REST API
+  description: |
+    API per il sistema di gestione delle richieste di soccorso e delle missioni di intervento.
+    
+    Progetto integrato MVC + REST basato su:
+    - Sistema MVC originale SoccorsoWeb (Freemarker + MySQL)
+    - API REST con JAX-RS (Jersey) per l'integrazione
+    - Autenticazione JWT
+    
+    Sviluppatore:
+    - Guido Maria Di Fiore (guidomaria.difiore@student.univaq.it)
+    - Beatrice Pascucci (beatrice.pascucci@student.univaq.it)
+    - Erika Baliva (erika.baliva@student.univaq.it)
+    
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/nuovissimo-soccorso-web-1.0-SNAPSHOT/api
+    description: Server di sviluppo locale
+
+tags:
+  - name: Autenticazione
+    description: Endpoint per login/logout e verifica token
+  - name: Richieste
+    description: Gestione delle richieste di soccorso
+  - name: Missioni
+    description: Gestione delle missioni di intervento
+  - name: Operatori
+    description: Gestione degli operatori di soccorso
+  - name: Admin
+    description: Funzionalità riservate agli amministratori
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Token JWT ottenuto dal login.
+        Formato: Bearer <token>
+
+  schemas:
+    # ===== AUTENTICAZIONE =====
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          description: Username o email dell'utente
+        password:
+          type: string
+          format: password
+          description: Password dell'utente
+      example:
+        username: "guidomariadifiore@gmail.com"
+        password: "Ciao"
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Esito dell'operazione
+        message:
+          type: string
+          description: Messaggio di risposta
+        token:
+          type: string
+          description: Token JWT per le chiamate successive
+        user:
+          $ref: '#/components/schemas/UserInfo'
+      example:
+        success: true
+        message: "Login effettuato con successo"
+        token: "95eb6d0c6e7e3a6f74ce864f6d094d73..."
+
+    UserInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [USER, ADMIN]
+
+    # ===== RICHIESTE DI SOCCORSO =====
+    RichiestaCreateRequest:
+      type: object
+      required:
+        - telefono
+        - indirizzo
+        - descrizione
+      properties:
+        telefono:
+          type: string
+          description: Numero di telefono del richiedente
+        indirizzo:
+          type: string
+          description: Indirizzo dove intervenire
+        descrizione:
+          type: string
+          description: Descrizione del problema/emergenza
+      example:
+        telefono: "3401234567"
+        indirizzo: "Via Roma 123, L'Aquila"
+        descrizione: "Incendio appartamento al secondo piano"
+
+    RichiestaSoccorso:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        telefono:
+          type: string
+        indirizzo:
+          type: string
+        descrizione:
+          type: string
+        stato:
+          $ref: '#/components/schemas/StatoRichiesta'
+        dataCreazione:
+          type: string
+          format: date-time
+        validationToken:
+          type: string
+          description: Token per la convalida via email
+
+    StatoRichiesta:
+      type: string
+      enum:
+        - PENDING_VALIDATION
+        - ATTIVA
+        - IN_CORSO
+        - CHIUSA
+        - IGNORATA
+      description: |
+        Stati delle richieste:
+        - PENDING_VALIDATION: In attesa di convalida
+        - ATTIVA: Convalidata e in attesa di assegnazione
+        - IN_CORSO: Assegnata a una missione
+        - CHIUSA: Completata
+        - IGNORATA: Rifiutata dall'admin
+
+    # ===== MISSIONI =====
+    MissioneCreateRequest:
+      type: object
+      required:
+        - richiestaId
+        - autistaId
+        - caposquadraId
+      properties:
+        richiestaId:
+          type: integer
+          format: int64
+          description: ID della richiesta da assegnare
+        autistaId:
+          type: integer
+          format: int64
+          description: ID dell'autista
+        caposquadraId:
+          type: integer
+          format: int64
+          description: ID del caposquadra
+      example:
+        richiestaId: 1
+        autistaId: 2
+        caposquadraId: 3
+
+    Missione:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        richiestaId:
+          type: integer
+          format: int64
+        autistaId:
+          type: integer
+          format: int64
+        caposquadraId:
+          type: integer
+          format: int64
+        stato:
+          type: string
+          enum: [IN_CORSO, COMPLETATA, FALLITA]
+        livelloSuccesso:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Livello di successo (1-5, richiesto alla chiusura)
+        dataCreazione:
+          type: string
+          format: date-time
+        dataChiusura:
+          type: string
+          format: date-time
+
+    # ===== OPERATORI =====
+    Operatore:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nome:
+          type: string
+        cognome:
+          type: string
+        ruolo:
+          type: string
+          enum: [AUTISTA, CAPOSQUADRA]
+        disponibile:
+          type: boolean
+          description: Indica se l'operatore è attualmente libero
+      example:
+        nome: "Mario"
+        cognome: "Rossi"
+        ruolo: "AUTISTA"
+        disponibile: true
+
+    # ===== RISPOSTE PAGINATE =====
+    PaginatedRichieste:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/RichiestaSoccorso'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        number:
+          type: integer
+          description: Numero pagina corrente (0-based)
+        size:
+          type: integer
+        first:
+          type: boolean
+        last:
+          type: boolean
+
+    # ===== ERRORI =====
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+security:
+  - bearerAuth: []
+
+paths:
+  # ===== AUTENTICAZIONE =====
+  /auth/login:
+    post:
+      security: []  # No auth required for login
+      tags:
+        - Autenticazione
+      summary: Login utente
+      description: Autentica un utente e restituisce un token JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login effettuato con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Credenziali non valide
+        '400':
+          description: Dati di input non validi
+
+  /auth/logout:
+    post:
+      tags:
+        - Autenticazione
+      summary: Logout utente
+      responses:
+        '200':
+          description: Logout effettuato con successo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  # ===== RICHIESTE DI SOCCORSO =====
+  /richieste:
+    post:
+      tags:
+        - Richieste
+      summary: Inserimento richiesta di soccorso
+      description: Crea una nuova richiesta di soccorso
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RichiestaCreateRequest'
+      responses:
+        '201':
+          description: Richiesta creata con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RichiestaSoccorso'
+        '400':
+          description: Dati non validi
+
+    get:
+      tags:
+        - Richieste
+      summary: Lista richieste (paginata)
+      description: |
+        Recupera una lista paginata delle richieste filtrata per tipologia.
+        Solo admin possono vedere tutte le richieste, gli utenti vedono solo le proprie.
+      parameters:
+        - name: page
+          in: query
+          description: Numero di pagina (0-based)
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Elementi per pagina
+          schema:
+            type: integer
+            default: 20
+        - name: tipologia
+          in: query
+          description: Filtra per tipologia
+          schema:
+            $ref: '#/components/schemas/StatoRichiesta'
+      responses:
+        '200':
+          description: Lista richieste
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRichieste'
+
+  /richieste/{id}/convalida:
+    post:
+      security: []  # No auth required - uses validation token
+      tags:
+        - Richieste
+      summary: Convalida richiesta di soccorso
+      description: Endpoint per convalidare una richiesta tramite link email
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Token di validazione inviato via email
+      responses:
+        '200':
+          description: Richiesta convalidata con successo
+        '400':
+          description: Token non valido
+        '404':
+          description: Richiesta non trovata
+
+  /richieste/{id}:
+    get:
+      tags:
+        - Richieste
+      summary: Dettagli richiesta di soccorso
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Dettagli richiesta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RichiestaSoccorso'
+        '404':
+          description: Richiesta non trovata
+
+    delete:
+      tags:
+        - Admin
+      summary: Annulla richiesta (solo admin)
+      description: Annulla una richiesta di soccorso - solo amministratori
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Richiesta annullata
+        '403':
+          description: Solo admin possono annullare richieste
+        '404':
+          description: Richiesta non trovata
+
+  /richieste/insuccesso:
+    get:
+      tags:
+        - Admin
+      summary: Richieste chiuse con insuccesso
+      description: Lista delle richieste con livello di successo < 5
+      responses:
+        '200':
+          description: Lista richieste
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RichiestaSoccorso'
+
+  # ===== OPERATORI =====
+  /operatori/liberi:
+    get:
+      tags:
+        - Operatori
+      summary: Lista operatori liberi
+      description: Restituisce gli operatori attualmente disponibili
+      responses:
+        '200':
+          description: Lista operatori liberi
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Operatore'
+
+  /operatori/{id}:
+    get:
+      tags:
+        - Operatori
+      summary: Dettagli operatore
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Dettagli operatore
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Operatore'
+        '404':
+          description: Operatore non trovato
+
+  /operatori/{id}/missioni:
+    get:
+      tags:
+        - Operatori
+      summary: Missioni di un operatore
+      description: Lista delle missioni in cui un operatore è stato coinvolto
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Lista missioni
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Missione'
+
+  # ===== MISSIONI =====
+  /missioni:
+    post:
+      tags:
+        - Admin
+      summary: Creazione missione
+      description: Crea una nuova missione assegnando operatori a una richiesta
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MissioneCreateRequest'
+      responses:
+        '201':
+          description: Missione creata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Missione'
+        '400':
+          description: Dati non validi
+        '403':
+          description: Solo admin possono creare missioni
+
+  /missioni/{id}:
+    get:
+      tags:
+        - Missioni
+      summary: Dettagli missione
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Dettagli missione
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Missione'
+        '404':
+          description: Missione non trovata
+
+  /missioni/{id}/chiudi:
+    put:
+      tags:
+        - Admin
+      summary: Chiusura missione in corso
+      description: Chiude una missione specificando il livello di successo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: livelloSuccesso
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 5
+          description: Livello di successo da 1 (fallimento) a 5 (successo totale)
+      responses:
+        '200':
+          description: Missione chiusa
+        '400':
+          description: Livello successo non valido
+        '403':
+          description: Solo admin possono chiudere missioni
+        '404':
+          description: Missione non trovata
