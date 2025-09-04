@@ -18,6 +18,11 @@ tags:
     description: Endpoint di test e verifica sistema
   - name: Missioni
     description: Gestione delle missioni di soccorso
+  - name: Richieste
+    description: Gestione e consultazione delle richieste di soccorso
+  - name: Richieste Pubbliche
+    description: Inserimento e convalida delle richieste di soccorso (endpoint pubblici)
+
 
 
 components:
@@ -480,7 +485,7 @@ components:
           type: integer
           nullable: true
 
-          # === OPERATORI ===
+    # === OPERATORI ===
     OperatoreDTO:
       type: object
       properties:
@@ -534,6 +539,265 @@ components:
         abilita: ["Soccorso Alpino", "Primo Soccorso Avanzato"]
         missioniInCorso: 0
         missioniCompletate: 23
+        
+      # === RICHIESTE DI SOCCORSO ===
+      ListaRichiesteResponse:
+        type: object
+        properties:
+          content:
+            type: array
+            items:
+              $ref: '#/components/schemas/RichiestaDTO'
+            description: Lista delle richieste nella pagina corrente
+          totalElements:
+            type: integer
+            description: Numero totale di elementi
+          totalPages:
+            type: integer
+            description: Numero totale di pagine
+          number:
+            type: integer
+            description: Numero della pagina corrente (0-based)
+          size:
+            type: integer
+            description: Dimensione della pagina
+          first:
+            type: boolean
+            description: Indica se questa è la prima pagina
+          last:
+            type: boolean
+            description: Indica se questa è l'ultima pagina
+        example:
+          content:
+            - codice: 123
+              stato: "Convalidata"
+              descrizione: "Escursionista ferito sul Monte Bianco"
+          totalElements: 150
+          totalPages: 8
+          number: 0
+          size: 20
+          first: true
+          last: false
+
+      DettagliRichiestaDTO:
+        type: object
+        properties:
+          id:
+            type: integer
+            description: ID della richiesta
+          stato:
+            type: string
+            enum: ["In Attesa", "Convalidata", "Attiva", "Chiusa", "Ignorata", "Annullata"]
+            description: Stato corrente della richiesta
+          descrizione:
+            type: string
+            description: Descrizione dell'emergenza
+          indirizzo:
+            type: string
+            description: Indirizzo del luogo dell'emergenza
+          nome:
+            type: string
+            description: Nome del luogo (opzionale)
+          coordinate:
+            type: string
+            description: Coordinate GPS del luogo
+          foto:
+            type: string
+            description: Foto dell'emergenza (Base64 encoded)
+            nullable: true
+          ip:
+            type: string
+            description: Indirizzo IP del segnalante
+          emailSegnalante:
+            type: string
+            format: email
+            description: Email del segnalante
+          nomeSegnalante:
+            type: string
+            description: Nome del segnalante
+          idAmministratore:
+            type: integer
+            nullable: true
+            description: ID dell'amministratore che ha gestito la richiesta
+          nomeAmministratore:
+            type: string
+            nullable: true
+            description: Nome dell'amministratore
+          missioneAssociata:
+            $ref: '#/components/schemas/MissioneAssociataDTO'
+            nullable: true
+            description: Missione associata alla richiesta (se esistente)
+        example:
+          id: 123
+          stato: "Attiva"
+          descrizione: "Escursionista ferito sul Monte Bianco"
+          indirizzo: "Monte Bianco, quota 2500m"
+          coordinate: "45.8326,6.8652"
+          emailSegnalante: "segnalante@email.com"
+          nomeSegnalante: "Mario Rossi"
+
+      MissioneAssociataDTO:
+        type: object
+        properties:
+          id:
+            type: integer
+            description: ID della missione
+          nome:
+            type: string
+            description: Nome della missione
+          posizione:
+            type: string
+            description: Posizione dell'intervento
+          obiettivo:
+            type: string
+            description: Obiettivo della missione
+          stato:
+            type: string
+            enum: ["ATTIVA", "CONCLUSA"]
+            description: Stato della missione
+          dataOraInizio:
+            type: string
+            format: date-time
+            description: Data e ora inizio missione
+          dataOraFine:
+            type: string
+            format: date-time
+            nullable: true
+            description: Data e ora fine missione (se conclusa)
+          livelloSuccesso:
+            type: integer
+            minimum: 0
+            maximum: 5
+            description: Livello di successo della missione (0 se non valutata)
+          commento:
+            type: string
+            nullable: true
+            description: Commento sulla missione
+          numeroOperatori:
+            type: integer
+            description: Numero di operatori assegnati
+        example:
+          id: 123
+          nome: "Soccorso alpino Monte Bianco"
+          stato: "ATTIVA"
+          dataOraInizio: "2024-01-15T14:30:00"
+          numeroOperatori: 4
+
+      AnnullaRichiestaResponse:
+        type: object
+        properties:
+          success:
+            type: boolean
+            description: Indica se l'operazione è riuscita
+          message:
+            type: string
+            description: Messaggio di stato
+          richiesta:
+            $ref: '#/components/schemas/RichiestaDTO'
+            description: Dati della richiesta annullata
+          statoOriginale:
+            type: string
+            description: Stato precedente all'annullamento
+          adminId:
+            type: integer
+            description: ID dell'amministratore che ha annullato la richiesta
+        example:
+          success: true
+          message: "Richiesta annullata con successo"
+          richiesta:
+            codice: 123
+            stato: "Annullata"
+          statoOriginale: "Convalidata"
+          adminId: 1
+          
+      # === INSERIMENTO E CONVALIDA RICHIESTE ===
+      RichiestaRequest:
+        type: object
+        required:
+          - descrizione
+          - indirizzo
+          - emailSegnalante
+          - nomeSegnalante
+        properties:
+          descrizione:
+            type: string
+            minLength: 10
+            maxLength: 1000
+            description: Descrizione dettagliata dell'emergenza
+            example: "Escursionista caduto in un crepaccio sul Monte Bianco, necessario soccorso alpino urgente"
+          indirizzo:
+            type: string
+            minLength: 5
+            maxLength: 500
+            description: Indirizzo o località dell'emergenza
+            example: "Monte Bianco, sentiero CAI 201, quota 2500m"
+          nome:
+            type: string
+            maxLength: 200
+            description: Nome del luogo o punto di riferimento (opzionale)
+            example: "Rifugio Torino"
+          emailSegnalante:
+            type: string
+            format: email
+            description: Email del segnalante per la convalida
+            example: "mario.rossi@email.com"
+          nomeSegnalante:
+            type: string
+            minLength: 2
+            maxLength: 100
+            description: Nome e cognome del segnalante
+            example: "Mario Rossi"
+          coordinate:
+            type: string
+            pattern: '^-?\d+\.\d+,-?\d+\.\d+$'
+            description: Coordinate GPS in formato "latitudine,longitudine"
+            example: "45.8326,6.8652"
+          foto:
+            type: string
+            description: Foto dell'emergenza (Base64 encoded, opzionale)
+            nullable: true
+
+      RichiestaResponse:
+        type: object
+        properties:
+          success:
+            type: boolean
+            description: Indica se l'operazione è riuscita
+          message:
+            type: string
+            description: Messaggio di stato o errore
+          richiesta:
+            $ref: '#/components/schemas/RichiestaDTO'
+            nullable: true
+            description: Dati della richiesta creata (solo in caso di successo)
+        example:
+          success: true
+          message: "Richiesta di soccorso inserita con successo. Email di convalida inviata."
+          richiesta:
+            codice: 123
+            stato: "In Attesa"
+            descrizione: "Escursionista ferito sul Monte Bianco"
+
+      ConvalidaResponse:
+        type: object
+        properties:
+          success:
+            type: boolean
+            description: Indica se la convalida è riuscita
+          message:
+            type: string
+            description: Messaggio di stato
+          richiesta:
+            $ref: '#/components/schemas/RichiestaDTO'
+            nullable: true
+            description: Dati della richiesta convalidata
+        example:
+          success: true
+          message: "Richiesta convalidata con successo. Gli amministratori sono stati notificati."
+          richiesta:
+            codice: 123
+            stato: "Convalidata"
+            descrizione: "Escursionista ferito sul Monte Bianco"
 
 paths:
   # === AUTENTICAZIONE ===
@@ -920,4 +1184,322 @@ paths:
           description: Token non valido o mancante
         '500':
           description: Errore interno del server
+          
+  # === RICHIESTE DI SOCCORSO ===
+  /richieste:
+    get:
+      tags:
+        - Richieste
+      summary: Lista paginata delle richieste di soccorso
+      description: |
+        Restituisce una lista paginata delle richieste di soccorso, 
+        filtrata opzionalmente per stato.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: stato
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: ["ATTIVA", "IN_CORSO", "CHIUSA", "IGNORATA"]
+          description: Filtra per stato delle richieste
+          example: "ATTIVA"
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Numero di pagina (1-based)
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Numero di elementi per pagina
+      responses:
+        '200':
+          description: Lista paginata delle richieste
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListaRichiesteResponse'
+        '400':
+          description: Parametri di paginazione non validi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Token non valido o mancante
+        '500':
+          description: Errore interno del server
+    post:
+      tags:
+        - Richieste Pubbliche
+      summary: Inserisce una nuova richiesta di soccorso
+      description: |
+        Endpoint pubblico per l'inserimento di nuove richieste di soccorso.
+        Non richiede autenticazione per permettere segnalazioni rapide in emergenza.
+        Invia automaticamente un'email di convalida al segnalante.
+      security: [] # Endpoint pubblico
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RichiestaRequest'
+      responses:
+        '201':
+          description: Richiesta creata con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RichiestaResponse'
+        '400':
+          description: Dati non validi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RichiestaResponse'
+              examples:
+                dati_mancanti:
+                  summary: Dati richiesta mancanti
+                  value:
+                    success: false
+                    message: "Dati richiesta mancanti"
+                    richiesta: null
+                validazione_fallita:
+                  summary: Errore di validazione
+                  value:
+                    success: false
+                    message: "Email segnalante non valida"
+                    richiesta: null
+        '500':
+          description: Errore interno del server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RichiestaResponse'
+
+
+  /richieste/non-positive:
+    get:
+      tags:
+        - Richieste
+      summary: Richieste con risultato non totalmente positivo
+      description: |
+        Lista delle richieste di soccorso chiuse con livello di successo 
+        minore di 5 (risultato non totalmente positivo).
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Numero di pagina (1-based)
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Numero di elementi per pagina
+      responses:
+        '200':
+          description: Lista paginata delle richieste non positive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListaRichiesteResponse'
+        '400':
+          description: Parametri di paginazione non validi
+        '401':
+          description: Token non valido o mancante
+        '500':
+          description: Errore interno del server
+
+  /richieste/{id}:
+    get:
+      tags:
+        - Richieste
+      summary: Dettagli di una richiesta di soccorso
+      description: |
+        Restituisce i dettagli completi di una richiesta di soccorso, 
+        inclusa la missione associata se esistente.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID della richiesta
+      responses:
+        '200':
+          description: Dettagli della richiesta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DettagliRichiestaDTO'
+        '400':
+          description: ID richiesta non valido
+        '404':
+          description: Richiesta non trovata
+        '403':
+          description: Solo gli amministratori possono vedere i dettagli
+        '401':
+          description: Token non valido o mancante
+
+  /richieste/{id}/annulla:
+    put:
+      tags:
+        - Richieste
+      summary: Annulla una richiesta di soccorso
+      description: |
+        Annulla una richiesta di soccorso in stato "Convalidata".
+        Solo gli amministratori possono annullare richieste.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID della richiesta da annullare
+      responses:
+        '200':
+          description: Richiesta annullata con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnnullaRichiestaResponse'
+        '400':
+          description: |
+            Richiesta non può essere annullata (stato non valido) o 
+            ID non valido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                stato_non_valido:
+                  summary: Stato non valido per annullamento
+                  value:
+                    error: "La richiesta selezionata deve avere lo stato \"Convalidata\". Stato attuale: Chiusa"
+                    code: "INVALID_STATE_FOR_CANCELLATION"
+                già_annullata:
+                  summary: Richiesta già annullata
+                  value:
+                    error: "La richiesta è già stata annullata"
+                    code: "ALREADY_CANCELLED"
+        '404':
+          description: Richiesta non trovata
+        '403':
+          description: Solo gli amministratori possono annullare richieste
+        '401':
+          description: Token non valido o mancante
+          
+  # === INSERIMENTO E CONVALIDA RICHIESTE (PUBBLICI) ===
+  /richieste/{id}/convalida:
+    post:
+      tags:
+        - Richieste Pubbliche
+      summary: Convalida una richiesta di soccorso
+      description: |
+        Endpoint pubblico per convalidare richieste tramite token ricevuto via email.
+        Una volta convalidata, la richiesta diventa visibile agli amministratori.
+      security: [] # Endpoint pubblico
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID della richiesta da convalidare
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Token di convalida ricevuto via email
+          example: "abc123def456ghi789"
+      responses:
+        '200':
+          description: Richiesta convalidata con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConvalidaResponse'
+              examples:
+                convalida_riuscita:
+                  summary: Prima convalida
+                  value:
+                    success: true
+                    message: "Richiesta convalidata con successo. Gli amministratori sono stati notificati."
+                    richiesta:
+                      codice: 123
+                      stato: "Convalidata"
+                già_convalidata:
+                  summary: Già convalidata
+                  value:
+                    success: true
+                    message: "La richiesta era già stata convalidata in precedenza."
+                    richiesta:
+                      codice: 123
+                      stato: "Convalidata"
+        '400':
+          description: Token non valido o richiesta in stato non convalidabile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConvalidaResponse'
+              examples:
+                token_mancante:
+                  summary: Token mancante
+                  value:
+                    success: false
+                    message: "Token di convalida mancante"
+                    richiesta: null
+                token_invalido:
+                  summary: Token non valido
+                  value:
+                    success: false
+                    message: "Token di convalida non valido o scaduto"
+                    richiesta: null
+                stato_invalido:
+                  summary: Stato non convalidabile
+                  value:
+                    success: false
+                    message: "La richiesta non può essere convalidata nel suo stato attuale"
+                    richiesta: null
+        '404':
+          description: Richiesta non trovata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConvalidaResponse'
+              example:
+                success: false
+                message: "Richiesta non trovata"
+                richiesta: null
+        '500':
+          description: Errore interno del server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConvalidaResponse'
 
