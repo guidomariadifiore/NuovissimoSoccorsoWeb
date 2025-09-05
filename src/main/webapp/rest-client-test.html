@@ -528,7 +528,7 @@
                 <h2>🎯 7. Creazione Missione</h2>
 
                 <!-- Form per creare missione (visibile solo per admin autenticati) -->
-                <div id="sezionFormMissione" class="form-section hidden">
+                <div id="sezionFormMissione" class="form-section">
                     <h3 style="color: #007bff;
                         margin-bottom: 20px;">📝 Compila Dati Missione</h3>
 
@@ -1029,9 +1029,6 @@
                     currentUser = null;
                     updateAuthUI(false, null);
 
-                    // Nascondi il form missione
-                    document.getElementById('sezionFormMissione').style.display = 'none';
-                    document.getElementById('messaggioNonAdmin').style.display = 'none';
                     showResponse('missioneResponse', 'Effettua il login come amministratore per creare missioni...', 'info');
 
                     showResponse('authResponse', '👋 Logout effettuato', 'info');
