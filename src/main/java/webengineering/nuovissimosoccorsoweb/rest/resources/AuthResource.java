@@ -55,7 +55,7 @@ public class AuthResource {
                         .build();
             }
             
-            // Usa AuthService che integra con il database reale
+            //  AuthService serve per l'integrazione con il database reale
             AuthService.UserInfo authResult = AuthService.getInstance()
                 .authenticateUser(loginRequest.getEmail(), loginRequest.getPassword());
             
@@ -65,7 +65,7 @@ public class AuthResource {
                         .build();
             }
             
-            // Converti il risultato in UserInfo per la risposta
+            //  risultato convertito in UserInfo per la risposta
             UserInfo user = new UserInfo(authResult.getId(), authResult.getEmail(), authResult.getRole());
             
             // Genera token JWT (converte int to Long per compatibilità)
@@ -133,7 +133,7 @@ public class AuthResource {
                 .build();
     }
     
-    // ========== CLASSI DTO (Data Transfer Objects) ==========
+    //  CLASSI DTO 
     
     /**
      * Classe per la richiesta di login.

@@ -204,7 +204,7 @@
                 transition: all 0.3s ease;
             }
 
-            /* Pulsante convalida verde */
+            
             .button-row button[style*="background-color: #28a745"] {
                 color: white;
             }
@@ -301,9 +301,8 @@
                     transform: none !important;
                 }
 
-                /* Quando abilitato: mantiene il colore originale dallo style="" */
+                /* Quando abilitato: mantiene il colore originale */
                 .button-row button:not(:disabled) {
-                    /* I colori sono già definiti negli attributi style="" dei pulsanti */
                     cursor: pointer;
                 }
 
@@ -360,7 +359,7 @@
                 </div>
             </div>
 
-            <!-- Sezione 2: Inserimento Richiesta di Soccorso (CORRETTA) -->
+            <!-- Sezione 2: Inserimento Richiesta di Soccorso -->
             <div class="section">
                 <h2>🆘 2. Inserimento Richiesta di Soccorso (NO AUTH richiesta)</h2>
 
@@ -408,7 +407,7 @@
                     <button onclick="clearForm()" style="background: #6c757d;">🧹 Pulisci Form</button>
                 </div>
 
-                <!-- QUESTO PULSANTE È SEMPRE ATTIVO (NO AUTH) -->
+                <!-- QUESTO PULSANTE È SEMPRE ATTIVO -->
                 <button onclick="inserisciRichiesta()" id="richiestaBtn">🆘 Inserisci Richiesta</button>
 
                 <div class="response-area" id="richiestaResponse">
@@ -595,7 +594,7 @@
                         <span id="orarioCreazione">--</span>
                     </div>
 
-                    <!-- Pulsanti azione (RIMOSSO il pulsante pulisci) -->
+                    
                     <!-- Pulsanti azione -->
 
                     <div class="button-row">
@@ -638,6 +637,8 @@
                     Effettua il login come amministratore per creare missioni...
                 </div>
             </div>
+            
+    <!-- Sezione 8: chiusura missione in corso -->
             <div class="section">
     <h2>🏁 8. Chiusura Missione in Corso</h2>
     
@@ -682,14 +683,13 @@
             🔚 Chiudi Missione
         </button>
         <button onclick="clearChiusuraMissioneForm()" id="pulisciFormChiusura" style="display: none;">🧹 Pulisci Form</button>
-        <!-- TASTO ESEMPIO RIMOSSO COMPLETAMENTE -->
     </div>
 
     <div class="response-area" id="chiusuraMissioneResponse">
         Effettua il login come amministratore per chiudere le missioni...
     </div>
 </div>
-            <!-- Sezione 9: Annullamento Richiesta di Soccorso (NUOVO) -->
+            <!-- Sezione 9: Annullamento Richiesta di Soccorso -->
             <div class="section">
                 <h2>❌ 9. Annullamento Richiesta di Soccorso (Solo Admin)</h2>
 
@@ -889,9 +889,7 @@
                 let authToken = null;
                 let currentUser = null;
 
-                // === FUNZIONI HELPER ===
-
-                // Utility function per le chiamate API
+                
                 async function apiCall(endpoint, options = {}) {
                     const url = `${API_BASE_URL}${endpoint}`;
 
@@ -902,7 +900,7 @@
                         }
                     };
 
-                    // Aggiungi token se disponibile
+                    
                     if (authToken) {
                         defaultOptions.headers['Authorization'] = `Bearer ${authToken}`;
                     }
@@ -942,7 +940,7 @@
                     element.className = `response-area ${type}`;
                 }
 
-                // === FUNZIONI DI AUTENTICAZIONE ===
+                // FUNZIONI DI AUTENTICAZIONE
 
                 async function doLogin() {
                     const email = document.getElementById('email').value;
@@ -961,7 +959,7 @@
                             body: JSON.stringify({email, password})
                         });
 
-                        // DEBUG: Stampa tutta la risposta per vedere cosa arriva
+                        // DEBUG
                         console.log('=== DEBUG LOGIN RESPONSE ===');
                         console.log('result.ok:', result.ok);
                         console.log('result.status:', result.status);
@@ -971,27 +969,26 @@
                         if (result.ok) {
                             authToken = result.data.token;
 
-                            // ✅ FIX: Normalizza il ruolo da 'admin' a 'ADMIN' per il backend
+                            //  Normalizzato il ruolo da 'admin' a 'ADMIN' per compatibilità
                             let userRole = result.data.role || 'ADMIN';
                             if (userRole.toLowerCase() === 'admin') {
-                                userRole = 'ADMIN';  // Converti a maiuscolo per il backend
+                                userRole = 'ADMIN';  
                             }
 
-                            // ✅ Assegna currentUser con ruolo normalizzato
+                            
                             currentUser = result.data.user || {
                                 id: result.data.userId || result.data.id,
                                 email: email,
-                                role: userRole  // Usa il ruolo normalizzato
+                                role: userRole  
                             };
 
-                            // DEBUG: Verifica che currentUser sia impostato correttamente
+                            // DEBUG
                             console.log('=== DEBUG LOGIN FIX ===');
                             console.log('Ruolo originale dal server:', result.data.role);
                             console.log('Ruolo normalizzato:', userRole);
                             console.log('currentUser finale:', currentUser);
                             console.log('========================');
 
-                            // ✅ CHIAMA updateAuthUI con i dati corretti
                             updateAuthUI(true, currentUser);
 
                             // DEBUG: Info per controllare il ruolo
@@ -1026,7 +1023,7 @@
                     currentUser = null;
                     updateAuthUI(false, null);
 
-                    // Nascondi il form missione
+                    // Nascondo il form missione
                     document.getElementById('sezionFormMissione').style.display = 'none';
                     document.getElementById('messaggioNonAdmin').style.display = 'none';
                     showResponse('missioneResponse', 'Effettua il login come amministratore per creare missioni...', 'info');
@@ -1056,35 +1053,31 @@
                     }
                 }
 
-// Aggiorna la lista dei pulsanti che devono essere mostrati/nascosti
-                // in base allo stato di autenticazione
-                // MODIFICA DA APPLICARE ALLA FUNZIONE updateAuthUI ESISTENTE IN rest-client-test.html
-
-// AGGIORNAMENTO ALLA FUNZIONE updateAuthUI PER INCLUDERE LA SEZIONE 12
+// Aggiorna la lista dei pulsanti che devono essere mostrati/nascosti in base allo stato di autenticazione
 
 function updateAuthUI(isAuthenticated, currentUser) {
     const statusElement = document.getElementById('authStatus');
 
     // Lista dei pulsanti che richiedono autenticazione ADMIN
     const adminOnlyButtons = [
-        'listaBtn',                     // ✅ Pulsante "Carica Lista" 
-        'richiesteNonPositiveBtn',      // ✅ Pulsante richieste non positive
-        'operatoriBtn',                 // ✅ Pulsante operatori 
-        'dettagliRichiestaBtn',         // ✅ Pulsante dettagli richiesta 
-        'dettagliOperatoreBtn',         // ✅ Pulsante dettagli operatore 
-        'missioni13Btn',                // ✅ Pulsante missioni operatore
-        'annullaBtn',                   // ✅ Pulsante annulla
-        'dettagliMissioneBtn',          // ✅ Pulsante dettagli missione
-        'chiusuraMissioneBtn',          // ✅ Pulsante chiusura missione
-        'pulisciFormChiusura',          // ✅ Pulsante pulisci form chiusura missione
-        'dettagliOperatoreBtn',         // ✅ NUOVO: Pulsante dettagli operatore (sezione 12)
-        'pulisciFormDettagliOperatore'  // ✅ NUOVO: Pulsante pulisci form dettagli operatore
+        'listaBtn',                     // Pulsante "Carica Lista" 
+        'richiesteNonPositiveBtn',      // Pulsante richieste non positive
+        'operatoriBtn',                 // Pulsante operatori 
+        'dettagliRichiestaBtn',         // Pulsante dettagli richiesta 
+        'dettagliOperatoreBtn',         // Pulsante dettagli operatore 
+        'missioni13Btn',                // Pulsante missioni operatore
+        'annullaBtn',                   // Pulsante annulla
+        'dettagliMissioneBtn',          // Pulsante dettagli missione
+        'chiusuraMissioneBtn',          // Pulsante chiusura missione
+        'pulisciFormChiusura',          // Pulsante pulisci form chiusura missione
+        'dettagliOperatoreBtn',         // Pulsante dettagli operatore (per la sezione 12)
+        'pulisciFormDettagliOperatore'  // Pulsante pulisci form dettagli operatore (sempre per sez. 12)
     ];
 
     // Pulsanti che possono essere visibili per tutti gli utenti autenticati
     const userButtons = [
-        'verifyBtn',                    // ✅ Pulsante verifica token
-        'logoutBtn'                     // ✅ Pulsante logout
+        'verifyBtn',                    // Pulsante verifica token
+        'logoutBtn'                     // Pulsante logout
     ];
 
     if (isAuthenticated && currentUser) {
@@ -1098,8 +1091,8 @@ function updateAuthUI(isAuthenticated, currentUser) {
             adminOnlyButtons.forEach(id => {
                 const btn = document.getElementById(id);
                 if (btn) {
-                    btn.style.display = 'inline-block';  // Mostra il pulsante
-                    btn.disabled = false;                 // E abilitalo
+                    btn.style.display = 'inline-block';  
+                    btn.disabled = false;                 
                     console.log(`✅ ADMIN - Mostrato pulsante: ${id}`);
                 } else {
                     console.log(`⚠️ Pulsante non trovato: ${id}`);
@@ -1116,7 +1109,6 @@ function updateAuthUI(isAuthenticated, currentUser) {
                 }
             });
 
-            // Gestisci form missione per admin (CODICE ESISTENTE)
             const sezionFormMissione = document.getElementById('sezionFormMissione');
             const messaggioNonAdmin = document.getElementById('messaggioNonAdmin');
             if (sezionFormMissione)
@@ -1129,7 +1121,7 @@ function updateAuthUI(isAuthenticated, currentUser) {
             adminOnlyButtons.forEach(id => {
                 const btn = document.getElementById(id);
                 if (btn) {
-                    btn.style.display = 'none';  // Nascondi il pulsante
+                    btn.style.display = 'none';  
                     console.log(`❌ UTENTE - Nascosto pulsante admin-only: ${id}`);
                 }
             });
@@ -1144,7 +1136,7 @@ function updateAuthUI(isAuthenticated, currentUser) {
                 }
             });
 
-            // Nascondi form missione per utenti normali (CODICE ESISTENTE)
+            // Nascondi form missione per utenti normali 
             const sezionFormMissione = document.getElementById('sezionFormMissione');
             const messaggioNonAdmin = document.getElementById('messaggioNonAdmin');
             if (sezionFormMissione)
@@ -1162,12 +1154,12 @@ function updateAuthUI(isAuthenticated, currentUser) {
         [...adminOnlyButtons, ...userButtons].forEach(id => {
             const btn = document.getElementById(id);
             if (btn) {
-                btn.style.display = 'none';  // Nascondi il pulsante
+                btn.style.display = 'none';  
                 console.log(`❌ NON AUTENTICATO - Nascosto pulsante: ${id}`);
             }
         });
 
-        // Nascondi tutto quando non autenticato (CODICE ESISTENTE)
+        // Nascondi tutto quando utente standard
         const sezionFormMissione = document.getElementById('sezionFormMissione');
         const messaggioNonAdmin = document.getElementById('messaggioNonAdmin');
         if (sezionFormMissione)
@@ -1179,15 +1171,13 @@ function updateAuthUI(isAuthenticated, currentUser) {
         showResponse('chiusuraMissioneResponse', 
             'Effettua il login come amministratore per chiudere le missioni...', 
             'info');
-        
-        // NUOVO: Reset messaggio sezione 12
         showResponse('dettagliOperatoreResponse', 
             'Effettua il login come amministratore per visualizzare i dettagli degli operatori...', 
             'info');
     }
 }
 
-                // === FUNZIONI MISSIONE ===
+                // FUNZIONI MISSIONE
 
                 function mostraFormMissioneAutomatic() {
                     document.getElementById('sezionFormMissione').style.display = 'block';
@@ -1332,7 +1322,7 @@ function updateAuthUI(isAuthenticated, currentUser) {
                     updateOrarioCreazione();
                 }
 
-                // === FUNZIONI RICHIESTE ===
+                // FUNZIONI RICHIESTE
 
                 async function inserisciRichiesta() {
                     const descrizione = document.getElementById('descrizione').value;
@@ -1437,7 +1427,7 @@ function updateAuthUI(isAuthenticated, currentUser) {
                     showResponse('richiestaResponse', 'Form pulito. Pronto per nuovi dati...', 'info');
                 }
 
-                // === FUNZIONI CONVALIDA ===
+                // FUNZIONI CONVALIDA
 
                 async function doConvalida() {
                     const id = document.getElementById('convalidaId').value;
@@ -1700,7 +1690,7 @@ function updateAuthUI(isAuthenticated, currentUser) {
                     }
                 }
 
-                // === FUNZIONI TEST ===
+                // FUNZIONI TEST 
 
                 async function testHealth() {
                     showResponse('testResponse', 'Testing basic connectivity...', 'info');
@@ -1758,7 +1748,7 @@ function updateAuthUI(isAuthenticated, currentUser) {
 
                     showResponse('testResponse', '🧹 Tutte le sezioni sono state pulite!', 'success');
                 }
-                // === INIZIALIZZAZIONE ===
+                // INIZIALIZZAZIONE
                 document.addEventListener('DOMContentLoaded', function () {
                     updateAuthUI(false, null);
                     showResponse('authResponse', 'Pronto per il test di autenticazione...');
@@ -1769,7 +1759,7 @@ function updateAuthUI(isAuthenticated, currentUser) {
                     showResponse('missioneResponse', 'Effettua il login come amministratore per creare missioni...');
                     showResponse('testResponse', 'Pronto per i test di connettività...');
                 });
-                // === FUNZIONI ANNULLAMENTO RICHIESTA ===
+                // FUNZIONI ANNULLAMENTO RICHIESTA
 
                 async function annullaRichiesta() {
                     if (!authToken) {
@@ -1785,7 +1775,6 @@ function updateAuthUI(isAuthenticated, currentUser) {
                         return;
                     }
 
-                    // ✅ SOSTITUISCI IL CONFIRM CON UNA CONFERMA PERSONALIZZATA
                     showResponse('annullaResponse',
                             `⚠️ CONFERMA ANNULLAMENTO\n\n` +
                             `Sei sicuro di voler ANNULLARE la richiesta ${richiestaId}?\n\n` +
@@ -1795,20 +1784,20 @@ function updateAuthUI(isAuthenticated, currentUser) {
                             `Clicca nuovamente "Annulla Richiesta" per confermare, o "Pulisci Form" per annullare.`,
                             'warning');
 
-                    // Cambia il pulsante per la conferma
+                    
                     const btnAnnulla = document.getElementById('annullaBtn');
                     const testoOriginale = btnAnnulla.innerHTML;
                     btnAnnulla.innerHTML = '⚠️ CONFERMA ANNULLAMENTO';
                     btnAnnulla.style.backgroundColor = '#ff6b35';
 
-                    // Sostituisci temporaneamente la funzione del pulsante
+                    
                     btnAnnulla.onclick = async function () {
                         // Ripristina il pulsante
                         btnAnnulla.innerHTML = testoOriginale;
                         btnAnnulla.style.backgroundColor = '#dc3545';
                         btnAnnulla.onclick = annullaRichiesta;
 
-                        // Procedi con l'annullamento
+                        
                         await eseguiAnnullamento(richiestaId);
                     };
                 }
@@ -1993,7 +1982,7 @@ function updateAuthUI(isAuthenticated, currentUser) {
                         return;
                     }
 
-                    // DEBUG: Controlliamo i dati dell'utente corrente
+                    // DEBUG
                     console.log('=== DEBUG UTENTE CORRENTE ===');
                     console.log('authToken presente:', !!authToken);
                     console.log('currentUser:', currentUser);
@@ -2017,14 +2006,14 @@ function updateAuthUI(isAuthenticated, currentUser) {
                         if (result.ok) {
                             const dettagli = result.data;
 
-                            // DEBUG: Stampa i dati ricevuti per capire la struttura
+                            // DEBUG
                             console.log('=== DEBUG DETTAGLI MISSIONE ===');
                             console.log('dettagli:', dettagli);
                             console.log('==============================');
 
                             let response = `✅ Dettagli Missione #${dettagli.id}\n\n`;
 
-                            // === INFORMAZIONI GENERALI ===
+                            // INFORMAZIONI GENERALI
                             response += `📊 INFORMAZIONI GENERALI:\n`;
                             response += `• Nome: ${dettagli.nome}\n`;
                             response += `• Posizione: ${dettagli.posizione}\n`;
@@ -2044,7 +2033,7 @@ function updateAuthUI(isAuthenticated, currentUser) {
                                 response += `• Stato: Missione Attiva\n`;
                             }
 
-                            // === RICHIESTA ASSOCIATA ===
+                            //  RICHIESTA ASSOCIATA
                             if (dettagli.richiesta) {
                                 const richiesta = dettagli.richiesta;
                                 response += `\n🆘 RICHIESTA DI SOCCORSO (#${richiesta.codice}):\n`;
@@ -2055,7 +2044,7 @@ function updateAuthUI(isAuthenticated, currentUser) {
                                 response += `• Email: ${richiesta.emailSegnalante}\n`;
                             }
 
-                            // === TEAM OPERATORI ===
+                            //  TEAM OPERATORI 
                             if (dettagli.operatori && dettagli.operatori.length > 0) {
                                 response += `\n👥 TEAM OPERATORI (${dettagli.operatori.length}):\n`;
                                 dettagli.operatori.forEach((operatore, index) => {
@@ -2065,7 +2054,7 @@ function updateAuthUI(isAuthenticated, currentUser) {
                                 });
                             }
 
-                            // === MEZZI UTILIZZATI ===
+                            //  MEZZI UTILIZZATI
                             if (dettagli.mezzi && dettagli.mezzi.length > 0) {
                                 response += `\n🚛 MEZZI UTILIZZATI (${dettagli.mezzi.length}):\n`;
                                 dettagli.mezzi.forEach((mezzo, index) => {
@@ -2075,7 +2064,7 @@ function updateAuthUI(isAuthenticated, currentUser) {
                                 });
                             }
 
-                            // === MATERIALI UTILIZZATI ===
+                            // MATERIALI UTILIZZATI 
                             if (dettagli.materiali && dettagli.materiali.length > 0) {
                                 response += `\n📦 MATERIALI UTILIZZATI (${dettagli.materiali.length}):\n`;
                                 dettagli.materiali.forEach((materiale, index) => {
@@ -2084,13 +2073,13 @@ function updateAuthUI(isAuthenticated, currentUser) {
                                 });
                             }
 
-                            // === VALUTAZIONE FINALE ===
+                            // VALUTAZIONE FINALE
                             if (dettagli.valutazione) {
                                 const val = dettagli.valutazione;
                                 response += `\n⭐ VALUTAZIONE FINALE:\n`;
                                 response += `• Livello successo: ${val.successo}/5 `;
 
-                                // Aggiungi emoji in base al livello
+                                
                                 if (val.successo >= 4)
                                     response += '🌟';
                                 else if (val.successo >= 3)
@@ -2143,17 +2132,14 @@ function updateAuthUI(isAuthenticated, currentUser) {
                             'Effettua il login come amministratore per visualizzare i dettagli delle missioni...',
                             'info');
                 }
-// === FUNZIONI CHIUSURA MISSIONE ===
+// FUNZIONI CHIUSURA MISSIONE
 
-                /**
-                 * Chiude una missione attiva con valutazione finale
-                 */
                 async function chiudiMissione() {
     const missioneId = document.getElementById('chiusuraMissioneId').value.trim();
     const livelloSuccesso = document.getElementById('livelloSuccesso').value;
     const commento = document.getElementById('commentoFinale').value.trim();
 
-    // Validazioni base
+    
     if (!missioneId) {
         showResponse('chiusuraMissioneResponse', '❌ Inserisci l\'ID della missione da chiudere', 'error');
         return;
@@ -2169,7 +2155,7 @@ function updateAuthUI(isAuthenticated, currentUser) {
         return;
     }
 
-    // POPUP/CONFIRM RIMOSSO - Procede direttamente con la chiusura
+    
     showResponse('chiusuraMissioneResponse', '🔄 Chiusura missione in corso...', 'info');
 
     try {
@@ -2191,7 +2177,7 @@ function updateAuthUI(isAuthenticated, currentUser) {
             message += `• ID Missione: ${response.missioneId || missioneId}\n`;
             message += `• Livello successo: ${livelloSuccesso}/5 `;
             
-            // Emoji in base al livello
+           
             if (livelloSuccesso >= 4) message += '🌟';
             else if (livelloSuccesso >= 3) message += '👍';
             else if (livelloSuccesso >= 2) message += '⚠️';
@@ -2203,10 +2189,10 @@ function updateAuthUI(isAuthenticated, currentUser) {
             message += `• Stato richiesta: CHIUSA\n`;
             message += `\n💬 Commento finale:\n"${commento}"\n`;
 
-            // TIMER RIMOSSO - Il resoconto rimane visibile permanentemente
+           
             showResponse('chiusuraMissioneResponse', message, 'success');
             
-            // Pulisce solo i campi input, ma mantiene visibile il resoconto
+            
             document.getElementById('chiusuraMissioneId').value = '';
             document.getElementById('livelloSuccesso').value = '';
             document.getElementById('commentoFinale').value = 'Missione completata con successo. Tutti gli obiettivi sono stati raggiunti e la situazione è stata gestita in modo efficace.';
@@ -2275,7 +2261,7 @@ function updateAuthUI(isAuthenticated, currentUser) {
                         'info');
                 }
                 
-                // Funzione di utilità per formattare date/ore
+                // Funzione per formattare date/ore
                 function formatDateTime(dateTimeString) {
                     if (!dateTimeString)
                         return 'N/A';
@@ -2291,7 +2277,7 @@ function updateAuthUI(isAuthenticated, currentUser) {
                             second: '2-digit'
                         });
                     } catch (e) {
-                        return dateTimeString; // Fallback se il parsing fallisce
+                        return dateTimeString; 
                     }
                 }
 
@@ -2321,7 +2307,7 @@ function updateAuthUI(isAuthenticated, currentUser) {
                         if (result.ok) {
                             const dettagli = result.data;
 
-                            // DEBUG: Stampa i dati ricevuti per capire la struttura
+                            // DEBUG
                             console.log('=== DEBUG DETTAGLI RICHIESTA ===');
                             console.log('dettagli:', dettagli);
                             console.log('dettagli.missioneAssociata:', dettagli.missioneAssociata);
@@ -2329,7 +2315,7 @@ function updateAuthUI(isAuthenticated, currentUser) {
 
                             let response = `✅ Dettagli Richiesta di Soccorso #${dettagli.id}\n\n`;
 
-                            // === DATI DELLA SEGNALAZIONE ===
+                            // DATI DELLA SEGNALAZIONE
                             response += `🚨 DATI DELLA SEGNALAZIONE:\n`;
                             response += `• Nome: ${dettagli.nome}\n`;
                             response += `• Descrizione: ${dettagli.descrizione}\n`;
@@ -2343,12 +2329,12 @@ function updateAuthUI(isAuthenticated, currentUser) {
                                 response += `• Foto allegata: Sì\n`;
                             }
 
-                            // === DATI DEL SEGNALANTE ===
+                            //  DATI DEL SEGNALANTE 
                             response += `\n👤 DATI DEL SEGNALANTE:\n`;
                             response += `• Nome segnalante: ${dettagli.nomeSegnalante}\n`;
                             response += `• Email: ${dettagli.emailSegnalante}\n`;
 
-                            // === STATO E GESTIONE ===
+                            // STATO E GESTIONE
                             response += `\n📊 STATO E GESTIONE:\n`;
                             response += `• Stato: ${dettagli.stato}\n`;
 
@@ -2356,7 +2342,7 @@ function updateAuthUI(isAuthenticated, currentUser) {
                                 response += `• Admin responsabile: ${dettagli.nomeAmministratore || `ID ${dettagli.idAmministratore}`}\n`;
                             }
 
-                            // === DATI TECNICI ===
+                            // DATI TECNICI
                             response += `\n🔧 DATI TECNICI:\n`;
                             response += `• IP segnalazione: ${dettagli.ip || 'N/A'}\n`;
 
@@ -2368,7 +2354,7 @@ function updateAuthUI(isAuthenticated, currentUser) {
                                 response += `• Data creazione: ${formatDateTime(dettagli.dataCreazione)}\n`;
                             }
 
-                            // === MISSIONE COLLEGATA ===
+                            // MISSIONE COLLEGATA
                             if (dettagli.missioneAssociata) {
                                 const missione = dettagli.missioneAssociata;
                                 response += `\n🚀 MISSIONE COLLEGATA #${missione.id}:\n`;
@@ -2464,23 +2450,22 @@ async function getDettagliOperatore() {
             
             let message = `✅ DETTAGLI OPERATORE #${operatore.id}\n\n`;
             
-            // === DATI ANAGRAFICI ===
+            // DATI ANAGRAFICI
             message += `👤 DATI ANAGRAFICI:\n`;
             message += `• Nome completo: ${operatore.nome} ${operatore.cognome}\n`;
             message += `• Email: ${operatore.email || 'Non specificata'}\n`;
             message += `• Codice fiscale: ${operatore.codiceFiscale || 'Non specificato'}\n\n`;
             
-            // === STATO OPERATIVO ===
+            // STATO OPERATIVO
             message += `📊 STATO OPERATIVO:\n`;
             const statoIcon = operatore.disponibile ? '🟢' : '🔴';
             const statoText = operatore.disponibile ? 'DISPONIBILE' : 'IMPEGNATO';
             message += `• Stato attuale: ${statoIcon} ${statoText}\n\n`;
             
-            // === COMPETENZE - PATENTI ===
+            // COMPETENZE - PATENTI
             message += `🚗 PATENTI POSSEDUTE:\n`;
             if (operatore.patenti && operatore.patenti.length > 0) {
                 operatore.patenti.forEach((patente, index) => {
-                    // Formattazione delle patenti (rimuove underscore e migliora la leggibilità)
                     const patenteFormatted = patente.replace(/_/g, ' ').replace(/PATENTE/gi, '').trim();
                     message += `   ${index + 1}. ${patenteFormatted}\n`;
                 });
@@ -2489,16 +2474,15 @@ async function getDettagliOperatore() {
             }
             message += `\n`;
             
-            // === COMPETENZE - ABILITÀ ===
+            // ABILITÀ
             message += `🛠️ ABILITÀ SPECIALISTICHE:\n`;
             if (operatore.abilita && operatore.abilita.length > 0) {
                 operatore.abilita.forEach((abilita, index) => {
-                    // Formattazione delle abilità (migliora leggibilità)
                     const abilitaFormatted = abilita
                         .replace(/_/g, ' ')
                         .replace(/-/g, ' ')
                         .toLowerCase()
-                        .replace(/\b\w/g, l => l.toUpperCase()); // Capitalizza ogni parola
+                        .replace(/\b\w/g, l => l.toUpperCase()); 
                     message += `   ${index + 1}. ${abilitaFormatted}\n`;
                 });
             } else {
@@ -2506,7 +2490,7 @@ async function getDettagliOperatore() {
             }
             message += `\n`;
             
-            // === STATISTICHE MISSIONI ===
+            // STATISTICHE MISSIONI 
             message += `📈 STATISTICHE MISSIONI:\n`;
             message += `• Missioni in corso: ${operatore.missioniInCorso || 0}\n`;
             message += `• Missioni completate: ${operatore.missioniCompletate || 0}\n`;
@@ -2554,9 +2538,7 @@ function clearDettagliOperatoreForm() {
         'info');
 }
 
-/**
- * Formatta un numero con separatore delle migliaia (se necessario)
- */
+
 function formatNumber(num) {
     if (!num || num === 0) return '0';
     return num.toLocaleString('it-IT');
