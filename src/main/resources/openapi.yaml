@@ -1,11 +1,14 @@
 openapi: 3.0.3
 info:
   title: SoccorsoWeb REST API
-  description: API RESTful per il sistema di gestione delle richieste di soccorso
+  description: |
+    API per il sistema di gestione delle richieste di soccorso
+    
+    Sviluppatori:
+    - Guido Maria Di Fiore (guidomaria.difiore@student.univaq.it)
+    - Beatrice Pascucci (beatrice.pascucci@student.univaq.it)
+    - Erika Baliva (erika.baliva@student.univaq.it)
   version: 1.0.0
-  contact:
-    name: NuovissimoSoccorsoWeb
-    email: support@soccorsoweb.it
 
 servers:
   - url: http://localhost:8080/nuovissimo-soccorso-web-1.0-SNAPSHOT/api/
@@ -540,264 +543,264 @@ components:
         missioniInCorso: 0
         missioniCompletate: 23
         
-      # === RICHIESTE DI SOCCORSO ===
-      ListaRichiesteResponse:
-        type: object
-        properties:
-          content:
-            type: array
-            items:
-              $ref: '#/components/schemas/RichiestaDTO'
-            description: Lista delle richieste nella pagina corrente
-          totalElements:
-            type: integer
-            description: Numero totale di elementi
-          totalPages:
-            type: integer
-            description: Numero totale di pagine
-          number:
-            type: integer
-            description: Numero della pagina corrente (0-based)
-          size:
-            type: integer
-            description: Dimensione della pagina
-          first:
-            type: boolean
-            description: Indica se questa è la prima pagina
-          last:
-            type: boolean
-            description: Indica se questa è l'ultima pagina
-        example:
-          content:
-            - codice: 123
-              stato: "Convalidata"
-              descrizione: "Escursionista ferito sul Monte Bianco"
-          totalElements: 150
-          totalPages: 8
-          number: 0
-          size: 20
-          first: true
-          last: false
-
-      DettagliRichiestaDTO:
-        type: object
-        properties:
-          id:
-            type: integer
-            description: ID della richiesta
-          stato:
-            type: string
-            enum: ["In Attesa", "Convalidata", "Attiva", "Chiusa", "Ignorata", "Annullata"]
-            description: Stato corrente della richiesta
-          descrizione:
-            type: string
-            description: Descrizione dell'emergenza
-          indirizzo:
-            type: string
-            description: Indirizzo del luogo dell'emergenza
-          nome:
-            type: string
-            description: Nome del luogo (opzionale)
-          coordinate:
-            type: string
-            description: Coordinate GPS del luogo
-          foto:
-            type: string
-            description: Foto dell'emergenza (Base64 encoded)
-            nullable: true
-          ip:
-            type: string
-            description: Indirizzo IP del segnalante
-          emailSegnalante:
-            type: string
-            format: email
-            description: Email del segnalante
-          nomeSegnalante:
-            type: string
-            description: Nome del segnalante
-          idAmministratore:
-            type: integer
-            nullable: true
-            description: ID dell'amministratore che ha gestito la richiesta
-          nomeAmministratore:
-            type: string
-            nullable: true
-            description: Nome dell'amministratore
-          missioneAssociata:
-            $ref: '#/components/schemas/MissioneAssociataDTO'
-            nullable: true
-            description: Missione associata alla richiesta (se esistente)
-        example:
-          id: 123
-          stato: "Attiva"
-          descrizione: "Escursionista ferito sul Monte Bianco"
-          indirizzo: "Monte Bianco, quota 2500m"
-          coordinate: "45.8326,6.8652"
-          emailSegnalante: "segnalante@email.com"
-          nomeSegnalante: "Mario Rossi"
-
-      MissioneAssociataDTO:
-        type: object
-        properties:
-          id:
-            type: integer
-            description: ID della missione
-          nome:
-            type: string
-            description: Nome della missione
-          posizione:
-            type: string
-            description: Posizione dell'intervento
-          obiettivo:
-            type: string
-            description: Obiettivo della missione
-          stato:
-            type: string
-            enum: ["ATTIVA", "CONCLUSA"]
-            description: Stato della missione
-          dataOraInizio:
-            type: string
-            format: date-time
-            description: Data e ora inizio missione
-          dataOraFine:
-            type: string
-            format: date-time
-            nullable: true
-            description: Data e ora fine missione (se conclusa)
-          livelloSuccesso:
-            type: integer
-            minimum: 0
-            maximum: 5
-            description: Livello di successo della missione (0 se non valutata)
-          commento:
-            type: string
-            nullable: true
-            description: Commento sulla missione
-          numeroOperatori:
-            type: integer
-            description: Numero di operatori assegnati
-        example:
-          id: 123
-          nome: "Soccorso alpino Monte Bianco"
-          stato: "ATTIVA"
-          dataOraInizio: "2024-01-15T14:30:00"
-          numeroOperatori: 4
-
-      AnnullaRichiestaResponse:
-        type: object
-        properties:
-          success:
-            type: boolean
-            description: Indica se l'operazione è riuscita
-          message:
-            type: string
-            description: Messaggio di stato
-          richiesta:
+    # === RICHIESTE DI SOCCORSO ===
+    ListaRichiesteResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
             $ref: '#/components/schemas/RichiestaDTO'
-            description: Dati della richiesta annullata
-          statoOriginale:
-            type: string
-            description: Stato precedente all'annullamento
-          adminId:
-            type: integer
-            description: ID dell'amministratore che ha annullato la richiesta
-        example:
-          success: true
-          message: "Richiesta annullata con successo"
-          richiesta:
-            codice: 123
-            stato: "Annullata"
-          statoOriginale: "Convalidata"
-          adminId: 1
-          
-      # === INSERIMENTO E CONVALIDA RICHIESTE ===
-      RichiestaRequest:
-        type: object
-        required:
-          - descrizione
-          - indirizzo
-          - emailSegnalante
-          - nomeSegnalante
-        properties:
-          descrizione:
-            type: string
-            minLength: 10
-            maxLength: 1000
-            description: Descrizione dettagliata dell'emergenza
-            example: "Escursionista caduto in un crepaccio sul Monte Bianco, necessario soccorso alpino urgente"
-          indirizzo:
-            type: string
-            minLength: 5
-            maxLength: 500
-            description: Indirizzo o località dell'emergenza
-            example: "Monte Bianco, sentiero CAI 201, quota 2500m"
-          nome:
-            type: string
-            maxLength: 200
-            description: Nome del luogo o punto di riferimento (opzionale)
-            example: "Rifugio Torino"
-          emailSegnalante:
-            type: string
-            format: email
-            description: Email del segnalante per la convalida
-            example: "mario.rossi@email.com"
-          nomeSegnalante:
-            type: string
-            minLength: 2
-            maxLength: 100
-            description: Nome e cognome del segnalante
-            example: "Mario Rossi"
-          coordinate:
-            type: string
-            pattern: '^-?\d+\.\d+,-?\d+\.\d+$'
-            description: Coordinate GPS in formato "latitudine,longitudine"
-            example: "45.8326,6.8652"
-          foto:
-            type: string
-            description: Foto dell'emergenza (Base64 encoded, opzionale)
-            nullable: true
-
-      RichiestaResponse:
-        type: object
-        properties:
-          success:
-            type: boolean
-            description: Indica se l'operazione è riuscita
-          message:
-            type: string
-            description: Messaggio di stato o errore
-          richiesta:
-            $ref: '#/components/schemas/RichiestaDTO'
-            nullable: true
-            description: Dati della richiesta creata (solo in caso di successo)
-        example:
-          success: true
-          message: "Richiesta di soccorso inserita con successo. Email di convalida inviata."
-          richiesta:
-            codice: 123
-            stato: "In Attesa"
-            descrizione: "Escursionista ferito sul Monte Bianco"
-
-      ConvalidaResponse:
-        type: object
-        properties:
-          success:
-            type: boolean
-            description: Indica se la convalida è riuscita
-          message:
-            type: string
-            description: Messaggio di stato
-          richiesta:
-            $ref: '#/components/schemas/RichiestaDTO'
-            nullable: true
-            description: Dati della richiesta convalidata
-        example:
-          success: true
-          message: "Richiesta convalidata con successo. Gli amministratori sono stati notificati."
-          richiesta:
-            codice: 123
+          description: Lista delle richieste nella pagina corrente
+        totalElements:
+          type: integer
+          description: Numero totale di elementi
+        totalPages:
+          type: integer
+          description: Numero totale di pagine
+        number:
+          type: integer
+          description: Numero della pagina corrente (0-based)
+        size:
+          type: integer
+          description: Dimensione della pagina
+        first:
+          type: boolean
+          description: Indica se questa è la prima pagina
+        last:
+          type: boolean
+          description: Indica se questa è l'ultima pagina
+      example:
+        content:
+          - codice: 123
             stato: "Convalidata"
             descrizione: "Escursionista ferito sul Monte Bianco"
+        totalElements: 150
+        totalPages: 8
+        number: 0
+        size: 20
+        first: true
+        last: false
+
+    DettagliRichiestaDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID della richiesta
+        stato:
+          type: string
+          enum: ["In Attesa", "Convalidata", "Attiva", "Chiusa", "Ignorata", "Annullata"]
+          description: Stato corrente della richiesta
+        descrizione:
+          type: string
+          description: Descrizione dell'emergenza
+        indirizzo:
+          type: string
+          description: Indirizzo del luogo dell'emergenza
+        nome:
+          type: string
+          description: Nome del luogo (opzionale)
+        coordinate:
+          type: string
+          description: Coordinate GPS del luogo
+        foto:
+          type: string
+          description: Foto dell'emergenza (Base64 encoded)
+          nullable: true
+        ip:
+          type: string
+          description: Indirizzo IP del segnalante
+        emailSegnalante:
+          type: string
+          format: email
+          description: Email del segnalante
+        nomeSegnalante:
+          type: string
+          description: Nome del segnalante
+        idAmministratore:
+          type: integer
+          nullable: true
+          description: ID dell'amministratore che ha gestito la richiesta
+        nomeAmministratore:
+          type: string
+          nullable: true
+          description: Nome dell'amministratore
+        missioneAssociata:
+          $ref: '#/components/schemas/MissioneAssociataDTO'
+          nullable: true
+          description: Missione associata alla richiesta (se esistente)
+      example:
+        id: 123
+        stato: "Attiva"
+        descrizione: "Escursionista ferito sul Monte Bianco"
+        indirizzo: "Monte Bianco, quota 2500m"
+        coordinate: "45.8326,6.8652"
+        emailSegnalante: "segnalante@email.com"
+        nomeSegnalante: "Mario Rossi"
+
+    MissioneAssociataDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID della missione
+        nome:
+          type: string
+          description: Nome della missione
+        posizione:
+          type: string
+          description: Posizione dell'intervento
+        obiettivo:
+          type: string
+          description: Obiettivo della missione
+        stato:
+          type: string
+          enum: ["ATTIVA", "CONCLUSA"]
+          description: Stato della missione
+        dataOraInizio:
+          type: string
+          format: date-time
+          description: Data e ora inizio missione
+        dataOraFine:
+          type: string
+          format: date-time
+          nullable: true
+          description: Data e ora fine missione (se conclusa)
+        livelloSuccesso:
+          type: integer
+          minimum: 0
+          maximum: 5
+          description: Livello di successo della missione (0 se non valutata)
+        commento:
+          type: string
+          nullable: true
+          description: Commento sulla missione
+        numeroOperatori:
+          type: integer
+          description: Numero di operatori assegnati
+      example:
+        id: 123
+        nome: "Soccorso alpino Monte Bianco"
+        stato: "ATTIVA"
+        dataOraInizio: "2024-01-15T14:30:00"
+        numeroOperatori: 4
+
+    AnnullaRichiestaResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Indica se l'operazione è riuscita
+        message:
+          type: string
+          description: Messaggio di stato
+        richiesta:
+          $ref: '#/components/schemas/RichiestaDTO'
+          description: Dati della richiesta annullata
+        statoOriginale:
+          type: string
+          description: Stato precedente all'annullamento
+        adminId:
+          type: integer
+          description: ID dell'amministratore che ha annullato la richiesta
+      example:
+        success: true
+        message: "Richiesta annullata con successo"
+        richiesta:
+          codice: 123
+          stato: "Annullata"
+        statoOriginale: "Convalidata"
+        adminId: 1
+
+    # === INSERIMENTO E CONVALIDA RICHIESTE ===
+    RichiestaRequest:
+      type: object
+      required:
+        - descrizione
+        - indirizzo
+        - emailSegnalante
+        - nomeSegnalante
+      properties:
+        descrizione:
+          type: string
+          minLength: 10
+          maxLength: 1000
+          description: Descrizione dettagliata dell'emergenza
+          example: "Escursionista caduto in un crepaccio sul Monte Bianco, necessario soccorso alpino urgente"
+        indirizzo:
+          type: string
+          minLength: 5
+          maxLength: 500
+          description: Indirizzo o località dell'emergenza
+          example: "Monte Bianco, sentiero CAI 201, quota 2500m"
+        nome:
+          type: string
+          maxLength: 200
+          description: Nome del luogo o punto di riferimento (opzionale)
+          example: "Rifugio Torino"
+        emailSegnalante:
+          type: string
+          format: email
+          description: Email del segnalante per la convalida
+          example: "mario.rossi@email.com"
+        nomeSegnalante:
+          type: string
+          minLength: 2
+          maxLength: 100
+          description: Nome e cognome del segnalante
+          example: "Mario Rossi"
+        coordinate:
+          type: string
+          pattern: '^-?\d+\.\d+,-?\d+\.\d+$'
+          description: Coordinate GPS in formato "latitudine,longitudine"
+          example: "45.8326,6.8652"
+        foto:
+          type: string
+          description: Foto dell'emergenza (Base64 encoded, opzionale)
+          nullable: true
+
+    RichiestaResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Indica se l'operazione è riuscita
+        message:
+          type: string
+          description: Messaggio di stato o errore
+        richiesta:
+          $ref: '#/components/schemas/RichiestaDTO'
+          nullable: true
+          description: Dati della richiesta creata (solo in caso di successo)
+      example:
+        success: true
+        message: "Richiesta di soccorso inserita con successo. Email di convalida inviata."
+        richiesta:
+          codice: 123
+          stato: "In Attesa"
+          descrizione: "Escursionista ferito sul Monte Bianco"
+
+    ConvalidaResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Indica se la convalida è riuscita
+        message:
+          type: string
+          description: Messaggio di stato
+        richiesta:
+          $ref: '#/components/schemas/RichiestaDTO'
+          nullable: true
+          description: Dati della richiesta convalidata
+      example:
+        success: true
+        message: "Richiesta convalidata con successo. Gli amministratori sono stati notificati."
+        richiesta:
+          codice: 123
+          stato: "Convalidata"
+          descrizione: "Escursionista ferito sul Monte Bianco"
 
 paths:
   # === AUTENTICAZIONE ===
