@@ -11,15 +11,11 @@ import java.util.logging.Level;
 
 /**
  * Servizio per la gestione delle richieste di soccorso.
- * Centralizza la logica business per evitare duplicazione tra MVC e REST.
  */
 public class RichiestaService {
     
     private static final Logger logger = Logger.getLogger(RichiestaService.class.getName());
     
-    /**
-     * DTO per i dati di input della richiesta.
-     */
     public static class RichiestaInput {
         private final String descrizione;
         private final String indirizzo;
@@ -87,7 +83,6 @@ public class RichiestaService {
     
     /**
      * Inserisce una nuova richiesta di soccorso.
-     * UNICA implementazione condivisa.
      */
     public static RichiestaResult inserisciRichiesta(RichiestaInput input, SoccorsoDataLayer dataLayer) {
         try {
@@ -186,8 +181,7 @@ public class RichiestaService {
     }
     
     /**
-     * Genera stringa di validazione univoca (stesso algoritmo del MVC).
-     * 64 caratteri alfanumerici come in Home.java.
+     * Genera stringa di validazione univoca.
      */
     private static String generateValidationString() {
         SecureRandom random = new SecureRandom();

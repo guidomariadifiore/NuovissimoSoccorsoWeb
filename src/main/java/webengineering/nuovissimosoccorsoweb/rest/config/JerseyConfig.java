@@ -4,7 +4,7 @@ import jakarta.ws.rs.ApplicationPath;
 import org.glassfish.jersey.server.ResourceConfig;
 
 /**
- * Configurazione semplificata di Jersey.
+ * Configurazione di Jersey.
  * Auto-discovery: Jersey trova automaticamente tutte le risorse nei package specificati.
  * 
  * Trova automaticamente:

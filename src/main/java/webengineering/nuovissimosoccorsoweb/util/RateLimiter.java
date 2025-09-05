@@ -99,9 +99,6 @@ public class RateLimiter {
         return ipAllowed && emailAllowed;
     }
     
-    /**
-     * Metodo di compatibilità con la versione precedente
-     */
     public synchronized boolean isAllowed(String ip) {
         return isIPAllowed(ip);
     }
@@ -224,7 +221,7 @@ public class RateLimiter {
         return new RateLimiterStats(
             ipLastRequestTime.size(),
             emailLastRequestTime.size(),
-            RATE_LIMIT_WINDOW_MS / 1000 / 60, // window in minuti
+            RATE_LIMIT_WINDOW_MS / 1000 / 60, 
             MAX_REQUESTS_PER_WINDOW
         );
     }

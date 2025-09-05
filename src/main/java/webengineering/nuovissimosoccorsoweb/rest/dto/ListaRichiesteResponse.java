@@ -3,15 +3,14 @@ package webengineering.nuovissimosoccorsoweb.rest.dto;
 import java.util.List;
 
 /**
- * DTO per la risposta della lista richieste paginata. Segue il pattern Spring
- * Data Page per compatibilità.
+ * DTO per la risposta della lista richieste paginata. 
  */
 public class ListaRichiesteResponse {
 
     private List<RichiestaDTO> content;
     private int totalElements;
     private int totalPages;
-    private int number; // Numero pagina corrente (0-based)
+    private int number; // Numero pagina corrente 
     private int size;   // Elementi per pagina
     private boolean first;
     private boolean last;

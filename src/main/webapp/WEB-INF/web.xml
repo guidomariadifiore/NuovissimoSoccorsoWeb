@@ -327,7 +327,7 @@
         <url-pattern>/index.jsp</url-pattern>
     </servlet-mapping>
     
-    <!-- Servlet per servire file statici - delegato al default servlet di Tomcat -->
+    <!-- Servlet per servire file statici -->
     <servlet-mapping>
         <servlet-name>default</servlet-name>
         <url-pattern>*.html</url-pattern>

@@ -1,10 +1,7 @@
 package webengineering.nuovissimosoccorsoweb.rest.dto;
 
 /**
- * DTO per i dati della richiesta di soccorso nelle risposte REST.
- * Contiene tutti i dati della richiesta (incluso il codice generato).
- * 
- * @author YourName
+ * DTO per i dati della richiesta di soccorso.
  */
 public class RichiestaDTO {
     private int codice;

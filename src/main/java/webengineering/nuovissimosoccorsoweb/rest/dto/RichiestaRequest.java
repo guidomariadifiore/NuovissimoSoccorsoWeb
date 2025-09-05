@@ -2,8 +2,6 @@ package webengineering.nuovissimosoccorsoweb.rest.dto;
 
 /**
  * DTO per la richiesta di inserimento di una nuova richiesta di soccorso.
- * 
- * @author YourName
  */
 public class RichiestaRequest {
     private String descrizione;

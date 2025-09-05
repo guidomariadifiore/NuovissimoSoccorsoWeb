@@ -10,7 +10,6 @@ import java.util.logging.Level;
 
 /**
  * Servizio per le operazioni di query sugli operatori.
- * Centralizza la logica business per evitare duplicazione tra MVC e REST.
  * 
  * Gestisce:
  * - Lista operatori liberi (disponibili)
@@ -21,9 +20,7 @@ public class OperatoriQueryService {
     
     private static final Logger logger = Logger.getLogger(OperatoriQueryService.class.getName());
     
-    /**
-     * DTO per i dati di un operatore con informazioni aggiuntive.
-     */
+    
     public static class OperatoreInfo {
         private final Operatore operatore;
         private final boolean disponibile;
@@ -77,7 +74,6 @@ public class OperatoriQueryService {
     
     /**
      * Recupera tutti gli operatori attualmente liberi/disponibili.
-     * UNICA implementazione condivisa tra MVC e REST.
      * 
      * Usa la query complessa esistente che verifica operatori NON impegnati in missioni attive.
      * 
@@ -88,7 +84,6 @@ public class OperatoriQueryService {
         try {
             logger.info("=== RECUPERO OPERATORI LIBERI ===");
             
-            // USA IL DAO ESISTENTE - la query complessa è già implementata!
             List<Operatore> operatoriLiberi = dataLayer.getOperatoreDAO().getOperatoriDisponibili();
             
             logger.info("Trovati " + operatoriLiberi.size() + " operatori disponibili");
@@ -115,7 +110,6 @@ public class OperatoriQueryService {
     
     /**
      * Recupera tutti gli operatori con informazioni dettagliate su disponibilità.
-     * Utile per dashboard amministrative.
      * 
      * @param dataLayer DataLayer per accesso database
      * @return Lista operatori con stato dettagliato
@@ -138,17 +132,15 @@ public class OperatoriQueryService {
                 boolean disponibile = operatoriLiberi.stream()
                     .anyMatch(libero -> libero.getId() == operatore.getId());
                 
-                // Conta missioni (se hai i metodi nel MissioneDAO)
+                // Conta missioni 
                 int missioniInCorso = 0;
                 int missioniCompletate = 0;
                 
                 try {
-                    // USA I METODI GIÀ ESISTENTI se disponibili
                     missioniInCorso = dataLayer.getMissioneDAO().countMissioniInCorsoByOperatore(operatore.getId());
                     missioniCompletate = dataLayer.getMissioneDAO().countMissioniCompletateByOperatore(operatore.getId());
                 } catch (Exception ex) {
                     logger.log(Level.WARNING, "Errore nel conteggio missioni per operatore " + operatore.getId(), ex);
-                    // I contatori rimangono a 0
                 }
                 
                 operatoriConStato.add(new OperatoreInfo(
@@ -212,7 +204,6 @@ public class OperatoriQueryService {
     
     /**
      * Conta gli operatori per stato.
-     * Utile per statistiche dashboard.
      */
     public static class StatisticheOperatori {
         private final int totaleOperatori;

@@ -30,10 +30,10 @@ import webengineering.nuovissimosoccorsoweb.rest.dto.MissioneAssociataDTO;
 
 /**
  * Resource REST per le operazioni di query/lettura delle richieste di soccorso.
- * Complementare al RichiesteResource esistente (che gestisce l'inserimento).
- *
- * Gestisce: - Lista paginata filtrata per stato - Richieste non positive -
- * Dettagli singola richiesta
+ * Gestisce: 
+ * - Lista paginata filtrata per stato 
+ * - Richieste non positive 
+ * - Dettagli singola richiesta
  */
 @Path("richieste")
 @Produces(MediaType.APPLICATION_JSON)
@@ -51,11 +51,7 @@ public class RichiesteQueryResource {
     /**
      * Lista (paginata) delle richieste di soccorso, filtrata in base alla
      * tipologia. GET /api/richieste?stato={stato}&page={page}&size={size}
-     *
-     * Richiede autenticazione: solo admin può vedere tutte le richieste
-     *
-     * @param stato Stato delle richieste (ATTIVA, IN_CORSO, CHIUSA, IGNORATA) -
-     * opzionale
+     * @param Stato delle richieste (ATTIVA, IN_CORSO, CHIUSA, IGNORATA) 
      * @param page Numero pagina (1-based, default=1)
      * @param size Elementi per pagina (default=20, max=100)
      * @return Lista paginata delle richieste
@@ -86,7 +82,7 @@ public class RichiesteQueryResource {
             // Crea DataLayer
             dataLayer = createDataLayer();
 
-            // USA IL SERVICE DEDICATO - zero duplicazione!
+            
             RichiesteQueryService.PaginatedResult<RichiestaSoccorso> result
                     = RichiesteQueryService.getRichiesteFiltrate(stato, page, size, dataLayer);
 
@@ -101,7 +97,7 @@ public class RichiesteQueryResource {
                     richiesteDTO,
                     result.getTotalElements(),
                     result.getTotalPages(),
-                    result.getCurrentPage() - 1, // REST API usa 0-based
+                    result.getCurrentPage() - 1, 
                     result.getPageSize(),
                     result.isFirst(),
                     result.isLast()
@@ -138,9 +134,6 @@ public class RichiesteQueryResource {
     /**
      * Lista delle richieste di soccorso chiuse con risultato non totalmente
      * positivo. GET /api/richieste/non-positive?page={page}&size={size}
-     *
-     * Richiede autenticazione: solo ADMIN
-     *
      * @param page Numero pagina (1-based, default=1)
      * @param size Elementi per pagina (default=20, max=100)
      * @return Lista paginata delle richieste con livello di successo < 5
@@ -170,7 +163,7 @@ public class RichiesteQueryResource {
             // Crea DataLayer
             dataLayer = createDataLayer();
 
-            // USA IL SERVICE DEDICATO
+            
             RichiesteQueryService.PaginatedResult<RichiestaSoccorso> result
                     = RichiesteQueryService.getRichiesteNonPositive(page, size, dataLayer);
 
@@ -185,7 +178,7 @@ public class RichiesteQueryResource {
                     richiesteDTO,
                     result.getTotalElements(),
                     result.getTotalPages(),
-                    result.getCurrentPage() - 1, // REST API usa 0-based
+                    result.getCurrentPage() - 1, 
                     result.getPageSize(),
                     result.isFirst(),
                     result.isLast()
@@ -221,9 +214,6 @@ public class RichiesteQueryResource {
 
     /**
      * Dettagli di una richiesta di soccorso specifica. GET /api/richieste/{id}
-     *
-     * Richiede autenticazione: solo ADMIN
-     *
      * @param id ID della richiesta
      * @return Dettagli della richiesta
      */
@@ -254,7 +244,7 @@ public class RichiesteQueryResource {
             // Crea DataLayer
             dataLayer = createDataLayer();
 
-            // Carica richiesta base
+            
             RichiestaSoccorso richiesta = dataLayer.getRichiestaSoccorsoDAO().getRichiestaByCodice(id);
 
             if (richiesta == null) {
@@ -317,8 +307,6 @@ public class RichiesteQueryResource {
         // Informazioni amministratore (se presente)
         if (richiesta.getIdAmministratore() > 0) {
             try {
-                // Prova a caricare info amministratore se hai il DAO
-                // Altrimenti lascia solo l'ID
                 dettagli.setNomeAmministratore("Admin ID: " + richiesta.getIdAmministratore());
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Errore recupero info amministratore " + richiesta.getIdAmministratore(), e);
@@ -373,9 +361,6 @@ public class RichiesteQueryResource {
 
     /**
      * Annulla una richiesta di soccorso. PUT /api/richieste/{id}/annulla
-     *
-     * Richiede autenticazione: solo ADMIN può annullare richieste
-     *
      * @param id ID della richiesta da annullare
      * @return Risultato dell'operazione
      */
@@ -389,7 +374,7 @@ public class RichiesteQueryResource {
             logger.info("=== ANNULLAMENTO RICHIESTA VIA REST ===");
             logger.info("ID richiesta da annullare: " + id);
 
-            // DEBUG: Stampa tutte le proprietà del context
+            // DEBUG
             String userRole = (String) requestContext.getProperty("userRole");
             String username = (String) requestContext.getProperty("username");
             Integer userId = (Integer) requestContext.getProperty("userId");
@@ -408,7 +393,7 @@ public class RichiesteQueryResource {
                         .build();
             }
 
-            // Verifica ruolo admin (dal token JWT) - CON GESTIONE CASE-INSENSITIVE
+            // Verifica ruolo admin
             boolean isAdmin = "ADMIN".equalsIgnoreCase(userRole) || "admin".equals(userRole) || "amministratore".equalsIgnoreCase(userRole);
 
             if (!isAdmin) {
@@ -434,7 +419,6 @@ public class RichiesteQueryResource {
 
             logger.info("DEBUG - ID amministratore per annullamento: " + adminId);
 
-            // resto del codice esistente...
             dataLayer = createDataLayer();
 
             // Verifica che la richiesta esista
@@ -459,7 +443,7 @@ public class RichiesteQueryResource {
                         .build();
             }
 
-// ✅ AGGIUNGI QUESTO CONTROLLO SUBITO DOPO:
+
             if (!"Convalidata".equals(statoAttuale)) {
                 return Response.status(Response.Status.BAD_REQUEST)
                         .entity(new ErrorResponse("La richiesta selezionata deve avere lo stato \"Convalidata\". Stato attuale: " + statoAttuale, "INVALID_STATE_FOR_CANCELLATION"))
@@ -477,7 +461,7 @@ public class RichiesteQueryResource {
             logger.info("Richiesta " + id + " annullata dall'amministratore " + adminId
                     + " (stato: " + statoOriginale + " → Annullata)");
 
-            // Prepara la risposta di successo
+            //risposta di successo
             AnnullaRichiestaResponse response = new AnnullaRichiestaResponse(
                     true,
                     "Richiesta annullata con successo",
@@ -512,12 +496,11 @@ public class RichiesteQueryResource {
     }
 
     /**
-     * Verifica se ci sono missioni attive collegate alla richiesta. Versione
-     * semplificata che usa metodi esistenti.
+     * Verifica se ci sono missioni attive collegate alla richiesta.
      */
     private boolean verificaMissioniAttive(SoccorsoDataLayer dataLayer, int richiestaId) {
         try {
-            // Usa il metodo esistente per verificare se esiste una missione per questa richiesta
+            // verificare se esiste una missione per questa richiesta
             Missione missione = dataLayer.getMissioneDAO().getMissioneByCodice(richiestaId);
 
             if (missione == null) {
@@ -544,7 +527,7 @@ public class RichiesteQueryResource {
         }
     }
 
-    // ========== METODI DI UTILITÀ ==========
+    //  METODI DI UTILITÀ 
     /**
      * Crea DataLayer.
      */
@@ -557,8 +540,7 @@ public class RichiesteQueryResource {
     }
 
     /**
-     * Converte il modello interno in DTO per la risposta. Riutilizza la logica
-     * del RichiesteResource esistente.
+     * Converte il modello interno in DTO per la risposta. 
      */
     private RichiestaDTO mapToRichiestaDTO(RichiestaSoccorso richiesta) {
         RichiestaDTO dto = new RichiestaDTO();

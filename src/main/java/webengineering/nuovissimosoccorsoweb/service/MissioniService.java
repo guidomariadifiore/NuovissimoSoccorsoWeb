@@ -4,10 +4,6 @@
  */
 package webengineering.nuovissimosoccorsoweb.service;
 
-/**
- *
- * @author beatr
- */
 public class MissioniService {
     
 }

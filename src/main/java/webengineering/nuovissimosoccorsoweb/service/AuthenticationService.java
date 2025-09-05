@@ -8,10 +8,6 @@ import webengineering.framework.security.SecurityHelpers;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-/**
- * Servizio di autenticazione condiviso tra MVC e REST. Centralizza tutta la
- * logica di autenticazione per evitare duplicazione.
- */
 public class AuthenticationService {
 
     private static final Logger logger = Logger.getLogger(AuthenticationService.class.getName());
@@ -58,8 +54,7 @@ public class AuthenticationService {
     }
 
     /**
-     * Autentica un utente (amministratore o operatore). UNICA implementazione
-     * condivisa tra MVC e REST.
+     * Autentica un utente (amministratore o operatore). 
      */
     public static UserInfo authenticateUser(String email, String password, SoccorsoDataLayer dataLayer) {
         try {
@@ -93,7 +88,6 @@ public class AuthenticationService {
         try {
             Amministratore admin = dataLayer.getAmministratoreDAO().getAmministratoreByEmail(email);
             if (admin != null) {
-                // Prova PBKDF2, poi SHA come fallback
                 boolean passwordValid = false;
                 try {
                     passwordValid = SecurityHelpers.checkPasswordHashPBKDF2(password, admin.getPassword());
@@ -123,7 +117,6 @@ public class AuthenticationService {
         try {
             Operatore operatore = dataLayer.getOperatoreDAO().getOperatoreByEmail(email);
             if (operatore != null) {
-                // Prova PBKDF2, poi SHA come fallback
                 boolean passwordValid = false;
                 try {
                     passwordValid = SecurityHelpers.checkPasswordHashPBKDF2(password, operatore.getPassword());

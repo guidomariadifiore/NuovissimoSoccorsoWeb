@@ -2,18 +2,17 @@ package webengineering.nuovissimosoccorsoweb.rest.dto;
 
 /**
  * DTO per la richiesta di creazione missione.
- * AGGIORNATO per gestire caposquadra e operatori standard separatamente.
  */
 public class MissioneRequest {
     private int richiestaId;
     private String nome;
     private String posizione;
     private String obiettivo;
-    private String operatori;          // Tutti gli operatori (per compatibilità)
-    private String caposquadra;        // NUOVO: IDs caposquadra separati da virgola
-    private String operatoriStandard;  // NUOVO: IDs operatori standard separati da virgola
-    private String mezzi;              // Targhe separate da virgola (non più ID)
-    private String materiali;          // IDs separati da virgola (opzionale)
+    private String operatori;          
+    private String caposquadra;        
+    private String operatoriStandard;  
+    private String mezzi;              
+    private String materiali;          
     
     // Costruttori
     public MissioneRequest() {}
@@ -34,11 +33,9 @@ public class MissioneRequest {
     public String getOperatori() { return operatori; }
     public void setOperatori(String operatori) { this.operatori = operatori; }
     
-    // NUOVI GETTER/SETTER per caposquadra
     public String getCaposquadra() { return caposquadra; }
     public void setCaposquadra(String caposquadra) { this.caposquadra = caposquadra; }
     
-    // NUOVI GETTER/SETTER per operatori standard
     public String getOperatoriStandard() { return operatoriStandard; }
     public void setOperatoriStandard(String operatoriStandard) { this.operatoriStandard = operatoriStandard; }
     

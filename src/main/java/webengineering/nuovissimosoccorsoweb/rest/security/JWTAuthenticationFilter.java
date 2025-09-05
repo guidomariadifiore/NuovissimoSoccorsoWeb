@@ -10,7 +10,7 @@ import jakarta.ws.rs.ext.Provider;
 import java.io.IOException;
 
 /**
- * Filtro JWT per l'autenticazione delle API REST.
+ * Filtro JWT per l'autenticazione.
  * Si attiva automaticamente per tutti i metodi annotati con @Secured.
  */
 @Provider

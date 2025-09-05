@@ -1,4 +1,3 @@
-// ===== DettagliRichiestaDTO.java =====
 package webengineering.nuovissimosoccorsoweb.rest.dto;
 
 /**
