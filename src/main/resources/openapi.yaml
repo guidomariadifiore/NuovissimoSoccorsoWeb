@@ -18,7 +18,7 @@ tags:
   - name: Autenticazione
     description: Gestione dell'autenticazione degli utenti (login/logout)
   - name: Test
-    description: Endpoint di test e verifica sistema
+    description: Endpoint di test e verifica sistema (una sorta di debug fatto all'inizio, ignorare)
   - name: Missioni
     description: Gestione delle missioni di soccorso
   - name: Richieste
@@ -48,12 +48,12 @@ components:
           type: string
           format: email
           description: Email dell'utente (amministratore o operatore)
-          example: "admin@soccorso.it"
+          example: "guidomariadifiore@gmail.com"
         password:
           type: string
           format: password
           description: Password dell'utente
-          example: "password123"
+          example: "Ciao"
 
     LoginResponse:
       type: object
@@ -74,9 +74,9 @@ components:
         message: "Login effettuato con successo"
         token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
         user:
-          id: 1
-          email: "admin@soccorso.it"
-          role: "ADMIN"
+          id: 2
+          email: "guidomariadifiore@gmail.com"
+          role: "admin"
 
     LogoutResponse:
       type: object
@@ -106,9 +106,9 @@ components:
         valid: true
         message: "Token valido"
         user:
-          id: 1
-          email: "admin@soccorso.it"
-          role: "ADMIN"
+          id: 2
+          email: "guidomariadifiore@gmail.com"
+          role: "Ciao"
 
     UserInfo:
       type: object
@@ -125,9 +125,9 @@ components:
           enum: ["ADMIN", "OPERATORE"]
           description: Ruolo dell'utente nel sistema
       example:
-        id: 1
-        email: "admin@soccorso.it"
-        role: "ADMIN"
+        id: 2
+        email: "guidomariadifiore@gmail.com"
+        role: "Ciao"
 
     # === ERRORI ===
     ErrorResponse:
@@ -180,14 +180,14 @@ components:
           type: string
           description: IDs materiali separati da virgola
       example:
-        richiestaId: 123
+        richiestaId: 15
         nome: "Soccorso alpino Monte Bianco"
         posizione: "Monte Bianco, quota 2500m"
         obiettivo: "Recupero escursionista ferito"
-        caposquadra: "1,3"
-        operatoriStandard: "5,7,9"
-        mezzi: "AB123CD,EF456GH"
-        materiali: "1,2,4"
+        caposquadra: "1"
+        operatoriStandard: "2"
+        mezzi: "EP900MH"
+        materiali: "1,2"
 
     MissioneDTO:
       type: object
@@ -215,7 +215,7 @@ components:
           type: integer
           description: ID dell'amministratore che ha creato la missione
       example:
-        codiceRichiesta: 123
+        codiceRichiesta: 1
         nome: "Soccorso alpino Monte Bianco"
         posizione: "Monte Bianco, quota 2500m"
         obiettivo: "Recupero escursionista ferito"
