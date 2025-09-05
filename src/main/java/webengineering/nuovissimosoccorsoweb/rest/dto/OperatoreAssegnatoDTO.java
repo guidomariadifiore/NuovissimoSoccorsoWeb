@@ -2,7 +2,6 @@ package webengineering.nuovissimosoccorsoweb.rest.dto;
 
 /**
  * DTO per rappresentare un operatore assegnato a una missione.
- * Include informazioni base dell'operatore + il ruolo nella missione.
  */
 public class OperatoreAssegnatoDTO {
     private int id;
@@ -42,9 +41,6 @@ public class OperatoreAssegnatoDTO {
     public String getRuolo() { return ruolo; }
     public void setRuolo(String ruolo) { this.ruolo = ruolo; }
     
-    /**
-     * Nome completo dell'operatore.
-     */
     public String getNomeCompleto() {
         return nome + " " + cognome;
     }

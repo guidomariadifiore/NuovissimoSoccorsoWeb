@@ -1,8 +1,5 @@
 package webengineering.nuovissimosoccorsoweb.rest.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import java.time.LocalDateTime;
-
 /**
  * DTO per rappresentare una missione nelle risposte API.
  */

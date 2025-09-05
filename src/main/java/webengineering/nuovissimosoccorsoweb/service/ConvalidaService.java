@@ -9,7 +9,6 @@ import java.util.logging.Level;
 
 /**
  * Servizio per la convalida delle richieste di soccorso.
- * Centralizza la logica business per evitare duplicazione tra MVC e REST.
  */
 public class ConvalidaService {
     
@@ -23,7 +22,7 @@ public class ConvalidaService {
         private final String message;
         private final RichiestaSoccorso richiesta;
         private final String errorCode;
-        private final String status; // "success", "warning", "error"
+        private final String status; 
         
         private ConvalidaResult(boolean success, String message, RichiestaSoccorso richiesta, 
                                String errorCode, String status) {
@@ -56,7 +55,6 @@ public class ConvalidaService {
     
     /**
      * Convalida una richiesta di soccorso usando il token.
-     * UNICA implementazione condivisa tra MVC e REST.
      * 
      * @param token Token di convalida (dalla stringa email)
      * @param dataLayer DataLayer per accesso database
@@ -115,8 +113,7 @@ public class ConvalidaService {
     }
     
     /**
-     * Convalida una richiesta di soccorso usando ID + token (per REST API).
-     * Validazione aggiuntiva che l'ID corrisponda al token.
+     * Convalida una richiesta di soccorso usando ID + token.
      * 
      * @param id ID della richiesta
      * @param token Token di convalida

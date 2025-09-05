@@ -11,9 +11,7 @@ import java.util.logging.Level;
 
 /**
  * Servizio per le operazioni di query/lettura delle richieste di soccorso.
- * Complementare al RichiestaService esistente (che gestisce l'inserimento).
  *
- * Centralizza la logica business per evitare duplicazione tra MVC e REST.
  */
 public class RichiesteQueryService {
 
@@ -90,7 +88,7 @@ public class RichiesteQueryService {
             // Mappa stati REST a stati database se necessario
             String statoDb = (stato != null && !stato.trim().isEmpty()) ? mapStatoRestToDb(stato) : null;
 
-            // 1. Recupera richieste filtrate (usa i metodi DAO esistenti)
+            // 1. Recupera richieste filtrate 
             List<RichiestaSoccorso> tutteRichieste;
             if (statoDb != null) {
                 tutteRichieste = dataLayer.getRichiestaSoccorsoDAO().getRichiesteByStato(statoDb);
@@ -98,7 +96,7 @@ public class RichiesteQueryService {
                 tutteRichieste = dataLayer.getRichiestaSoccorsoDAO().getAllRichieste();
             }
 
-            // ✅ NUOVA LOGICA: Filtra automaticamente le richieste "Inviata"
+            // Filtra automaticamente le richieste "Inviata"
             List<RichiestaSoccorso> richiesteFiltrate = new ArrayList<>();
             for (RichiestaSoccorso richiesta : tutteRichieste) {
                 // Escludi le richieste con stato "Inviata"
@@ -150,13 +148,11 @@ public class RichiesteQueryService {
         try {
             logger.info("Recupero richieste non positive - Pagina: " + page + ", Size: " + size);
 
-            // 1. Recupera richieste chiuse (usa metodo DAO esistente)
+            // 1. Recupera richieste chiuse 
             List<RichiestaSoccorso> richiesteChiuse
                     = dataLayer.getRichiestaSoccorsoDAO().getRichiesteByStato("Chiusa");
 
             // 2. Per ora restituisci tutte le richieste chiuse
-            // TODO: Implementare il filtro per livello di successo < 5 quando avrai il JOIN con info_missione
-            // Puoi estendere il DAO con un metodo specifico o fare un JOIN manuale
             List<RichiestaSoccorso> richiesteNonPositive = richiesteChiuse;
 
             // 3. Applica paginazione
@@ -253,8 +249,7 @@ public class RichiesteQueryService {
     }
 
     /**
-     * Ottiene una descrizione user-friendly dello stato. Utile per logging e
-     * messaggi.
+     * Ottiene una descrizione user-friendly dello stato. 
      */
     public static String getStatoDescription(String stato) {
         if (stato == null) {

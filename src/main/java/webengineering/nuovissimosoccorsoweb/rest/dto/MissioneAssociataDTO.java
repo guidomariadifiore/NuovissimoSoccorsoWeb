@@ -1,4 +1,3 @@
-// ===== MissioneAssociataDTO.java =====
 package webengineering.nuovissimosoccorsoweb.rest.dto;
 
 /**
@@ -13,7 +12,7 @@ public class MissioneAssociataDTO {
     private String stato; // "ATTIVA" o "CONCLUSA"
     private String dataOraInizio;
     private String dataOraFine;
-    private int livelloSuccesso; // 0-10, 0 se non valutata
+    private int livelloSuccesso; // 0-5
     private String commento;
     private int numeroOperatori;
 

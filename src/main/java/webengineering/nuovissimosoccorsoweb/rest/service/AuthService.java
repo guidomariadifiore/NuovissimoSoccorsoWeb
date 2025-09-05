@@ -11,15 +11,11 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-/**
- * AuthService REST - ora usa il servizio condiviso invece di duplicare codice.
- */
 public class AuthService {
     
     private static final Logger logger = Logger.getLogger(AuthService.class.getName());
     private static AuthService instance;
     
-    // Adapter class per compatibilità con il codice REST esistente
     public static class UserInfo {
         private final int id;
         private final String email;
@@ -33,7 +29,7 @@ public class AuthService {
             this.fullName = fullName;
         }
         
-        // Costruttore da AuthenticationService.UserInfo
+        // Costruttore
         public UserInfo(AuthenticationService.UserInfo authInfo) {
             this.id = authInfo.getId();
             this.email = authInfo.getEmail();
@@ -57,7 +53,7 @@ public class AuthService {
     }
     
     /**
-     * Autentica un utente - codice condiviso con MVC
+     * Autentica un utente 
      */
     public UserInfo authenticateUser(String email, String password) {
         SoccorsoDataLayer dataLayer = null;

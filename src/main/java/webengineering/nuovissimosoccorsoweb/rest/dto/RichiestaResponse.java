@@ -2,8 +2,6 @@ package webengineering.nuovissimosoccorsoweb.rest.dto;
 
 /**
  * DTO per la risposta alle operazioni sulle richieste di soccorso.
- * 
- * @author YourName
  */
 public class RichiestaResponse {
     private boolean success;

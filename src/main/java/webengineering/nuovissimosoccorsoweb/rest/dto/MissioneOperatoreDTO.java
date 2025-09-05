@@ -13,7 +13,7 @@ public class MissioneOperatoreDTO {
     private String dataOraInizio;
     private String dataOraFine;
     private String ruoloOperatore; // "Caposquadra" o "Standard"
-    private int livelloSuccesso; // 0-10, 0 se non valutata
+    private int livelloSuccesso; // 0-5
     private String descrizioneRichiesta;
     private String indirizzoIntervento;
 

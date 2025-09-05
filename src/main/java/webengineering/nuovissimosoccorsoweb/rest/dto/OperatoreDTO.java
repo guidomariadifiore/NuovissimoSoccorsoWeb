@@ -3,10 +3,7 @@ package webengineering.nuovissimosoccorsoweb.rest.dto;
 import java.util.List;
 
 /**
- * DTO per la rappresentazione di un operatore nelle API REST.
- * Non include informazioni sensibili come password.
- * 
- * VERSIONE ESTESA: Include patenti e abilità dell'operatore.
+ * DTO per la rappresentazione di un operatore.
  */
 public class OperatoreDTO {
     private int id;
@@ -16,11 +13,9 @@ public class OperatoreDTO {
     private String codiceFiscale;
     private boolean disponibile;
     
-    // NUOVI CAMPI: Patenti e abilità
     private List<String> patenti;
     private List<String> abilita;
     
-    // Informazioni aggiuntive opzionali
     private Integer missioniInCorso;
     private Integer missioniCompletate;
     
@@ -35,7 +30,7 @@ public class OperatoreDTO {
         this.disponibile = disponibile;
     }
     
-    // Getters e Setters esistenti
+    // Getters e Setters 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     
@@ -60,16 +55,12 @@ public class OperatoreDTO {
     public Integer getMissioniCompletate() { return missioniCompletate; }
     public void setMissioniCompletate(Integer missioniCompletate) { this.missioniCompletate = missioniCompletate; }
     
-    // NUOVI Getters e Setters per patenti e abilità
     public List<String> getPatenti() { return patenti; }
     public void setPatenti(List<String> patenti) { this.patenti = patenti; }
     
     public List<String> getAbilita() { return abilita; }
     public void setAbilita(List<String> abilita) { this.abilita = abilita; }
     
-    /**
-     * Metodo di convenienza per ottenere nome completo.
-     */
     public String getNomeCompleto() {
         return nome + " " + cognome;
     }

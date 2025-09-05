@@ -405,7 +405,7 @@
         });
         </#if>
 
-        // Validazione form avanzata
+        // Validazione form 
         document.querySelector('form').addEventListener('submit', function(e) {
             const submitBtn = document.getElementById('submitBtn');
             const captchaCheckbox = document.getElementById('captcha_check');
@@ -432,7 +432,7 @@
             submitBtn.onmouseover = null;
             submitBtn.onmouseout = null;
             
-            // Validazione email più rigorosa
+            // Validazione email 
             const email = document.getElementById('email_segnalante').value;
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             
