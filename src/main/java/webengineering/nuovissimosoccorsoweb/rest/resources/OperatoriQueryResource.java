@@ -26,7 +26,7 @@ import java.util.logging.Level;
  * Resource REST per le operazioni di query sugli operatori.
  * 
  * Gestisce:
- * - Lista operatori liberi (per la specifica)
+ * - Lista operatori liberi
  * - Dettagli singolo operatore
  * - Statistiche operatori
  */
@@ -41,12 +41,8 @@ public class OperatoriQueryResource {
     private HttpServletRequest httpRequest;
     
     /**
-     * Lista degli operatori attualmente liberi.
+     * Lista degli operatori attualmente liberi: Richiede autenticazione: solo ADMIN può vedere gli operatori
      * GET /api/operatori/liberi
-     * 
-     * Richiede autenticazione: solo ADMIN può vedere gli operatori
-     * 
-     * @return Lista degli operatori disponibili (non impegnati in missioni attive)
      */
     @GET
     @Path("liberi")
@@ -60,7 +56,6 @@ public class OperatoriQueryResource {
             // Crea DataLayer
             dataLayer = createDataLayer();
             
-            // USA IL SERVICE CONDIVISO - riutilizza logica MVC!
             OperatoriQueryService.OperatoriResult result = 
                 OperatoriQueryService.getOperatoriLiberi(dataLayer);
             
@@ -70,10 +65,9 @@ public class OperatoriQueryResource {
                         .build();
             }
             
-            // Converte i modelli interni in DTO per la risposta CON patenti e abilità
             List<OperatoreDTO> operatoriDTO = new ArrayList<>();
             for (Operatore operatore : result.getOperatori()) {
-                operatoriDTO.add(mapToOperatoreDTOWithDetails(operatore, true, dataLayer)); // METODO AGGIORNATO
+                operatoriDTO.add(mapToOperatoreDTOWithDetails(operatore, true, dataLayer)); 
             }
             
             logger.info("Restituiti " + operatoriDTO.size() + " operatori liberi con dettagli completi");
@@ -100,11 +94,6 @@ public class OperatoriQueryResource {
     /**
      * Lista di tutti gli operatori con informazioni su disponibilità.
      * GET /api/operatori?includeStato=true
-     * 
-     * Richiede autenticazione: solo ADMIN
-     * 
-     * @param includeStato Se includere informazioni su disponibilità e missioni
-     * @return Lista operatori con stato dettagliato
      */
     @GET
     @Secured
@@ -135,7 +124,7 @@ public class OperatoriQueryResource {
                 return Response.ok(operatoriDTO).build();
                 
             } else {
-                // Lista semplice - usa solo operatori liberi (per la specifica)
+                // usa solo operatori liberi
                 OperatoriQueryService.OperatoriResult result = 
                     OperatoriQueryService.getOperatoriLiberi(dataLayer);
                 
@@ -180,9 +169,6 @@ public class OperatoriQueryResource {
     /**
      * Dettagli di un operatore specifico.
      * GET /api/operatori/{id}
-     * 
-     * Richiede autenticazione: solo ADMIN
-     * 
      * @param id ID dell'operatore
      * @return Dettagli dell'operatore con stato
      */
@@ -205,7 +191,6 @@ public class OperatoriQueryResource {
             // Crea DataLayer
             dataLayer = createDataLayer();
             
-            // USA IL SERVICE CONDIVISO
             OperatoriQueryService.OperatoreInfo operatoreInfo = 
                 OperatoriQueryService.getOperatoreById(id, dataLayer);
             
@@ -253,7 +238,7 @@ public class OperatoriQueryResource {
         }
     }
     
-    // ========== METODI DI UTILITÀ ==========
+    // METODI DI UTILITÀ:
     
     /**
      * Crea DataLayer.
@@ -266,10 +251,7 @@ public class OperatoriQueryResource {
         return dataLayer;
     }
     
-    /**
-     * METODO AGGIORNATO: Converte il modello interno in DTO per la risposta 
-     * INCLUDENDO patenti e abilità caricate dal database.
-     */
+    
     private OperatoreDTO mapToOperatoreDTOWithDetails(Operatore operatore, boolean disponibile, SoccorsoDataLayer dataLayer) {
         OperatoreDTO dto = new OperatoreDTO();
         dto.setId(operatore.getId());
@@ -279,12 +261,12 @@ public class OperatoriQueryResource {
         dto.setCodiceFiscale(operatore.getCodiceFiscale());
         dto.setDisponibile(disponibile);
         
-        // NUOVO: Carica patenti dell'operatore
+        // Carica patenti dell'operatore
         try {
             List<TipoPatente> patentiObj = dataLayer.getOperatoreHaPatenteDAO().getPatentiByOperatore(operatore.getId());
             List<String> patentiString = new ArrayList<>();
             for (TipoPatente patente : patentiObj) {
-                patentiString.add(patente.toDBString()); // Converte enum in stringa leggibile
+                patentiString.add(patente.toDBString()); // Converte enum in stringa
             }
             dto.setPatenti(patentiString);
             logger.fine("Caricate " + patentiString.size() + " patenti per operatore " + operatore.getId());
@@ -293,12 +275,12 @@ public class OperatoriQueryResource {
             dto.setPatenti(new ArrayList<>()); // Lista vuota in caso di errore
         }
         
-        // NUOVO: Carica abilità dell'operatore
+        // Carica abilità dell'operatore
         try {
             List<Abilita> abilitaObj = dataLayer.getAbilitaDAO().getAbilitaByOperatore(operatore.getId());
             List<String> abilitaString = new ArrayList<>();
             for (Abilita abilita : abilitaObj) {
-                abilitaString.add(abilita.getTipo().toDBString()); // Converte enum in stringa leggibile
+                abilitaString.add(abilita.getTipo().toDBString()); // Converte enum in stringa
             }
             dto.setAbilita(abilitaString);
             logger.fine("Caricate " + abilitaString.size() + " abilità per operatore " + operatore.getId());
@@ -311,8 +293,7 @@ public class OperatoriQueryResource {
     }
     
     /**
-     * METODO LEGACY: Manteniamo per compatibilità, ma deprecato.
-     * @deprecated Usa mapToOperatoreDTOWithDetails invece
+     * Manteniamo per compatibilità, ma deprecato.
      */
     @Deprecated
     private OperatoreDTO mapToOperatoreDTO(Operatore operatore, boolean disponibile) {

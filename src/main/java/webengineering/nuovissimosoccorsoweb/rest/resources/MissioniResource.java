@@ -21,7 +21,6 @@ import webengineering.framework.data.DataException;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
-import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,10 +43,10 @@ import webengineering.nuovissimosoccorsoweb.model.impl.InfoMissioneImpl;
 import java.sql.Connection;
 
 /**
- * Resource REST per la gestione delle missioni. AGGIORNATO per gestire i nuovi
- * requisiti: - Operatori divisi in caposquadra e standard - Mezzi inseriti per
- * targa - Controllo stato "Convalidata" - Cambio stato richiesta da
- * "Convalidata" ad "Attiva"
+ * Resource REST per la gestione delle missioni. 
+ * - Operatori divisi in caposquadra e standard 
+ * - Mezzi inseriti per targa 
+ * - Controllo stato "Convalidata"  e cambio stato richiesta da "Convalidata" ad "Attiva" per la creazione della missione
  */
 @Path("missioni")
 @Produces(MediaType.APPLICATION_JSON)
@@ -64,10 +63,6 @@ public class MissioniResource {
 
     /**
      * Crea una nuova missione. POST /api/missioni
-     *
-     * Richiede autenticazione: solo ADMIN può creare missioni AGGIORNATO per i
-     * nuovi requisiti
-     *
      * @param missioneRequest Dati della missione da creare
      * @return Risultato della creazione
      */
@@ -79,7 +74,7 @@ public class MissioniResource {
         try {
             logger.info("=== CREAZIONE MISSIONE VIA REST (AGGIORNATA) ===");
 
-            // Validazione input base
+            // Validazione input
             if (missioneRequest == null) {
                 return Response.status(Response.Status.BAD_REQUEST)
                         .entity(new ErrorResponse("Dati missione mancanti", "VALIDATION_ERROR"))
@@ -140,16 +135,16 @@ public class MissioniResource {
                         .build();
             }
 
-            // Prepara le targhe dei mezzi (non più ID)
+            // Prepara le targhe dei mezzi
             List<String> targhe = parseTargheMezzi(missioneRequest.getMezzi());
 
-            // Prepara i materiali (rimangono ID)
+            // Prepara i materiali 
             List<Integer> materialiIds = parseIntegerList(missioneRequest.getMateriali());
 
             // DEBUG RIMUOVI
             logger.info("DEBUG: Iniziando creaMissioneCore...");
 
-            // Riusa la logica del controller MVC con le modifiche
+            
             Missione missione = creaMissioneCore(
                     dataLayer,
                     missioneRequest.getRichiestaId(),
@@ -165,7 +160,7 @@ public class MissioniResource {
             // DEBUG RIMUOVI
             logger.info("DEBUG: creaMissioneCore completato con successo");
 
-            // NUOVO: Cambia stato della richiesta da "Convalidata" ad "Attiva"
+            // Cambia stato della richiesta da "Convalidata" ad "Attiva"
             logger.info("DEBUG: Cambiando stato richiesta..."); //DEBUG RIMUOVI
             dataLayer.getRichiestaSoccorsoDAO().updateStato(
                     missioneRequest.getRichiestaId(), "Attiva");
@@ -260,7 +255,7 @@ public class MissioniResource {
     }
 
     /**
-     * NUOVO METODO: Prepara la lista delle targhe dei mezzi.
+     * Prepara la lista delle targhe dei mezzi.
      */
     private List<String> parseTargheMezzi(String mezziString) {
         List<String> targhe = new ArrayList<>();
@@ -277,8 +272,7 @@ public class MissioniResource {
     }
 
     /**
-     * Metodo core per la creazione della missione (AGGIORNATO). Versione
-     * modificata per gestire operatori con ruoli e targhe mezzi.
+     * Metodo core per la creazione della missione.
      */
     private Missione creaMissioneCore(SoccorsoDataLayer dataLayer, int richiestaId,
             String nome, String posizione, String obiettivo,
@@ -303,7 +297,6 @@ public class MissioniResource {
 
         } catch (DataException e) {
             // Se getMissioneByCodice restituisce null o dà errore, significa che non esiste
-            // Possiamo continuare
             logger.info("Nessuna missione esistente trovata per richiesta " + richiestaId + " - OK per creare nuova missione");
 
         }
@@ -334,7 +327,7 @@ public class MissioniResource {
                 logger.info("Operatore " + operatore.idOperatore + " assegnato con ruolo " + operatore.ruolo);
             }
 
-            // 3. Assegna mezzi per targa (non più per ID)
+            // 3. Assegna mezzi
             for (String targa : targhe) {
                 dataLayer.getMissioneDAO().assegnaMezzoAMissione(targa, richiestaId);
                 logger.info("Mezzo con targa " + targa + " assegnato alla missione");
@@ -372,7 +365,7 @@ public class MissioniResource {
     }
 
     /**
-     * NUOVO METODO: Raccoglie le email degli operatori per le notifiche.
+     * Raccoglie le email degli operatori per le notifiche.
      */
     private List<String> raccogliEmailOperatori(SoccorsoDataLayer dataLayer,
             List<OperatoreConRuolo> operatori) {
@@ -437,10 +430,6 @@ public class MissioniResource {
 
     /**
      * Recupera i dettagli di una missione specifica. GET /api/missioni/{id}
-     *
-     * Richiede autenticazione: solo ADMIN può visualizzare i dettagli delle
-     * missioni
-     *
      * @param id ID della missione
      * @return Dettagli completi della missione
      */
@@ -465,7 +454,7 @@ public class MissioniResource {
             logger.info("  userId: " + userId);
             logger.info("  token presente: " + (token != null ? "SÌ" : "NO"));
 
-            // ✅ CORREZIONE: Verifica ruolo admin con controllo case-insensitive (come nell'annullamento)
+            //  Verifica ruolo admin con controllo case-insensitive (come nell'annullamento)
             boolean isAdmin = "ADMIN".equalsIgnoreCase(userRole) || "admin".equals(userRole) || "amministratore".equalsIgnoreCase(userRole);
 
             if (!isAdmin) {
@@ -547,7 +536,7 @@ public class MissioniResource {
         if (missione.getDataOraInizio() != null) {
             dettagli.setDataOraInizio(missione.getDataOraInizio().toString());
         }
-        // Data fine - ottienila dalle InfoMissione
+        // Data fine 
         try {
             InfoMissione infoMissione = dataLayer.getInfoMissioneDAO().getInfoByCodiceMissione(missione.getCodiceRichiesta());
             if (infoMissione != null) {
@@ -661,10 +650,6 @@ public class MissioniResource {
     /**
      * Lista delle missioni in cui un operatore è stato coinvolto. GET
      * /api/missioni/operatore/{idOperatore}
-     *
-     * Richiede autenticazione: solo ADMIN può vedere le missioni degli
-     * operatori
-     *
      * @param idOperatore ID dell'operatore
      * @return Lista delle missioni con dettagli
      */
@@ -703,7 +688,7 @@ public class MissioniResource {
                         .build();
             }
 
-            // ✅ USA IL METODO ESISTENTE del MissioneDAO
+            
             List<Missione> missioni = dataLayer.getMissioneDAO().getMissioniByOperatore(idOperatore);
 
             // Converte in DTO con dettagli aggiuntivi
@@ -1003,7 +988,7 @@ public class MissioniResource {
         dto.setNome(missione.getNome());
         dto.setPosizione(missione.getPosizione());
         dto.setObiettivo(missione.getObiettivo());
-        dto.setNota(missione.getNota()); // Aggiungo anche le note se mancavano
+        dto.setNota(missione.getNota()); 
 
         // Converte LocalDateTime in String
         if (missione.getDataOraInizio() != null) {

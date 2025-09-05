@@ -19,7 +19,6 @@ import webengineering.nuovissimosoccorsoweb.service.ConvalidaService;
 
 /**
  * Resource REST per la gestione delle richieste di soccorso.
- * Ora usa il RichiestaService condiviso - zero duplicazione!
  */
 @Path("richieste")
 @Produces(MediaType.APPLICATION_JSON)
@@ -35,7 +34,7 @@ public class RichiesteResource {
      * Endpoint per inserire una nuova richiesta di soccorso.
      * POST /api/richieste
      * 
-     * NON richiede autenticazione (in emergenza non c'è tempo per il login!)
+     * NON richiede autenticazione
      */
     @POST
     public Response inserisciRichiesta(RichiestaRequest richiestaRequest) {
@@ -54,7 +53,7 @@ public class RichiesteResource {
             // Crea DataLayer
             dataLayer = createDataLayer();
             
-            // Prepara input per il service
+            // input per il service
             RichiestaService.RichiestaInput input = new RichiestaService.RichiestaInput(
                 richiestaRequest.getDescrizione(),
                 richiestaRequest.getIndirizzo(),
@@ -66,7 +65,7 @@ public class RichiesteResource {
                 getClientIpAddress()
             );
             
-            // USA IL SERVICE CONDIVISO - zero duplicazione di logica business!
+            
             RichiestaService.RichiestaResult result = 
                 RichiestaService.inserisciRichiesta(input, dataLayer);
             
@@ -82,7 +81,6 @@ public class RichiesteResource {
                         .entity(response)
                         .build();
             } else {
-                // Errore di business - determina status HTTP
                 Response.Status status = getHttpStatusFromErrorCode(result.getErrorCode());
                 return Response.status(status)
                         .entity(new RichiestaResponse(false, result.getMessage()))
@@ -116,9 +114,7 @@ public class RichiesteResource {
         return dataLayer;
     }
     
-    /**
-     * Mappa errori business a status HTTP.
-     */
+    
     private Response.Status getHttpStatusFromErrorCode(String errorCode) {
         if (errorCode == null) return Response.Status.INTERNAL_SERVER_ERROR;
         
@@ -133,7 +129,7 @@ public class RichiesteResource {
     }
     
     /**
-     * Ottiene l'IP del client (gestisce proxy e load balancer).
+     * Ottiene l'IP del client
      */
     private String getClientIpAddress() {
         String xForwardedFor = httpRequest.getHeader("X-Forwarded-For");
@@ -167,14 +163,11 @@ public class RichiesteResource {
         dto.setIdAmministratore(richiesta.getIdAmministratore() > 0 ? richiesta.getIdAmministratore() : null);
         return dto;
     }
-    // Aggiungi questo metodo in RichiesteResource.java
+    
 
 /**
  * Endpoint per convalidare una richiesta di soccorso.
- * POST /api/richieste/{id}/convalida?token=...
- * 
- * NON richiede autenticazione (il link è pubblico nell'email)
- * 
+ * POST /api/richieste/{id}/convalida?token=... 
  * @param id ID della richiesta da convalidare
  * @param token Token di convalida (dalla email)
  * @return Risultato della convalida
@@ -204,7 +197,7 @@ public Response convalidaRichiesta(@PathParam("id") int id, @QueryParam("token")
         // Crea DataLayer
         dataLayer = createDataLayer();
         
-        // USA IL SERVICE CONDIVISO - zero duplicazione!
+        
         ConvalidaService.ConvalidaResult result = 
             ConvalidaService.convalidaRichiestaById(id, token, dataLayer);
         
@@ -219,7 +212,7 @@ public Response convalidaRichiesta(@PathParam("id") int id, @QueryParam("token")
             return Response.ok(response).build();
             
         } else if ("warning".equals(result.getStatus())) {
-            // Warning - già convalidata (non è un errore grave)
+            // errore - già convalidata 
             ConvalidaResponse response = new ConvalidaResponse(
                 true, // success=true perché la richiesta è comunque convalidata
                 result.getMessage(),
@@ -229,7 +222,6 @@ public Response convalidaRichiesta(@PathParam("id") int id, @QueryParam("token")
             return Response.ok(response).build();
             
         } else {
-            // Errore - determina status HTTP appropriato
             Response.Status status = getHttpStatusFromConvalidaError(result.getErrorCode());
             
             ConvalidaResponse response = new ConvalidaResponse(
@@ -277,7 +269,7 @@ private Response.Status getHttpStatusFromConvalidaError(String errorCode) {
     }
 }
 
-// ========== DTO per la convalida ==========
+// DTO per la convalida
 
 /**
  * DTO per la risposta di convalida.
@@ -295,7 +287,6 @@ public static class ConvalidaResponse {
         this.richiesta = richiesta;
     }
     
-    // Getter e Setter
     public boolean isSuccess() { return success; }
     public void setSuccess(boolean success) { this.success = success; }
     
