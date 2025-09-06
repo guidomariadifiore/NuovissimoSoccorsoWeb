@@ -336,11 +336,11 @@
                         <h3>Login</h3>
                         <div class="form-group">
                             <label for="email">Email:</label>
-                            <input type="email" id="email" value="admin@soccorso.it" placeholder="Inserisci email">
+                            <input type="email" id="email" placeholder="Inserisci email">
                         </div>
                         <div class="form-group">
                             <label for="password">Password:</label>
-                            <input type="password" id="password" value="admin123" placeholder="Inserisci password">
+                            <input type="password" id="password" placeholder="Inserisci password">
                         </div>
                         <button onclick="doLogin()">Effettua Login</button>
                         <button onclick="verifyToken()" id="verifyBtn" disabled>Verifica Token</button>
@@ -349,9 +349,8 @@
 
                     <div>
                         <h3>Credenziali di Test</h3>
-                        <p><strong>Admin:</strong> admin@soccorso.it / admin123</p>
-                        <p><strong>Operatore:</strong> operatore@soccorso.it / op123</p>
-                        <p><strong>Utente:</strong> utente@soccorso.it / user123</p>
+                        <p><strong>Admin:</strong> guidomariadifiore@gmail.com / Ciao</p>
+                        <p><strong>Operatore:</strong> mariokart@nintendo.it / Password</p>
                     </div>
                 </div>
 
@@ -362,7 +361,7 @@
 
             <!-- Sezione 2: Inserimento Richiesta di Soccorso (CORRETTA) -->
             <div class="section">
-                <h2>🆘 2. Inserimento Richiesta di Soccorso (NO AUTH richiesta)</h2>
+                <h2>🆘 2. Inserimento Richiesta di Soccorso</h2>
 
                 <div class="form-group">
                     <label for="descrizione">Descrizione emergenza:</label>
@@ -514,7 +513,6 @@
                         color: #666;">
                         <li><strong>Operatori Liberi:</strong> Mostra operatori non impegnati in missioni attive</li>
                         <li><strong>Dettagli inclusi:</strong> Nome, email, codice fiscale, patenti possedute, abilità speciali</li>
-                        <li><strong>Utilità:</strong> Ideale per assegnare operatori a nuove missioni</li>
                     </ul>
                 </div>
 
@@ -695,12 +693,11 @@
             </div>
             <!-- Sezione 9: Annullamento Richiesta di Soccorso (NUOVO) -->
             <div class="section">
-                <h2>❌ 9. Annullamento Richiesta di Soccorso (Solo Admin)</h2>
+                <h2>❌ 9. Annullamento Richiesta di Soccorso</h2>
 
                 <div class="form-group">
                     <label for="annullaRichiestaId">ID Richiesta da Annullare:</label>
                     <input type="number" id="annullaRichiestaId" min="1" placeholder="Inserisci l'ID della richiesta da annullare">
-                    <small style="color: #666;">Solo richieste non chiuse possono essere annullate</small>
                 </div>
 
                 <div class="info-box">
@@ -710,9 +707,7 @@
                         font-size: 14px;
                         color: #0c5460;">
                         <li><strong>Solo amministratori</strong> possono annullare richieste</li>
-                        <li><strong>Non si possono annullare</strong> richieste già chiuse</li>
-                        <li><strong>Non si possono annullare</strong> richieste con missioni attive</li>
-                        <li><strong>Stati annullabili:</strong> Inviata, Convalidata, Attiva</li>
+                        <li><strong>Richieste annullabili:</strong> stato: Convalidata</li>
                     </ul>
                 </div>
 
@@ -731,7 +726,7 @@
 
             <!-- Sezione 10: Dettagli Missione -->
             <div class="section">
-                <h2>📋 10. Dettagli di una Missione (Solo Admin)</h2>
+                <h2>📋 10. Dettagli di una Missione</h2>
 
                 <div class="form-group">
                     <label for="dettagliMissioneId">ID Missione:</label>
@@ -745,9 +740,9 @@
                         padding-left: 20px;
                         font-size: 14px;
                         color: #0c5460;">
-                        <li><strong>Dati base:</strong> Nome, posizione, obiettivo, note, date</li>
+                        <li><strong>Dati base:</strong> Nome, posizione, obiettivo</li>
                         <li><strong>Richiesta associata:</strong> Dettagli della richiesta di soccorso originale</li>
-                        <li><strong>Team:</strong> Operatori assegnati con i loro ruoli (Caposquadra/Standard)</li>
+                        <li><strong>Squadra:</strong> Operatori assegnati con i loro ruoli (Caposquadra/Standard)</li>
                         <li><strong>Risorse:</strong> Mezzi e materiali utilizzati</li>
                         <li><strong>Valutazione:</strong> Livello di successo e commenti (se conclusa)</li>
                     </ul>
@@ -769,7 +764,7 @@
 
             <!-- Sezione 11: Dettagli Richiesta di Soccorso -->
             <div class="section">
-                <h2>📋 11. Dettagli di una Richiesta di Soccorso (Solo Admin)</h2>
+                <h2>📋 11. Dettagli di una Richiesta di Soccorso</h2>
 
                 <div class="form-group">
                     <label for="dettagliRichiestaId">ID Richiesta:</label>
@@ -843,7 +838,7 @@
             </div>
             <!-- Sezione 13 Lista Missioni Operatore -->
             <div class="section">
-                <h2>👨‍🚒 13. Lista delle Missioni in cui un Operatore è stato coinvolto (Solo Admin)</h2>
+                <h2>👨‍🚒 13. Lista delle Missioni in cui un Operatore è stato coinvolto</h2>
 
                 <div class="form-group">
                     <label for="missioniOperatoreId">ID Operatore:</label>
@@ -979,13 +974,13 @@
                         if (result.ok) {
                             authToken = result.data.token;
 
-                            // ✅ FIX: Normalizza il ruolo da 'admin' a 'ADMIN' per il backend
+                            // Normalizza il ruolo da 'admin' a 'ADMIN' per il backend
                             let userRole = result.data.role || 'ADMIN';
                             if (userRole.toLowerCase() === 'admin') {
                                 userRole = 'ADMIN';  // Converti a maiuscolo per il backend
                             }
 
-                            // ✅ Assegna currentUser con ruolo normalizzato
+                            // Assegna currentUser con ruolo normalizzato
                             currentUser = result.data.user || {
                                 id: result.data.userId || result.data.id,
                                 email: email,
@@ -999,7 +994,7 @@
                             console.log('currentUser finale:', currentUser);
                             console.log('========================');
 
-                            // ✅ CHIAMA updateAuthUI con i dati corretti
+                            // Aggiorna la UI dopo il login
                             updateAuthUI(true, currentUser);
 
                             // DEBUG: Info per controllare il ruolo
@@ -1013,7 +1008,10 @@
                             message += `Token: ${authToken.substring(0, 30)}...\n`;
 
                             showResponse('authResponse', message, 'success');
-                            mostraFormMissioneAutomatic();
+
+                            if (isAdmin) {
+                                mostraFormMissioneAutomatic();
+                            }
 
                         } else {
                             showResponse('authResponse', `❌ Login fallito: ${result.data.error || result.data.message}`, 'error');
