@@ -628,6 +628,9 @@
                     Effettua il login come amministratore per creare missioni...
                 </div>
             </div>
+
+
+
             <div class="section">
                 <h2>🏁 8. Chiusura Missione in Corso</h2>
 
@@ -676,7 +679,7 @@
                         🔚 Chiudi Missione
                     </button>
                     <button onclick="clearChiusuraMissioneForm()" id="pulisciFormChiusura" style="display: none;">🧹 Pulisci Form</button>
-ù                </div>
+                    ù                </div>
 
                 <div class="response-area" id="chiusuraMissioneResponse">
                     Effettua il login come amministratore per chiudere le missioni...
@@ -882,8 +885,6 @@
                 let authToken = null;
                 let currentUser = null;
 
-                // === FUNZIONI HELPER ===
-
                 // Utility function per le chiamate API
                 async function apiCall(endpoint, options = {}) {
                     const url = `${API_BASE_URL}${endpoint}`;
@@ -975,7 +976,7 @@
                             currentUser = result.data.user || {
                                 id: result.data.userId || result.data.id,
                                 email: email,
-                                role: userRole  // Usa il ruolo normalizzato
+                                role: userRole
                             };
 
                             // DEBUG: Verifica che currentUser sia impostato correttamente
@@ -1019,10 +1020,21 @@
                     }
                 }
 
-                function doLogout() {
+                async function doLogout() {
                     authToken = null;
                     currentUser = null;
-                    updateAuthUI(false, null);
+
+
+                    const result = await apiCall('/auth/logout');
+
+                    if (result.ok && result.data.valid) {
+                        showResponse('authResponse', `Logout effettuato con successo`);
+                        updateAuthUI(false, null);
+
+                    } else {
+                        showResponse('authResponse',
+                                `Logout fallito`);
+                    }
 
                     showResponse('missioneResponse', 'Effettua il login come amministratore per creare missioni...', 'info');
 
@@ -2170,7 +2182,6 @@
                         return;
                     }
 
-                    // POPUP/CONFIRM RIMOSSO - Procede direttamente con la chiusura
                     showResponse('chiusuraMissioneResponse', '🔄 Chiusura missione in corso...', 'info');
 
                     try {
